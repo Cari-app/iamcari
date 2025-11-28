@@ -1,5 +1,5 @@
 import { useState, ReactNode } from 'react';
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, PanInfo } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -9,70 +9,80 @@ interface SwipeableRowProps {
   className?: string;
 }
 
-export function SwipeableRow({ children, onDelete, className }: SwipeableRowProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  
-  const x = useMotionValue(0);
-  const deleteOpacity = useTransform(x, [-100, -50, 0], [1, 0.8, 0]);
-  
-  const DELETE_THRESHOLD = -60;
-  const DELETE_BUTTON_WIDTH = 72;
+const DELETE_BUTTON_WIDTH = 76;
+const SWIPE_THRESHOLD = -40;
 
-  const handleDragEnd = (_: any, info: PanInfo) => {
-    setIsDragging(false);
-    
-    if (info.offset.x < DELETE_THRESHOLD) {
-      setIsOpen(true);
-    } else {
-      setIsOpen(false);
-    }
+export function SwipeableRow({ children, onDelete, className }: SwipeableRowProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragStart = () => {
+    setIsDragging(true);
   };
 
-  const handleDelete = () => {
+  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    setIsDragging(false);
+    const shouldOpen = info.offset.x < SWIPE_THRESHOLD;
+    setIsOpen(shouldOpen);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onDelete();
     setIsOpen(false);
   };
 
-  const closeSwipe = () => {
-    setIsOpen(false);
+  const handleCardClick = () => {
+    if (isOpen) {
+      setIsOpen(false);
+    }
   };
 
   return (
     <div className={cn('relative', className)}>
-      {/* Delete Button Background */}
-      <motion.div
-        className="absolute right-0 top-0 bottom-0 flex items-center justify-center rounded-2xl overflow-hidden"
-        style={{ 
-          width: DELETE_BUTTON_WIDTH + 8,
-          opacity: deleteOpacity,
-        }}
+      {/* Delete button - always present but hidden behind card */}
+      <div 
+        className="absolute top-0 right-0 bottom-0 flex items-stretch overflow-hidden rounded-2xl"
+        style={{ width: DELETE_BUTTON_WIDTH }}
       >
-        <button
+        <motion.button
           onClick={handleDelete}
-          className="flex flex-col items-center justify-center gap-1 h-full w-full bg-destructive text-white rounded-2xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isOpen ? 1 : 0 }}
+          transition={{ duration: 0.15 }}
+          className={cn(
+            'flex flex-1 flex-col items-center justify-center gap-1',
+            'bg-destructive text-white font-medium',
+            'active:opacity-90'
+          )}
         >
           <Trash2 className="h-5 w-5" />
-          <span className="text-xs font-medium">Apagar</span>
-        </button>
-      </motion.div>
+          <span className="text-[11px] font-semibold">Apagar</span>
+        </motion.button>
+      </div>
 
-      {/* Swipeable Content */}
+      {/* Swipeable card */}
       <motion.div
         drag="x"
+        dragDirectionLock
         dragConstraints={{ left: -DELETE_BUTTON_WIDTH, right: 0 }}
-        dragElastic={0.1}
+        dragElastic={{ left: 0.05, right: 0.3 }}
         dragMomentum={false}
-        onDragStart={() => setIsDragging(true)}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        animate={{ x: isOpen ? -DELETE_BUTTON_WIDTH : 0 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        onClick={isOpen ? closeSwipe : undefined}
+        animate={{ 
+          x: isOpen ? -DELETE_BUTTON_WIDTH : 0,
+        }}
+        transition={{ 
+          type: 'spring', 
+          stiffness: 400, 
+          damping: 30,
+        }}
+        onClick={handleCardClick}
         className={cn(
-          'relative rounded-2xl',
+          'relative z-10 touch-pan-y select-none',
           isDragging && 'cursor-grabbing'
         )}
-        style={{ x }}
       >
         {children}
       </motion.div>
