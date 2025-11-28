@@ -10,10 +10,10 @@ export function TimelineEntryCard({ entry }: TimelineEntryCardProps) {
   // Meal Entry Card
   if (entry.type === 'meal') {
     return (
-      <div className="p-4 border border-border">
-        <div className="flex items-start gap-4">
+      <div className="p-4 rounded-2xl bg-card border border-border">
+        <div className="flex items-start gap-3">
           <div className={cn(
-            'w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0',
+            'w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0',
             entry.entry_method === 'ai' ? 'gradient-primary' : 'bg-muted'
           )}>
             {entry.entry_method === 'ai' ? (
@@ -24,23 +24,25 @@ export function TimelineEntryCard({ entry }: TimelineEntryCardProps) {
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground tabular-nums">
-                {entry.time}
-              </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground tabular-nums">
+                  {entry.time}
+                </span>
+              </div>
               {entry.is_emotional && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-xs">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 text-xs font-medium">
                   <Heart className="h-3 w-3" />
                   Emocional
                 </span>
               )}
             </div>
-            <p className="mt-1 text-foreground font-medium truncate">
+            <p className="mt-1.5 text-foreground font-medium leading-snug line-clamp-2">
               {entry.food_name}
             </p>
             {entry.calories && (
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground tabular-nums">
                 {entry.calories} kcal
               </p>
             )}
@@ -57,24 +59,29 @@ export function TimelineEntryCard({ entry }: TimelineEntryCardProps) {
     
     return (
       <div className={cn(
-        'p-3 border-l-4 border border-border',
-        isPositive ? 'border-l-emerald-500' : 'border-l-rose-500'
+        'p-3.5 rounded-2xl bg-card border border-border relative overflow-hidden'
       )}>
-        <div className="flex items-center gap-3">
+        {/* Left accent bar */}
+        <div className={cn(
+          'absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl',
+          isPositive ? 'bg-emerald-500' : 'bg-rose-500'
+        )} />
+        
+        <div className="flex items-center gap-3 pl-2">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-violet-500/20 flex-shrink-0">
             <BrainCircuit className="h-5 w-5 text-violet-400" />
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm font-medium text-foreground">
-                Sentindo-se{' '}
-                <span className={cn(
-                  'px-2 py-0.5 rounded-full text-xs',
-                  emotionData?.color || 'bg-muted'
-                )}>
-                  {emotionData?.label || entry.emotion_tag}
-                </span>
+                Sentindo-se
+              </span>
+              <span className={cn(
+                'px-2 py-0.5 rounded-full text-xs font-medium border',
+                emotionData?.color || 'bg-muted text-muted-foreground'
+              )}>
+                {emotionData?.label || entry.emotion_tag}
               </span>
             </div>
             <div className="flex items-center gap-2 mt-1">
@@ -95,16 +102,16 @@ export function TimelineEntryCard({ entry }: TimelineEntryCardProps) {
   // Water Entry Card
   if (entry.type === 'water') {
     return (
-      <div className="px-4 py-2.5 bg-sky-500/10 border border-sky-500/20">
+      <div className="px-4 py-3 rounded-2xl bg-sky-500/10 border border-sky-500/20">
         <div className="flex items-center gap-3">
-          <Droplet className="h-4 w-4 text-sky-400" />
-          <span className="text-sm font-medium text-sky-400">
+          <Droplet className="h-4 w-4 text-sky-400 flex-shrink-0" />
+          <span className="text-sm font-semibold text-sky-400 tabular-nums">
             {entry.value}ml
           </span>
           <div className="flex-1" />
-          <div className="flex items-center gap-1">
-            <Clock className="h-3 w-3 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground tabular-nums">
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5 text-sky-400/60" />
+            <span className="text-xs text-sky-400/60 tabular-nums">
               {entry.time}
             </span>
           </div>
@@ -116,16 +123,16 @@ export function TimelineEntryCard({ entry }: TimelineEntryCardProps) {
   // Weight Entry Card
   if (entry.type === 'weight') {
     return (
-      <div className="px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/20">
+      <div className="px-4 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
         <div className="flex items-center gap-3">
-          <Scale className="h-4 w-4 text-emerald-400" />
-          <span className="text-sm font-medium text-emerald-400">
-            Peso registrado: {entry.value}kg
+          <Scale className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+          <span className="text-sm font-semibold text-emerald-400">
+            Peso registrado: <span className="tabular-nums">{entry.value}kg</span>
           </span>
           <div className="flex-1" />
-          <div className="flex items-center gap-1">
-            <Clock className="h-3 w-3 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground tabular-nums">
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5 text-emerald-400/60" />
+            <span className="text-xs text-emerald-400/60 tabular-nums">
               {entry.time}
             </span>
           </div>
