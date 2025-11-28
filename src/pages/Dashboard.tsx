@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
@@ -11,8 +11,11 @@ import { useFastingTimer } from '@/hooks/useFastingTimer';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, RotateCcw, Flame, Zap, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Dashboard() {
+  const { user, profile } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProtocolOpen, setIsProtocolOpen] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState(16);
@@ -29,9 +32,51 @@ export default function Dashboard() {
     targetHours,
   } = useFastingTimer();
 
-  // Mock data for nutrition and check-in (replace with real data later)
-  const mockNutrition = { consumed: 850, target: 1800 };
-  const mockLastCheckIn = { isEmotional: false, time: 'Há 2 horas' };
+  // Fetch real nutrition data from meal_logs
+  const [caloriesConsumed, setCaloriesConsumed] = useState(0);
+  const [lastCheckIn, setLastCheckIn] = useState<{ isEmotional: boolean; time: string } | null>(null);
+  
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchTodayMeals = async () => {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { data, error } = await supabase
+        .from('meal_logs')
+        .select('calories, is_emotional, created_at')
+        .eq('user_id', user.id)
+        .gte('created_at', `${today}T00:00:00`)
+        .order('created_at', { ascending: false });
+      
+      if (!error && data) {
+        const totalCalories = data.reduce((sum, log) => sum + (log.calories || 0), 0);
+        setCaloriesConsumed(totalCalories);
+        
+        if (data.length > 0) {
+          const lastLog = data[0];
+          const logTime = new Date(lastLog.created_at);
+          const now = new Date();
+          const diffMinutes = Math.floor((now.getTime() - logTime.getTime()) / 60000);
+          
+          let timeText = '';
+          if (diffMinutes < 60) {
+            timeText = `Há ${diffMinutes} minutos`;
+          } else {
+            const hours = Math.floor(diffMinutes / 60);
+            timeText = `Há ${hours} hora${hours > 1 ? 's' : ''}`;
+          }
+          
+          setLastCheckIn({
+            isEmotional: lastLog.is_emotional || false,
+            time: timeText,
+          });
+        }
+      }
+    };
+    
+    fetchTodayMeals();
+  }, [user]);
 
   const time = formatTime(elapsedSeconds);
 
@@ -124,9 +169,9 @@ export default function Dashboard() {
 
           {/* Bento Stats Grid */}
           <BentoStats
-            caloriesConsumed={mockNutrition.consumed}
-            caloriesTarget={mockNutrition.target}
-            lastCheckIn={mockLastCheckIn}
+            caloriesConsumed={caloriesConsumed}
+            caloriesTarget={profile?.daily_calories_target || 1800}
+            lastCheckIn={lastCheckIn}
           />
 
           {/* Phase Info Card */}
