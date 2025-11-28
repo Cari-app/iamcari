@@ -48,7 +48,7 @@ export function WeightInputDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] max-w-[340px] bg-card border-border rounded-2xl">
+      <DialogContent className="max-w-[340px] bg-card border-border">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
