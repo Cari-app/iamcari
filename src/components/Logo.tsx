@@ -5,11 +5,12 @@ import { cn } from '@/lib/utils';
 
 interface LogoProps {
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
 }
 
 // The logo is horizontally wide (aspect ratio ~4:1), so we use width-based sizing
 const sizeClasses = {
+  xs: 'h-5',
   sm: 'h-8',
   md: 'h-9',
   lg: 'h-14',
