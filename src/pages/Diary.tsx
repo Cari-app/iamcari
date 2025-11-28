@@ -5,6 +5,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
 import { WeightInputDialog } from '@/components/diary/WeightInputDialog';
+import { WaterInputDialog } from '@/components/diary/WaterInputDialog';
 import { MealInputDialog } from '@/components/diary/MealInputDialog';
 import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
@@ -81,6 +82,7 @@ const mockTimeline: TimelineEntry[] = [
 export default function Diary() {
   const [moodDrawerOpen, setMoodDrawerOpen] = useState(false);
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
+  const [waterDialogOpen, setWaterDialogOpen] = useState(false);
   const [mealDialogOpen, setMealDialogOpen] = useState(false);
   const [timeline, setTimeline] = useState<TimelineEntry[]>(mockTimeline);
   const [waterTotal, setWaterTotal] = useState(500); // Sum from mock data
@@ -110,20 +112,20 @@ export default function Diary() {
     });
   };
 
-  const handleWaterClick = () => {
+  const handleWaterSubmit = (amount: number) => {
     const now = new Date();
     const newEntry: TimelineEntry = {
       id: Date.now().toString(),
       type: 'water',
       time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
       created_at: now.toISOString(),
-      value: 250,
+      value: amount,
     };
     setTimeline(prev => [newEntry, ...prev]);
-    setWaterTotal(prev => prev + 250);
+    setWaterTotal(prev => prev + amount);
     toast({
-      title: '💧 +250ml registrado',
-      description: `Total hoje: ${waterTotal + 250}ml`,
+      title: '💧 Água registrada',
+      description: `+${amount}ml • Total hoje: ${waterTotal + amount}ml`,
     });
   };
 
@@ -252,7 +254,7 @@ export default function Diary() {
           {/* Quick Assessment Bar */}
           <QuickAssessmentBar
             onMoodClick={() => setMoodDrawerOpen(true)}
-            onWaterClick={handleWaterClick}
+            onWaterClick={() => setWaterDialogOpen(true)}
             onWeightClick={() => setWeightDialogOpen(true)}
             onMealClick={() => setMealDialogOpen(true)}
           />
@@ -315,6 +317,12 @@ export default function Diary() {
         onOpenChange={setWeightDialogOpen}
         onSubmit={handleWeightSubmit}
         lastWeight={lastWeight}
+      />
+
+      <WaterInputDialog
+        open={waterDialogOpen}
+        onOpenChange={setWaterDialogOpen}
+        onSubmit={handleWaterSubmit}
       />
 
       <MealInputDialog
