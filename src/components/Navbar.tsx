@@ -16,7 +16,7 @@ export function Navbar() {
     >
       <div className="mx-auto max-w-lg">
         <div className="glass rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between">
-          <Logo size="sm" />
+          <Logo size="xs" />
           
           <Button
             variant="ghost"
