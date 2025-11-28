@@ -6,6 +6,7 @@ import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
 import { WeightInputDialog } from '@/components/diary/WeightInputDialog';
 import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
+import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { Calendar, Camera } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry, EmotionTag } from '@/types';
@@ -149,6 +150,21 @@ export default function Diary() {
     });
   };
 
+  const handleDeleteEntry = (id: string) => {
+    const entry = timeline.find(e => e.id === id);
+    setTimeline(prev => prev.filter(e => e.id !== id));
+    
+    // Update water total if deleting water entry
+    if (entry?.type === 'water' && entry.value) {
+      setWaterTotal(prev => Math.max(0, prev - entry.value));
+    }
+    
+    toast({
+      title: '🗑️ Registro apagado',
+      description: 'O registro foi removido da timeline',
+    });
+  };
+
   // Sort timeline by time (most recent first for display purposes)
   const sortedTimeline = [...timeline].sort((a, b) => {
     const timeA = a.time.split(':').map(Number);
@@ -235,7 +251,16 @@ export default function Diary() {
             </motion.h2>
             
             {sortedTimeline.map((entry, index) => (
-              <TimelineEntryCard key={entry.id} entry={entry} index={index} />
+              <motion.div
+                key={entry.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + index * 0.05 }}
+              >
+                <SwipeableRow onDelete={() => handleDeleteEntry(entry.id)}>
+                  <TimelineEntryCard entry={entry} />
+                </SwipeableRow>
+              </motion.div>
             ))}
           </div>
 

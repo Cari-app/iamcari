@@ -1,28 +1,19 @@
-import { motion } from 'framer-motion';
 import { Camera, Pencil, Heart, Clock, Droplet, Scale, BrainCircuit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TimelineEntry, EMOTION_TAGS } from '@/types';
 
 interface TimelineEntryCardProps {
   entry: TimelineEntry;
-  index: number;
 }
 
-export function TimelineEntryCard({ entry, index }: TimelineEntryCardProps) {
-  const animationDelay = 0.2 + index * 0.1;
-
+export function TimelineEntryCard({ entry }: TimelineEntryCardProps) {
   // Meal Entry Card
   if (entry.type === 'meal') {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: animationDelay }}
-        className="p-4 rounded-2xl bg-card border border-border press-effect cursor-pointer"
-      >
+      <div className="p-4 border border-border">
         <div className="flex items-start gap-4">
           <div className={cn(
-            'w-12 h-12 rounded-xl flex items-center justify-center',
+            'w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0',
             entry.entry_method === 'ai' ? 'gradient-primary' : 'bg-muted'
           )}>
             {entry.entry_method === 'ai' ? (
@@ -55,7 +46,7 @@ export function TimelineEntryCard({ entry, index }: TimelineEntryCardProps) {
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -65,20 +56,12 @@ export function TimelineEntryCard({ entry, index }: TimelineEntryCardProps) {
     const isPositive = ['calmo', 'focado', 'feliz', 'energizado'].includes(entry.emotion_tag || '');
     
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: animationDelay }}
-        className={cn(
-          'p-3 rounded-2xl bg-card border-l-4 border border-border',
-          isPositive ? 'border-l-emerald-500' : 'border-l-rose-500'
-        )}
-      >
+      <div className={cn(
+        'p-3 border-l-4 border border-border',
+        isPositive ? 'border-l-emerald-500' : 'border-l-rose-500'
+      )}>
         <div className="flex items-center gap-3">
-          <div className={cn(
-            'w-10 h-10 rounded-xl flex items-center justify-center',
-            'bg-violet-500/20'
-          )}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-violet-500/20 flex-shrink-0">
             <BrainCircuit className="h-5 w-5 text-violet-400" />
           </div>
           
@@ -105,19 +88,14 @@ export function TimelineEntryCard({ entry, index }: TimelineEntryCardProps) {
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   // Water Entry Card
   if (entry.type === 'water') {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: animationDelay }}
-        className="px-4 py-2.5 rounded-xl bg-sky-500/10 border border-sky-500/20"
-      >
+      <div className="px-4 py-2.5 bg-sky-500/10 border border-sky-500/20">
         <div className="flex items-center gap-3">
           <Droplet className="h-4 w-4 text-sky-400" />
           <span className="text-sm font-medium text-sky-400">
@@ -131,19 +109,14 @@ export function TimelineEntryCard({ entry, index }: TimelineEntryCardProps) {
             </span>
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   // Weight Entry Card
   if (entry.type === 'weight') {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: animationDelay }}
-        className="px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20"
-      >
+      <div className="px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/20">
         <div className="flex items-center gap-3">
           <Scale className="h-4 w-4 text-emerald-400" />
           <span className="text-sm font-medium text-emerald-400">
@@ -157,7 +130,7 @@ export function TimelineEntryCard({ entry, index }: TimelineEntryCardProps) {
             </span>
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
