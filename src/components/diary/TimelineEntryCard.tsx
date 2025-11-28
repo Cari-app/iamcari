@@ -1,16 +1,30 @@
-import { Camera, Pencil, Heart, Clock, Droplet, Scale, BrainCircuit, Star } from 'lucide-react';
+import { Camera, Pencil, Heart, Clock, Droplet, Scale, BrainCircuit, Star, Edit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TimelineEntry, EMOTION_TAGS } from '@/types';
 
 interface TimelineEntryCardProps {
   entry: TimelineEntry;
+  onEdit?: () => void;
 }
 
-export function TimelineEntryCard({ entry }: TimelineEntryCardProps) {
+export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
   // Meal Entry Card
   if (entry.type === 'meal') {
     return (
-      <div className="p-4 bg-card border border-border rounded-2xl">
+      <div className="p-4 bg-card border border-border rounded-2xl relative group">
+        {onEdit && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            className="absolute top-3 right-3 h-8 w-8 rounded-lg bg-muted/80 hover:bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity press-effect"
+            aria-label="Editar refeição"
+          >
+            <Edit className="h-4 w-4 text-muted-foreground" />
+          </button>
+        )}
+        
         <div className="flex items-start gap-3">
           <div className={cn(
             'w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0',

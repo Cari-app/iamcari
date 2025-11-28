@@ -7,6 +7,7 @@ import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
 import { WeightInputDialog } from '@/components/diary/WeightInputDialog';
 import { WaterInputDialog } from '@/components/diary/WaterInputDialog';
 import { MealInputDialog } from '@/components/diary/MealInputDialog';
+import { MealEditDialog } from '@/components/diary/MealEditDialog';
 import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { Calendar, Camera } from 'lucide-react';
@@ -21,6 +22,8 @@ export default function Diary() {
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
   const [waterDialogOpen, setWaterDialogOpen] = useState(false);
   const [mealDialogOpen, setMealDialogOpen] = useState(false);
+  const [mealEditDialogOpen, setMealEditDialogOpen] = useState(false);
+  const [editingMeal, setEditingMeal] = useState<TimelineEntry | null>(null);
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -347,6 +350,55 @@ export default function Diary() {
     });
   };
 
+  const handleEditMeal = (entry: TimelineEntry) => {
+    setEditingMeal(entry);
+    setMealEditDialogOpen(true);
+  };
+
+  const handleMealEditSubmit = async (data: {
+    food_name: string;
+    calories: number;
+    is_emotional: boolean;
+  }) => {
+    if (!user || !editingMeal) return;
+
+    const { error } = await supabase
+      .from('meal_logs')
+      .update({
+        food_name: data.food_name,
+        calories: data.calories,
+        is_emotional: data.is_emotional,
+      })
+      .eq('id', editingMeal.id);
+
+    if (error) {
+      console.error('Error updating meal log:', error);
+      toast({
+        title: '❌ Erro ao salvar',
+        description: 'Não foi possível atualizar a refeição',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Update timeline
+    setTimeline(prev => prev.map(entry => 
+      entry.id === editingMeal.id 
+        ? {
+            ...entry,
+            food_name: data.food_name,
+            calories: data.calories,
+            is_emotional: data.is_emotional,
+          }
+        : entry
+    ));
+
+    toast({
+      title: '✅ Refeição atualizada',
+      description: 'As alterações foram salvas com sucesso',
+    });
+  };
+
   // Sort timeline by time (most recent first for display purposes)
   const sortedTimeline = [...timeline].sort((a, b) => {
     const timeA = a.time.split(':').map(Number);
@@ -444,7 +496,10 @@ export default function Diary() {
                 transition={{ delay: 0.2 + index * 0.05 }}
               >
                 <SwipeableRow onDelete={() => handleDeleteEntry(entry.id)}>
-                  <TimelineEntryCard entry={entry} />
+                  <TimelineEntryCard 
+                    entry={entry} 
+                    onEdit={entry.type === 'meal' ? () => handleEditMeal(entry) : undefined}
+                  />
                 </SwipeableRow>
               </motion.div>
             ))}
@@ -495,6 +550,17 @@ export default function Diary() {
         open={mealDialogOpen}
         onOpenChange={setMealDialogOpen}
         onSubmit={handleMealSubmit}
+      />
+
+      <MealEditDialog
+        open={mealEditDialogOpen}
+        onOpenChange={setMealEditDialogOpen}
+        onSubmit={handleMealEditSubmit}
+        initialData={{
+          food_name: editingMeal?.food_name || '',
+          calories: editingMeal?.calories,
+          is_emotional: editingMeal?.is_emotional,
+        }}
       />
 
       <BottomNav />
