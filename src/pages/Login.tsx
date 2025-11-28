@@ -323,9 +323,25 @@ export default function Login() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="py-6 text-center text-sm text-muted-foreground"
+        className="py-6 text-center text-sm text-muted-foreground space-y-2"
       >
         <p>Feito com 💜 para sua saúde</p>
+        <p className="text-xs">
+          Ao continuar, você concorda com nossos{' '}
+          <button
+            onClick={() => navigate('/terms')}
+            className="text-primary hover:underline"
+          >
+            Termos
+          </button>
+          {' '}e{' '}
+          <button
+            onClick={() => navigate('/privacy')}
+            className="text-primary hover:underline"
+          >
+            Privacidade
+          </button>
+        </p>
       </motion.footer>
     </div>
   );

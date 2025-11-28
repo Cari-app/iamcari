@@ -20,7 +20,9 @@ import {
   Crown,
   Camera,
   Pencil,
-  Loader2
+  Loader2,
+  FileText,
+  Trash
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -55,6 +57,7 @@ export default function Profile() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [savingName, setSavingName] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Fetch profile data on mount
   useEffect(() => {
@@ -208,6 +211,19 @@ export default function Profile() {
     navigate('/login');
   };
 
+  const handleDeleteAccount = () => {
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteAccount = async () => {
+    // TODO: Implement account deletion logic
+    toast({
+      title: '⚠️ Função em desenvolvimento',
+      description: 'A exclusão de conta estará disponível em breve.',
+    });
+    setIsDeleteDialogOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-background pb-24 pt-20">
       <Navbar />
@@ -353,6 +369,52 @@ export default function Profile() {
             ))}
           </motion.div>
 
+          {/* Sobre Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.22 }}
+            className="space-y-2"
+          >
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+              Sobre
+            </p>
+            <div className="rounded-2xl bg-card border border-border overflow-hidden">
+              <button
+                onClick={() => navigate('/terms')}
+                className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
+              >
+                <div className="flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-muted-foreground" />
+                  <span className="font-medium text-foreground">Termos de Uso</span>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </button>
+
+              <button
+                onClick={() => navigate('/privacy')}
+                className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
+              >
+                <div className="flex items-center gap-3">
+                  <Shield className="h-5 w-5 text-muted-foreground" />
+                  <span className="font-medium text-foreground">Política de Privacidade</span>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </button>
+
+              <button
+                onClick={handleDeleteAccount}
+                className="w-full flex items-center justify-between p-4 press-effect hover:bg-destructive/10 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Trash className="h-5 w-5 text-rose-500" />
+                  <span className="font-medium text-rose-500">Deletar minha conta</span>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+          </motion.div>
+
           {/* Logout */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -426,6 +488,47 @@ export default function Profile() {
               ) : (
                 'Salvar'
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Account Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="bg-card border-border sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Deletar Conta</DialogTitle>
+            <DialogDescription>
+              Esta ação é irreversível. Todos os seus dados serão permanentemente excluídos.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Tem certeza que deseja deletar sua conta? Você perderá:
+            </p>
+            <ul className="mt-2 space-y-1 text-sm text-muted-foreground list-disc list-inside">
+              <li>Histórico de jejum</li>
+              <li>Registros de refeições</li>
+              <li>Tokens e progresso</li>
+              <li>Todas as configurações</li>
+            </ul>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteAccount}
+              className="bg-rose-500 hover:bg-rose-600"
+            >
+              <Trash className="h-4 w-4 mr-2" />
+              Confirmar Exclusão
             </Button>
           </DialogFooter>
         </DialogContent>
