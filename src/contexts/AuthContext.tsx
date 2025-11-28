@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (data) {
       setProfile(data);
-      console.log('Profile loaded:', data);
+      // console.log('Profile loaded:', data); // Removed for security
     } else {
       // Profile doesn't exist, create it
       const { data: authUser } = await supabase.auth.getUser();
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (newProfile) {
         setProfile(newProfile);
-        console.log('Profile created:', newProfile);
+        // console.log('Profile created:', newProfile); // Removed for security
       }
     }
   };
