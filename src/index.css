@@ -191,6 +191,49 @@
     display: none;
   }
 
+  /* Themed Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.3);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 4px;
+    transition: background 0.2s;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.2);
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.3);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.5);
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) hsl(var(--muted) / 0.3);
+  }
+
+  .dark * {
+    scrollbar-color: hsl(var(--primary) / 0.3) hsl(var(--muted) / 0.2);
+  }
+
   /* Press Effect */
   .press-effect {
     @apply transition-transform duration-150 ease-out active:scale-95;
