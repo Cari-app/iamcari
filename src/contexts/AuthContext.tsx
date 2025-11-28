@@ -8,6 +8,7 @@ interface Profile {
   whatsapp: string | null;
   token_balance: number;
   tier: string;
+  onboarding_completed: boolean;
   created_at: string;
 }
 
@@ -35,8 +36,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .eq('id', userId)
       .single();
 
-    if (!error && data) {
+    if (error) {
+      console.error('Error fetching profile:', error);
+      return;
+    }
+
+    if (data) {
       setProfile(data);
+      console.log('Profile loaded:', data);
     }
   };
 

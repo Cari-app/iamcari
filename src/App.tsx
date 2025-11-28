@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Diary from "./pages/Diary";
 import Progress from "./pages/Progress";
 import Profile from "./pages/Profile";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/diary" element={<ProtectedRoute><Diary /></ProtectedRoute>} />
             <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />

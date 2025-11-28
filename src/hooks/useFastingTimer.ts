@@ -69,7 +69,13 @@ export function useFastingTimer() {
         .limit(1)
         .maybeSingle();
 
-      if (!error && data) {
+      if (error) {
+        console.error('Error fetching fasting session:', error);
+        setLoading(false);
+        return;
+      }
+
+      if (data) {
         setSession({
           id: data.id,
           startTime: new Date(data.start_time).getTime(),
@@ -138,7 +144,12 @@ export function useFastingTimer() {
       .select()
       .single();
 
-    if (!error && data) {
+    if (error) {
+      console.error('Error starting fasting session:', error);
+      return;
+    }
+
+    if (data) {
       setSession({
         id: data.id,
         startTime: new Date(data.start_time).getTime(),
@@ -151,11 +162,17 @@ export function useFastingTimer() {
   const stopFasting = useCallback(async () => {
     if (!session?.id || !user) return;
 
-    await supabase
+    const { error } = await supabase
       .from('fasting_sessions')
       .update({ end_time: new Date().toISOString() })
       .eq('id', session.id);
 
+    if (error) {
+      console.error('Error stopping fasting session:', error);
+      return;
+    }
+
+    console.log('Fasting session stopped successfully');
     setSession(null);
   }, [session, user]);
 
