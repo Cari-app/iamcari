@@ -37,10 +37,10 @@ export default function Profile() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center"
+            className="text-center pt-4"
           >
-            <div className="w-24 h-24 mx-auto mb-4 rounded-full gradient-primary flex items-center justify-center">
-              <User className="h-12 w-12 text-white" />
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full gradient-primary flex items-center justify-center">
+              <User className="h-10 w-10 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">Usuário</h1>
             <p className="text-muted-foreground">usuario@email.com</p>
