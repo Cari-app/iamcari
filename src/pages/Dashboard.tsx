@@ -5,6 +5,8 @@ import { BottomNav } from '@/components/BottomNav';
 import { CircularProgress } from '@/components/CircularProgress';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { MealLogModal } from '@/components/MealLogModal';
+import { ProtocolSelector } from '@/components/dashboard/ProtocolSelector';
+import { BentoStats } from '@/components/dashboard/BentoStats';
 import { useFastingTimer } from '@/hooks/useFastingTimer';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, RotateCcw, Flame, Zap, Sparkles } from 'lucide-react';
@@ -12,6 +14,9 @@ import { cn } from '@/lib/utils';
 
 export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProtocolOpen, setIsProtocolOpen] = useState(false);
+  const [selectedProtocol, setSelectedProtocol] = useState(16);
+  
   const {
     elapsedSeconds,
     progress,
@@ -23,6 +28,10 @@ export default function Dashboard() {
     formatTime,
     targetHours,
   } = useFastingTimer();
+
+  // Mock data for nutrition and check-in (replace with real data later)
+  const mockNutrition = { consumed: 850, target: 1800 };
+  const mockLastCheckIn = { isEmotional: false, time: 'Há 2 horas' };
 
   const time = formatTime(elapsedSeconds);
 
@@ -61,9 +70,9 @@ export default function Dashboard() {
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-            className="flex justify-center py-8"
+            className="flex justify-center py-4"
           >
-            <CircularProgress progress={isActive ? progress : 0} size={280} strokeWidth={20}>
+            <CircularProgress progress={isActive ? progress : 0} size={260} strokeWidth={20}>
               <div className="text-center">
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-5xl font-extrabold tabular-nums text-foreground dark:text-slate-50">
@@ -79,11 +88,11 @@ export default function Dashboard() {
                   </span>
                 </div>
                 
-                {isActive && (
+                {isActive ? (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-4"
+                    className="mt-3"
                   >
                     <div className={cn(
                       "inline-flex items-center gap-2 px-4 py-2 rounded-full",
@@ -95,10 +104,30 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="mt-3"
+                  >
+                    <ProtocolSelector
+                      selectedHours={selectedProtocol}
+                      onSelect={setSelectedProtocol}
+                      isOpen={isProtocolOpen}
+                      onOpenChange={setIsProtocolOpen}
+                    />
+                  </motion.div>
                 )}
               </div>
             </CircularProgress>
           </motion.div>
+
+          {/* Bento Stats Grid */}
+          <BentoStats
+            caloriesConsumed={mockNutrition.consumed}
+            caloriesTarget={mockNutrition.target}
+            lastCheckIn={mockLastCheckIn}
+          />
 
           {/* Phase Info Card */}
           {isActive && (
@@ -137,11 +166,11 @@ export default function Dashboard() {
           >
             {!isActive ? (
               <Button
-                onClick={() => startFasting(16)}
+                onClick={() => startFasting(selectedProtocol)}
                 className="flex-1 h-14 rounded-2xl gradient-primary text-white font-semibold text-base press-effect shadow-violet"
               >
                 <Play className="mr-2 h-5 w-5" />
-                Iniciar Jejum 16h
+                Iniciar Jejum {selectedProtocol}h
               </Button>
             ) : (
               <>
@@ -156,7 +185,7 @@ export default function Dashboard() {
                 <Button
                   onClick={() => {
                     stopFasting();
-                    setTimeout(() => startFasting(16), 100);
+                    setTimeout(() => startFasting(selectedProtocol), 100);
                   }}
                   variant="outline"
                   className="h-14 w-14 rounded-2xl press-effect"
