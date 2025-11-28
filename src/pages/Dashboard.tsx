@@ -70,9 +70,9 @@ export default function Dashboard() {
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-            className="flex justify-center py-4"
+            className="flex justify-center py-2"
           >
-            <CircularProgress progress={isActive ? progress : 0} size={260} strokeWidth={20}>
+            <CircularProgress progress={isActive ? progress : 0} size={220} strokeWidth={16}>
               <div className="text-center">
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-5xl font-extrabold tabular-nums text-foreground dark:text-slate-50">
