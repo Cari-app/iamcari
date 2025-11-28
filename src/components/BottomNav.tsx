@@ -19,7 +19,7 @@ export function BottomNav() {
       className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 safe-area-inset-bottom"
     >
       <div className="mx-auto max-w-lg">
-        <div className="glass rounded-3xl shadow-lg border border-border/50">
+        <div className="rounded-3xl shadow-lg backdrop-blur-2xl bg-white/80 dark:bg-black/50 border border-white/30 dark:border-white/10">
           <div className="flex items-center justify-around py-2">
             {navItems.map((item) => (
               <NavLink

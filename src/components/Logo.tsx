@@ -10,7 +10,7 @@ interface LogoProps {
 
 // The logo is horizontally wide (aspect ratio ~4:1), so we use width-based sizing
 const sizeClasses = {
-  sm: 'h-7',
+  sm: 'h-8',
   md: 'h-9',
   lg: 'h-14',
 };

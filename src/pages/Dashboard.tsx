@@ -63,18 +63,18 @@ export default function Dashboard() {
             transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
             className="flex justify-center py-8"
           >
-            <CircularProgress progress={isActive ? progress : 0} size={280} strokeWidth={14}>
+            <CircularProgress progress={isActive ? progress : 0} size={280} strokeWidth={20}>
               <div className="text-center">
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-5xl font-bold tabular-nums text-foreground">
+                  <span className="text-5xl font-extrabold tabular-nums text-foreground dark:text-slate-50">
                     {time.hours}
                   </span>
-                  <span className="text-2xl text-muted-foreground">:</span>
-                  <span className="text-5xl font-bold tabular-nums text-foreground">
+                  <span className="text-2xl font-bold text-foreground/60 dark:text-slate-400">:</span>
+                  <span className="text-5xl font-extrabold tabular-nums text-foreground dark:text-slate-50">
                     {time.minutes}
                   </span>
-                  <span className="text-2xl text-muted-foreground">:</span>
-                  <span className="text-3xl font-semibold tabular-nums text-muted-foreground">
+                  <span className="text-2xl font-bold text-foreground/60 dark:text-slate-400">:</span>
+                  <span className="text-3xl font-bold tabular-nums text-foreground/70 dark:text-slate-300">
                     {time.seconds}
                   </span>
                 </div>
