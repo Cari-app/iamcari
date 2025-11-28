@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   User, 
   Bell, 
@@ -26,6 +28,13 @@ const menuItems = [
 
 export default function Profile() {
   const { theme, toggleTheme } = useTheme();
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-background pb-24 pt-20">
@@ -42,8 +51,10 @@ export default function Profile() {
             <div className="w-20 h-20 mx-auto mb-4 rounded-full gradient-primary flex items-center justify-center">
               <User className="h-10 w-10 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Usuário</h1>
-            <p className="text-muted-foreground">usuario@email.com</p>
+            <h1 className="text-2xl font-bold text-foreground">
+              {user?.email?.split('@')[0] || 'Usuário'}
+            </h1>
+            <p className="text-muted-foreground">{user?.email || 'usuario@email.com'}</p>
           </motion.div>
 
           {/* Plan Card */}
@@ -59,8 +70,12 @@ export default function Profile() {
                   <Gem className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Plano Gratuito</p>
-                  <p className="text-sm text-muted-foreground">8 tokens restantes</p>
+                  <p className="font-semibold text-foreground">
+                    {profile?.tier === 'free' ? 'Plano Gratuito' : profile?.tier === 'premium' ? 'Plano Premium' : 'Plano Pro'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {profile?.token_balance || 0} tokens restantes
+                  </p>
                 </div>
               </div>
               <Button 
@@ -135,6 +150,7 @@ export default function Profile() {
             <Button
               variant="ghost"
               className="w-full h-14 rounded-2xl text-destructive hover:text-destructive hover:bg-destructive/10 press-effect"
+              onClick={handleSignOut}
             >
               <LogOut className="h-5 w-5 mr-2" />
               Sair da conta

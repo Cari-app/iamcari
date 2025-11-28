@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
@@ -12,6 +12,8 @@ import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { Calendar, Camera } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry, EmotionTag } from '@/types';
+import { supabase } from '@/integrations/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Mock timeline data with mixed entry types
 const mockTimeline: TimelineEntry[] = [
@@ -80,13 +82,53 @@ const mockTimeline: TimelineEntry[] = [
 ];
 
 export default function Diary() {
+  const { user } = useAuth();
   const [moodDrawerOpen, setMoodDrawerOpen] = useState(false);
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
   const [waterDialogOpen, setWaterDialogOpen] = useState(false);
   const [mealDialogOpen, setMealDialogOpen] = useState(false);
-  const [timeline, setTimeline] = useState<TimelineEntry[]>(mockTimeline);
-  const [waterTotal, setWaterTotal] = useState(500); // Sum from mock data
-  const [lastWeight, setLastWeight] = useState(75.4);
+  const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [waterTotal, setWaterTotal] = useState(0);
+  const [lastWeight, setLastWeight] = useState(0);
+
+  // Fetch meal logs from Supabase
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchLogs = async () => {
+      const { data, error } = await supabase
+        .from('meal_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('logged_at', { ascending: false });
+
+      if (!error && data) {
+        const entries: TimelineEntry[] = data.map(log => ({
+          id: log.id,
+          type: 'meal',
+          time: new Date(log.logged_at).toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          created_at: log.logged_at,
+          entry_method: log.entry_method as 'ai' | 'manual',
+          food_name: log.description || '',
+          calories: log.calories || 0,
+          image_url: log.image_url,
+          is_emotional: log.is_emotional || false,
+          hunger_level: log.hunger_level,
+        }));
+        setTimeline(entries);
+      }
+      setLoading(false);
+    };
+
+    fetchLogs();
+  }, [user]);
 
   // Calculate totals from timeline
   const todayCalories = timeline
@@ -146,43 +188,66 @@ export default function Diary() {
     });
   };
 
-  const handleMealSubmit = (data: { 
+  const handleMealSubmit = async (data: { 
     method: 'ai' | 'manual';
     description: string;
     calories?: number;
     isEmotional?: boolean;
   }) => {
-    const now = new Date();
-    const newEntry: TimelineEntry = {
-      id: Date.now().toString(),
-      type: 'meal',
-      time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      created_at: now.toISOString(),
-      entry_method: data.method,
-      food_name: data.description,
-      calories: data.calories || 0,
-      is_emotional: data.isEmotional || false,
-    };
-    setTimeline(prev => [newEntry, ...prev]);
-    toast({
-      title: data.method === 'ai' ? '📸 Refeição analisada' : '🍎 Refeição registrada',
-      description: `${data.description}${data.calories ? ` - ${data.calories} kcal` : ''}`,
-    });
+    if (!user) return;
+
+    const { data: logData, error } = await supabase
+      .from('meal_logs')
+      .insert({
+        user_id: user.id,
+        description: data.description,
+        calories: data.calories || 0,
+        is_emotional: data.isEmotional || false,
+        entry_method: data.method,
+        logged_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (!error && logData) {
+      const newEntry: TimelineEntry = {
+        id: logData.id,
+        type: 'meal',
+        time: new Date(logData.logged_at).toLocaleTimeString('pt-BR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        created_at: logData.logged_at,
+        entry_method: logData.entry_method as 'ai' | 'manual',
+        food_name: logData.description || '',
+        calories: logData.calories || 0,
+        is_emotional: logData.is_emotional || false,
+      };
+      
+      setTimeline(prev => [newEntry, ...prev]);
+      
+      toast({
+        title: data.method === 'ai' ? '📸 Refeição analisada' : '🍎 Refeição registrada',
+        description: `${data.description}${data.calories ? ` - ${data.calories} kcal` : ''}`,
+      });
+    }
   };
 
-  const handleDeleteEntry = (id: string) => {
-    const entry = timeline.find(e => e.id === id);
-    setTimeline(prev => prev.filter(e => e.id !== id));
-    
-    // Update water total if deleting water entry
-    if (entry?.type === 'water' && entry.value) {
-      setWaterTotal(prev => Math.max(0, prev - entry.value));
+  const handleDeleteEntry = async (id: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('meal_logs')
+      .delete()
+      .eq('id', id);
+
+    if (!error) {
+      setTimeline(prev => prev.filter(e => e.id !== id));
+      toast({
+        title: '🗑️ Registro apagado',
+        description: 'O registro foi removido da timeline',
+      });
     }
-    
-    toast({
-      title: '🗑️ Registro apagado',
-      description: 'O registro foi removido da timeline',
-    });
   };
 
   // Sort timeline by time (most recent first for display purposes)

@@ -1,19 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase';
 import { Moon, Sun, Mail, ArrowRight, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 export default function Login() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,21 +31,28 @@ export default function Login() {
 
     setIsLoading(true);
     
-    // Simulate magic link sending
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+      },
+    });
     
     setIsLoading(false);
-    setIsSent(true);
     
-    toast({
-      title: "Link mágico enviado! ✨",
-      description: "Verifique seu email para acessar o LeveStay.",
-    });
-
-    // For demo purposes, navigate after a delay
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 2000);
+    if (error) {
+      toast({
+        title: "Erro ao enviar link",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setIsSent(true);
+      toast({
+        title: "Link mágico enviado! ✨",
+        description: "Verifique seu email para acessar o LeveStay.",
+      });
+    }
   };
 
   return (
