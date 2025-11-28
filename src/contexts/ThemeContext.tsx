@@ -25,6 +25,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
     localStorage.setItem('levestay-theme', theme);
+    
+    // Update theme-color meta tag for mobile status bar
+    const themeColor = theme === 'dark' ? '#080b14' : '#ffffff';
+    const metaTags = document.querySelectorAll('meta[name="theme-color"]');
+    metaTags.forEach(tag => tag.setAttribute('content', themeColor));
   }, [theme]);
 
   const toggleTheme = () => {
