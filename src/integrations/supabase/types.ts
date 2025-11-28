@@ -112,10 +112,12 @@ export type Database = {
         Row: {
           activity_level: string | null
           age: number | null
+          avatar_url: string | null
           created_at: string
           daily_calories_target: number | null
           email: string | null
           fasting_protocol: string | null
+          full_name: string | null
           gender: string | null
           height: number | null
           id: string
@@ -128,10 +130,12 @@ export type Database = {
         Insert: {
           activity_level?: string | null
           age?: number | null
+          avatar_url?: string | null
           created_at?: string
           daily_calories_target?: number | null
           email?: string | null
           fasting_protocol?: string | null
+          full_name?: string | null
           gender?: string | null
           height?: number | null
           id: string
@@ -144,10 +148,12 @@ export type Database = {
         Update: {
           activity_level?: string | null
           age?: number | null
+          avatar_url?: string | null
           created_at?: string
           daily_calories_target?: number | null
           email?: string | null
           fasting_protocol?: string | null
+          full_name?: string | null
           gender?: string | null
           height?: number | null
           id?: string
