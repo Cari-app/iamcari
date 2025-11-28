@@ -69,7 +69,7 @@ export default function Login() {
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
           className="mb-8"
         >
-          <Logo size="lg" className="h-24" />
+          <Logo size="lg" />
         </motion.div>
 
         {/* Tagline */}
