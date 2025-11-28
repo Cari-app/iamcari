@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Camera, Pencil, Utensils, Sparkles, Heart } from 'lucide-react';
+import { Camera, Pencil, Utensils, Sparkles, Heart, Star } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -227,24 +227,25 @@ export function MealInputDialog({
                   'w-full p-3 rounded-xl border-2 transition-all flex items-center gap-3',
                   isEmotional
                     ? 'border-rose-500/50 bg-rose-500/10'
-                    : 'border-border bg-muted/30 hover:border-muted-foreground/30'
+                    : 'border-secondary/50 bg-secondary/10'
                 )}
               >
                 <div className={cn(
                   'h-10 w-10 rounded-lg flex items-center justify-center transition-colors',
-                  isEmotional ? 'bg-rose-500/20' : 'bg-muted'
+                  isEmotional ? 'bg-rose-500/20' : 'bg-secondary/20'
                 )}>
-                  <Heart className={cn(
-                    'h-5 w-5 transition-colors',
-                    isEmotional ? 'text-rose-400 fill-rose-400' : 'text-muted-foreground'
-                  )} />
+                  {isEmotional ? (
+                    <Heart className="h-5 w-5 text-rose-400 fill-rose-400 transition-colors" />
+                  ) : (
+                    <Star className="h-5 w-5 text-secondary fill-secondary transition-colors" />
+                  )}
                 </div>
                 <div className="flex-1 text-left">
                   <span className={cn(
                     'font-medium transition-colors',
-                    isEmotional ? 'text-rose-400' : 'text-foreground'
+                    isEmotional ? 'text-rose-400' : 'text-secondary'
                   )}>
-                    Refeição emocional
+                    {isEmotional ? 'Refeição emocional' : 'Refeição Planejada'}
                   </span>
                   <p className="text-xs text-muted-foreground">
                     Marque se essa refeição não faz parte do plano de dieta
