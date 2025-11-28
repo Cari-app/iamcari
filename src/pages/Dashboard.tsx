@@ -46,11 +46,11 @@ export default function Dashboard() {
   const PhaseIcon = phaseIcons[currentPhase];
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-24 pt-20">
+    <div className="min-h-[100dvh] bg-background pb-24 pt-20 overflow-x-clip overflow-y-visible">
       <Navbar />
       
-      <main className="px-4 py-6">
-        <div className="mx-auto max-w-lg space-y-6">
+      <main className="px-4 py-6 overflow-visible">
+        <div className="mx-auto max-w-lg space-y-6 overflow-visible">
           {/* Greeting */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -70,7 +70,7 @@ export default function Dashboard() {
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-            className="flex justify-center py-6"
+            className="flex justify-center py-4 overflow-visible"
           >
             <CircularProgress progress={isActive ? progress : 0} size={260} strokeWidth={20}>
               <div className="text-center">
