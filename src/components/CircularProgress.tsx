@@ -19,13 +19,18 @@ export function CircularProgress({
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const offset = circumference - (progress / 100) * circumference;
+  
+  // Extra padding for glow effects
+  const glowPadding = 30;
+  const totalSize = size + glowPadding * 2;
 
   return (
-    <div className={cn('relative inline-flex items-center justify-center overflow-visible p-4', className)}>
+    <div className={cn('relative inline-flex items-center justify-center', className)}>
       <svg
-        width={size}
-        height={size}
-        className="transform -rotate-90 overflow-visible"
+        width={totalSize}
+        height={totalSize}
+        viewBox={`0 0 ${totalSize} ${totalSize}`}
+        className="transform -rotate-90"
         style={{ overflow: 'visible' }}
       >
         {/* Gradient definition */}
@@ -53,8 +58,8 @@ export function CircularProgress({
 
         {/* Background circle - thicker and more visible */}
         <circle
-          cx={size / 2}
-          cy={size / 2}
+          cx={totalSize / 2}
+          cy={totalSize / 2}
           r={radius}
           fill="none"
           stroke="currentColor"
@@ -64,8 +69,8 @@ export function CircularProgress({
         
         {/* Progress circle with gradient and glow */}
         <motion.circle
-          cx={size / 2}
-          cy={size / 2}
+          cx={totalSize / 2}
+          cy={totalSize / 2}
           r={radius}
           fill="none"
           stroke="url(#progressGradient)"
@@ -85,8 +90,8 @@ export function CircularProgress({
         {/* Progress head glow - enhanced */}
         {progress > 0 && (
           <motion.circle
-            cx={size / 2 + radius * Math.sin((progress / 100) * 2 * Math.PI)}
-            cy={size / 2 - radius * Math.cos((progress / 100) * 2 * Math.PI)}
+            cx={totalSize / 2 + radius * Math.sin((progress / 100) * 2 * Math.PI)}
+            cy={totalSize / 2 - radius * Math.cos((progress / 100) * 2 * Math.PI)}
             r={strokeWidth / 2 + 6}
             fill="hsl(168 76% 48%)"
             className="opacity-60"
