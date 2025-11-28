@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface FastingSession {
   id?: string;
@@ -37,17 +39,9 @@ const phaseInfo: Record<FastingPhase, { label: string; color: string; descriptio
 };
 
 export function useFastingTimer() {
-  const [session, setSession] = useState<FastingSession | null>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  });
+  const { user } = useAuth();
+  const [session, setSession] = useState<FastingSession | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const [state, setState] = useState<FastingTimerState>({
     elapsedSeconds: 0,
@@ -57,6 +51,37 @@ export function useFastingTimer() {
     currentPhase: 'fed',
     timeRemaining: 0,
   });
+
+  // Fetch active fasting session from Supabase
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchActiveSession = async () => {
+      const { data, error } = await supabase
+        .from('fasting_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('end_time', null)
+        .order('start_time', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!error && data) {
+        setSession({
+          id: data.id,
+          startTime: new Date(data.start_time).getTime(),
+          targetHours: data.target_hours,
+          isActive: true,
+        });
+      }
+      setLoading(false);
+    };
+
+    fetchActiveSession();
+  }, [user]);
 
   // Calculate elapsed time based on real timestamps
   const calculateState = useCallback(() => {
@@ -99,27 +124,40 @@ export function useFastingTimer() {
     }
   }, [session, calculateState]);
 
-  // Persist session to localStorage
-  useEffect(() => {
-    if (session) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
+
+  const startFasting = useCallback(async (targetHours: number = 16) => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('fasting_sessions')
+      .insert({
+        user_id: user.id,
+        start_time: new Date().toISOString(),
+        target_hours: targetHours,
+      })
+      .select()
+      .single();
+
+    if (!error && data) {
+      setSession({
+        id: data.id,
+        startTime: new Date(data.start_time).getTime(),
+        targetHours: data.target_hours,
+        isActive: true,
+      });
     }
-  }, [session]);
+  }, [user]);
 
-  const startFasting = useCallback((targetHours: number = 16) => {
-    const newSession: FastingSession = {
-      startTime: Date.now(),
-      targetHours,
-      isActive: true,
-    };
-    setSession(newSession);
-  }, []);
+  const stopFasting = useCallback(async () => {
+    if (!session?.id || !user) return;
 
-  const stopFasting = useCallback(() => {
+    await supabase
+      .from('fasting_sessions')
+      .update({ end_time: new Date().toISOString() })
+      .eq('id', session.id);
+
     setSession(null);
-  }, []);
+  }, [session, user]);
 
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
@@ -140,5 +178,6 @@ export function useFastingTimer() {
     formatTime,
     phaseInfo: phaseInfo[state.currentPhase],
     targetHours: session?.targetHours || 16,
+    loading,
   };
 }
