@@ -104,7 +104,7 @@ export default function Diary() {
         .from('meal_logs')
         .select('*')
         .eq('user_id', user.id)
-        .order('logged_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching meal logs:', error);
@@ -116,13 +116,13 @@ export default function Diary() {
         const entries: TimelineEntry[] = data.map(log => ({
           id: log.id,
           type: 'meal',
-          time: new Date(log.logged_at).toLocaleTimeString('pt-BR', { 
+          time: new Date(log.created_at).toLocaleTimeString('pt-BR', { 
             hour: '2-digit', 
             minute: '2-digit' 
           }),
-          created_at: log.logged_at,
-          entry_method: log.entry_method as 'ai' | 'manual',
-          food_name: log.description || '',
+          created_at: log.created_at,
+          entry_method: log.entry_type as 'ai' | 'manual',
+          food_name: log.food_name || '',
           calories: log.calories || 0,
           image_url: log.image_url,
           is_emotional: log.is_emotional || false,
@@ -207,12 +207,11 @@ export default function Diary() {
       .from('meal_logs')
       .insert({
         user_id: user.id,
-        description: data.description,
+        food_name: data.description,
         calories: data.calories || 0,
         image_url: data.imageUrl || null,
         is_emotional: data.isEmotional || false,
-        entry_method: data.method,
-        logged_at: new Date().toISOString(),
+        entry_type: data.method,
       })
       .select()
       .single();
@@ -231,13 +230,13 @@ export default function Diary() {
       const newEntry: TimelineEntry = {
         id: logData.id,
         type: 'meal',
-        time: new Date(logData.logged_at).toLocaleTimeString('pt-BR', { 
+        time: new Date(logData.created_at).toLocaleTimeString('pt-BR', { 
           hour: '2-digit', 
           minute: '2-digit' 
         }),
-        created_at: logData.logged_at,
-        entry_method: logData.entry_method as 'ai' | 'manual',
-        food_name: logData.description || '',
+        created_at: logData.created_at,
+        entry_method: logData.entry_type as 'ai' | 'manual',
+        food_name: logData.food_name || '',
         calories: logData.calories || 0,
         is_emotional: logData.is_emotional || false,
       };

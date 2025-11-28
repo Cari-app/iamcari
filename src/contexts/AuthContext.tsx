@@ -5,11 +5,19 @@ import { useNavigate } from 'react-router-dom';
 
 interface Profile {
   id: string;
-  whatsapp: string | null;
+  whatsapp_number: string | null;
   token_balance: number;
   tier: string;
   onboarding_completed: boolean;
   created_at: string;
+  email: string | null;
+  age: number | null;
+  weight: number | null;
+  height: number | null;
+  gender: string | null;
+  activity_level: string | null;
+  daily_calories_target: number | null;
+  fasting_protocol: string | null;
 }
 
 interface AuthContextType {
