@@ -15,10 +15,18 @@ import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Dashboard() {
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProtocolOpen, setIsProtocolOpen] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState(16);
+  
+  // Sync selected protocol with profile on mount
+  useEffect(() => {
+    if (profile?.fasting_protocol) {
+      const hours = parseInt(profile.fasting_protocol.replace('h', ''));
+      setSelectedProtocol(hours);
+    }
+  }, [profile]);
   
   const {
     elapsedSeconds,
@@ -129,6 +137,24 @@ export default function Dashboard() {
     fetchDashboardData();
   }, [user]);
 
+  const handleProtocolSelect = async (hours: number) => {
+    setSelectedProtocol(hours);
+    
+    if (!user) return;
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update({ fasting_protocol: `${hours}h` })
+      .eq('id', user.id);
+    
+    if (error) {
+      console.error('Error updating fasting protocol:', error);
+    } else {
+      // Refresh profile context
+      refreshProfile?.();
+    }
+  };
+
   const time = formatTime(elapsedSeconds);
 
   const phaseIcons = {
@@ -208,7 +234,7 @@ export default function Dashboard() {
                   >
                     <ProtocolSelector
                       selectedHours={selectedProtocol}
-                      onSelect={setSelectedProtocol}
+                      onSelect={handleProtocolSelect}
                       isOpen={isProtocolOpen}
                       onOpenChange={setIsProtocolOpen}
                     />
