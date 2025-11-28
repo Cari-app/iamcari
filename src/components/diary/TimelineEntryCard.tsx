@@ -10,7 +10,7 @@ export function TimelineEntryCard({ entry }: TimelineEntryCardProps) {
   // Meal Entry Card
   if (entry.type === 'meal') {
     return (
-      <div className="p-4 rounded-2xl bg-card border border-border">
+      <div className="p-4 bg-card border border-border rounded-2xl">
         <div className="flex items-start gap-3">
           <div className={cn(
             'w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0',
@@ -58,12 +58,10 @@ export function TimelineEntryCard({ entry }: TimelineEntryCardProps) {
     const isPositive = ['calmo', 'focado', 'feliz', 'energizado'].includes(entry.emotion_tag || '');
     
     return (
-      <div className={cn(
-        'p-3.5 rounded-2xl bg-card border border-border relative overflow-hidden'
-      )}>
+      <div className="p-3.5 bg-card border border-border rounded-2xl relative overflow-hidden">
         {/* Left accent bar */}
         <div className={cn(
-          'absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl',
+          'absolute left-0 top-0 bottom-0 w-1',
           isPositive ? 'bg-emerald-500' : 'bg-rose-500'
         )} />
         
@@ -102,7 +100,7 @@ export function TimelineEntryCard({ entry }: TimelineEntryCardProps) {
   // Water Entry Card
   if (entry.type === 'water') {
     return (
-      <div className="px-4 py-3 rounded-2xl bg-sky-500/10 border border-sky-500/20">
+      <div className="px-4 py-3 bg-sky-500/10 border border-sky-500/20 rounded-2xl">
         <div className="flex items-center gap-3">
           <Droplet className="h-4 w-4 text-sky-400 flex-shrink-0" />
           <span className="text-sm font-semibold text-sky-400 tabular-nums">
@@ -123,7 +121,7 @@ export function TimelineEntryCard({ entry }: TimelineEntryCardProps) {
   // Weight Entry Card
   if (entry.type === 'weight') {
     return (
-      <div className="px-4 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+      <div className="px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
         <div className="flex items-center gap-3">
           <Scale className="h-4 w-4 text-emerald-400 flex-shrink-0" />
           <span className="text-sm font-semibold text-emerald-400">
