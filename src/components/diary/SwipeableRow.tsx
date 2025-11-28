@@ -1,4 +1,4 @@
-import { useState, useRef, ReactNode } from 'react';
+import { useState, ReactNode } from 'react';
 import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,14 +12,12 @@ interface SwipeableRowProps {
 export function SwipeableRow({ children, onDelete, className }: SwipeableRowProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const constraintsRef = useRef(null);
   
   const x = useMotionValue(0);
-  const deleteOpacity = useTransform(x, [-100, -50, 0], [1, 0.5, 0]);
-  const deleteScale = useTransform(x, [-100, -50, 0], [1, 0.8, 0.5]);
+  const deleteOpacity = useTransform(x, [-100, -50, 0], [1, 0.8, 0]);
   
-  const DELETE_THRESHOLD = -80;
-  const DELETE_BUTTON_WIDTH = 80;
+  const DELETE_THRESHOLD = -60;
+  const DELETE_BUTTON_WIDTH = 72;
 
   const handleDragEnd = (_: any, info: PanInfo) => {
     setIsDragging(false);
@@ -41,19 +39,18 @@ export function SwipeableRow({ children, onDelete, className }: SwipeableRowProp
   };
 
   return (
-    <div ref={constraintsRef} className={cn('relative overflow-hidden rounded-2xl', className)}>
+    <div className={cn('relative', className)}>
       {/* Delete Button Background */}
       <motion.div
-        className="absolute right-0 top-0 bottom-0 flex items-center justify-center bg-destructive rounded-r-2xl"
+        className="absolute right-0 top-0 bottom-0 flex items-center justify-center rounded-2xl overflow-hidden"
         style={{ 
-          width: DELETE_BUTTON_WIDTH,
+          width: DELETE_BUTTON_WIDTH + 8,
           opacity: deleteOpacity,
-          scale: deleteScale,
         }}
       >
         <button
           onClick={handleDelete}
-          className="flex flex-col items-center justify-center gap-1 text-white h-full w-full"
+          className="flex flex-col items-center justify-center gap-1 h-full w-full bg-destructive text-white rounded-2xl"
         >
           <Trash2 className="h-5 w-5" />
           <span className="text-xs font-medium">Apagar</span>
@@ -69,10 +66,10 @@ export function SwipeableRow({ children, onDelete, className }: SwipeableRowProp
         onDragStart={() => setIsDragging(true)}
         onDragEnd={handleDragEnd}
         animate={{ x: isOpen ? -DELETE_BUTTON_WIDTH : 0 }}
-        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         onClick={isOpen ? closeSwipe : undefined}
         className={cn(
-          'relative bg-card cursor-grab active:cursor-grabbing',
+          'relative rounded-2xl',
           isDragging && 'cursor-grabbing'
         )}
         style={{ x }}
