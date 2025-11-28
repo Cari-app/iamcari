@@ -10,7 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { 
   User, 
   Bell, 
-  Shield, 
+  Activity, 
   HelpCircle, 
   LogOut, 
   ChevronRight,
@@ -22,7 +22,8 @@ import {
   Pencil,
   Loader2,
   FileText,
-  Trash
+  Trash,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -40,7 +41,7 @@ import { cn } from '@/lib/utils';
 
 const menuItems = [
   { icon: Bell, label: 'Notificações', action: 'toggle' },
-  { icon: Shield, label: 'Privacidade', action: 'navigate' },
+  { icon: Activity, label: 'Meus Dados Corporais', action: 'edit-body-stats' },
   { icon: HelpCircle, label: 'Ajuda & Suporte', action: 'navigate' },
 ];
 
@@ -58,6 +59,11 @@ export default function Profile() {
   const [savingName, setSavingName] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isBodyStatsOpen, setIsBodyStatsOpen] = useState(false);
+  const [bodyWeight, setBodyWeight] = useState<number>(0);
+  const [bodyHeight, setBodyHeight] = useState<number>(0);
+  const [caloriesTarget, setCaloriesTarget] = useState<number>(2000);
+  const [savingBodyStats, setSavingBodyStats] = useState(false);
 
   // Fetch profile data on mount
   useEffect(() => {
@@ -69,7 +75,7 @@ export default function Profile() {
     const fetchProfile = async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('email, full_name, avatar_url, whatsapp_number, token_balance, tier')
+        .select('email, full_name, avatar_url, whatsapp_number, token_balance, tier, weight, height, daily_calories_target')
         .eq('id', user.id)
         .single();
 
@@ -87,6 +93,9 @@ export default function Profile() {
       if (data) {
         setFullName(data.full_name || user.email?.split('@')[0] || 'Usuário');
         setAvatarUrl(data.avatar_url);
+        setBodyWeight(data.weight || 0);
+        setBodyHeight(data.height || 0);
+        setCaloriesTarget(data.daily_calories_target || 2000);
       }
 
       setLoading(false);
@@ -224,6 +233,51 @@ export default function Profile() {
     setIsDeleteDialogOpen(false);
   };
 
+  const handleEditBodyStats = () => {
+    setIsBodyStatsOpen(true);
+  };
+
+  const handleSaveBodyStats = async () => {
+    if (!user) return;
+
+    setSavingBodyStats(true);
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          weight: bodyWeight,
+          height: bodyHeight,
+          daily_calories_target: caloriesTarget
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      setIsBodyStatsOpen(false);
+
+      toast({
+        title: '✅ Dados atualizados',
+        description: 'Suas informações corporais foram salvas',
+      });
+    } catch (error) {
+      console.error('Error updating body stats:', error);
+      toast({
+        title: '❌ Erro ao salvar',
+        description: 'Não foi possível atualizar seus dados',
+        variant: 'destructive',
+      });
+    } finally {
+      setSavingBodyStats(false);
+    }
+  };
+
+  const handleMenuItemClick = (action: string) => {
+    if (action === 'edit-body-stats') {
+      handleEditBodyStats();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-24 pt-20">
       <Navbar />
@@ -349,6 +403,7 @@ export default function Profile() {
             {menuItems.map((item, index) => (
               <button
                 key={item.label}
+                onClick={() => handleMenuItemClick(item.action)}
                 className={cn(
                   "w-full flex items-center justify-between p-4 press-effect",
                   "hover:bg-muted/50 transition-colors",
@@ -364,6 +419,9 @@ export default function Profile() {
                 )}
                 {item.action === 'toggle' && (
                   <Switch defaultChecked />
+                )}
+                {item.action === 'edit-body-stats' && (
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
                 )}
               </button>
             ))}
@@ -481,6 +539,95 @@ export default function Profile() {
               className="gradient-primary text-white"
             >
               {savingName ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                'Salvar'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Body Stats Dialog */}
+      <Dialog open={isBodyStatsOpen} onOpenChange={setIsBodyStatsOpen}>
+        <DialogContent className="bg-card border-border sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" />
+              Meus Dados Corporais
+            </DialogTitle>
+            <DialogDescription>
+              Atualize suas informações biométricas
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4 space-y-4">
+            <div>
+              <Label htmlFor="weight" className="text-foreground">
+                Peso Atual (kg)
+              </Label>
+              <Input
+                id="weight"
+                type="number"
+                value={bodyWeight || ''}
+                onChange={(e) => setBodyWeight(Number(e.target.value))}
+                placeholder="Ex: 70"
+                className="mt-2 bg-background"
+                min={0}
+                step={0.1}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="height" className="text-foreground">
+                Altura (cm)
+              </Label>
+              <Input
+                id="height"
+                type="number"
+                value={bodyHeight || ''}
+                onChange={(e) => setBodyHeight(Number(e.target.value))}
+                placeholder="Ex: 170"
+                className="mt-2 bg-background"
+                min={0}
+                step={1}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="calories" className="text-foreground">
+                Meta de Calorias (kcal/dia)
+              </Label>
+              <Input
+                id="calories"
+                type="number"
+                value={caloriesTarget || ''}
+                onChange={(e) => setCaloriesTarget(Number(e.target.value))}
+                placeholder="Ex: 2000"
+                className="mt-2 bg-background"
+                min={0}
+                step={50}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setIsBodyStatsOpen(false)}
+              disabled={savingBodyStats}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSaveBodyStats}
+              disabled={savingBodyStats}
+              className="gradient-primary text-white"
+            >
+              {savingBodyStats ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Salvando...
