@@ -497,38 +497,66 @@ export default function Profile() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="bg-card border-border sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-foreground">Deletar Conta</DialogTitle>
-            <DialogDescription>
-              Esta ação é irreversível. Todos os seus dados serão permanentemente excluídos.
+            <DialogTitle className="text-rose-500 flex items-center gap-2">
+              <Trash className="h-5 w-5" />
+              Deletar Conta Permanentemente
+            </DialogTitle>
+            <DialogDescription className="text-foreground font-semibold">
+              ⚠️ Esta ação é IRREVERSÍVEL
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-4">
-            <p className="text-sm text-muted-foreground">
-              Tem certeza que deseja deletar sua conta? Você perderá:
+          <div className="py-4 space-y-4">
+            <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20">
+              <p className="text-sm text-foreground font-medium mb-2">
+                Ao deletar sua conta:
+              </p>
+              <ul className="space-y-1.5 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="text-rose-500 mt-0.5">•</span>
+                  <span>Sua assinatura será <strong className="text-foreground">cancelada imediatamente</strong></span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-rose-500 mt-0.5">•</span>
+                  <span>Todos os dados serão <strong className="text-foreground">excluídos permanentemente</strong></span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-rose-500 mt-0.5">•</span>
+                  <span>Histórico de jejum, refeições e progresso serão perdidos</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-rose-500 mt-0.5">•</span>
+                  <span>Tokens e configurações não poderão ser recuperados</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+              <p className="text-sm text-muted-foreground">
+                <strong className="text-foreground">Para voltar a usar o app</strong>, você precisará criar uma nova conta e fazer uma <strong className="text-foreground">nova assinatura</strong>.
+              </p>
+            </div>
+
+            <p className="text-xs text-center text-muted-foreground">
+              Não há como desfazer esta ação. Tenha certeza absoluta antes de continuar.
             </p>
-            <ul className="mt-2 space-y-1 text-sm text-muted-foreground list-disc list-inside">
-              <li>Histórico de jejum</li>
-              <li>Registros de refeições</li>
-              <li>Tokens e progresso</li>
-              <li>Todas as configurações</li>
-            </ul>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
+              className="flex-1"
             >
               Cancelar
             </Button>
             <Button
               variant="destructive"
               onClick={confirmDeleteAccount}
-              className="bg-rose-500 hover:bg-rose-600"
+              className="flex-1 bg-rose-500 hover:bg-rose-600"
             >
               <Trash className="h-4 w-4 mr-2" />
-              Confirmar Exclusão
+              Sim, Deletar Tudo
             </Button>
           </DialogFooter>
         </DialogContent>
