@@ -32,29 +32,33 @@ export default function Dashboard() {
     targetHours,
   } = useFastingTimer();
 
-  // Fetch real nutrition data from meal_logs
+  // Fetch real data from Supabase
   const [caloriesConsumed, setCaloriesConsumed] = useState(0);
   const [lastCheckIn, setLastCheckIn] = useState<{ isEmotional: boolean; time: string } | null>(null);
+  const [weeklyFasts, setWeeklyFasts] = useState(0);
+  const [currentStreak, setCurrentStreak] = useState(0);
   
   useEffect(() => {
     if (!user) return;
     
-    const fetchTodayMeals = async () => {
+    const fetchDashboardData = async () => {
       const today = new Date().toISOString().split('T')[0];
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       
-      const { data, error } = await supabase
+      // Fetch today's meals
+      const { data: mealsData } = await supabase
         .from('meal_logs')
         .select('calories, is_emotional, created_at')
         .eq('user_id', user.id)
         .gte('created_at', `${today}T00:00:00`)
         .order('created_at', { ascending: false });
       
-      if (!error && data) {
-        const totalCalories = data.reduce((sum, log) => sum + (log.calories || 0), 0);
+      if (mealsData) {
+        const totalCalories = mealsData.reduce((sum, log) => sum + (log.calories || 0), 0);
         setCaloriesConsumed(totalCalories);
         
-        if (data.length > 0) {
-          const lastLog = data[0];
+        if (mealsData.length > 0) {
+          const lastLog = mealsData[0];
           const logTime = new Date(lastLog.created_at);
           const now = new Date();
           const diffMinutes = Math.floor((now.getTime() - logTime.getTime()) / 60000);
@@ -73,9 +77,56 @@ export default function Dashboard() {
           });
         }
       }
+      
+      // Fetch weekly fasting sessions (last 7 days, completed only)
+      const { data: weeklyData } = await supabase
+        .from('fasting_sessions')
+        .select('id')
+        .eq('user_id', user.id)
+        .not('end_time', 'is', null)
+        .gte('start_time', sevenDaysAgo);
+      
+      setWeeklyFasts(weeklyData?.length || 0);
+      
+      // Calculate streak (consecutive days with at least one completed fast)
+      const { data: allSessions } = await supabase
+        .from('fasting_sessions')
+        .select('start_time, end_time')
+        .eq('user_id', user.id)
+        .not('end_time', 'is', null)
+        .order('start_time', { ascending: false });
+      
+      if (allSessions && allSessions.length > 0) {
+        let streak = 0;
+        let currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+        
+        const sessionsByDay = new Map<string, boolean>();
+        allSessions.forEach(session => {
+          const dayKey = new Date(session.start_time).toISOString().split('T')[0];
+          sessionsByDay.set(dayKey, true);
+        });
+        
+        while (true) {
+          const dayKey = currentDate.toISOString().split('T')[0];
+          if (sessionsByDay.has(dayKey)) {
+            streak++;
+            currentDate.setDate(currentDate.getDate() - 1);
+          } else if (streak > 0) {
+            break;
+          } else {
+            currentDate.setDate(currentDate.getDate() - 1);
+            if (currentDate < new Date(allSessions[allSessions.length - 1].start_time)) {
+              break;
+            }
+          }
+        }
+        
+        setCurrentStreak(streak);
+      }
     };
     
-    fetchTodayMeals();
+    fetchDashboardData();
   }, [user]);
 
   const time = formatTime(elapsedSeconds);
@@ -248,23 +299,32 @@ export default function Dashboard() {
             transition={{ delay: 0.3 }}
             className="grid grid-cols-3 gap-3"
           >
-            {[
-              { label: 'Esta semana', value: '5', unit: 'jejuns' },
-              { label: 'Sequência', value: '12', unit: 'dias' },
-              { label: 'Tokens', value: '8', unit: '💎' },
-            ].map((stat, index) => (
-              <div
-                key={stat.label}
-                className="p-4 rounded-2xl bg-card border border-border text-center"
-              >
-                <p className="text-2xl font-bold text-foreground tabular-nums">
-                  {stat.value}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
+            <div className="p-4 rounded-2xl bg-card border border-border text-center">
+              <p className="text-2xl font-bold text-foreground tabular-nums">
+                {weeklyFasts}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Esta semana
+              </p>
+            </div>
+            
+            <div className="p-4 rounded-2xl bg-card border border-border text-center">
+              <p className="text-2xl font-bold text-foreground tabular-nums">
+                {currentStreak}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Sequência
+              </p>
+            </div>
+            
+            <div className="p-4 rounded-2xl bg-card border border-border text-center">
+              <p className="text-2xl font-bold text-foreground tabular-nums">
+                {profile?.token_balance || 0}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Tokens 💎
+              </p>
+            </div>
           </motion.div>
         </div>
       </main>
