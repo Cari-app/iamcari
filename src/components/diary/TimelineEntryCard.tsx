@@ -1,4 +1,4 @@
-import { Camera, Pencil, Heart, Clock, Droplet, Scale, BrainCircuit, Star, Edit } from 'lucide-react';
+import { Camera, Utensils, Heart, Clock, Droplet, Scale, BrainCircuit, Star, Edit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TimelineEntry, EMOTION_TAGS } from '@/types';
 
@@ -33,7 +33,7 @@ export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
             {entry.entry_method === 'ai' ? (
               <Camera className="h-5 w-5 text-white" />
             ) : (
-              <Pencil className="h-5 w-5 text-muted-foreground" />
+              <Utensils className="h-5 w-5 text-muted-foreground" />
             )}
           </div>
           
