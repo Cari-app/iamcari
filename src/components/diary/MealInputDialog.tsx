@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Camera, Pencil, Utensils, Sparkles, X } from 'lucide-react';
+import { Camera, Pencil, Utensils, Sparkles, Heart } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,7 @@ interface MealInputDialogProps {
     description: string;
     calories?: number;
     imageUrl?: string;
+    isEmotional?: boolean;
   }) => void;
 }
 
@@ -33,11 +34,13 @@ export function MealInputDialog({
   const [method, setMethod] = useState<InputMethod>('select');
   const [description, setDescription] = useState('');
   const [calories, setCalories] = useState('');
+  const [isEmotional, setIsEmotional] = useState(false);
 
   const resetState = () => {
     setMethod('select');
     setDescription('');
     setCalories('');
+    setIsEmotional(false);
   };
 
   const handleClose = () => {
@@ -52,6 +55,7 @@ export function MealInputDialog({
       method: 'ai',
       description: 'Refeição analisada por IA',
       calories: 0, // Would be filled by AI
+      isEmotional,
     });
     handleClose();
   };
@@ -63,6 +67,7 @@ export function MealInputDialog({
         method: 'manual',
         description: description.trim(),
         calories: numCalories,
+        isEmotional,
       });
       handleClose();
     }
@@ -213,6 +218,39 @@ export function MealInputDialog({
                   max="5000"
                 />
               </div>
+
+              {/* Emotional Toggle */}
+              <button
+                type="button"
+                onClick={() => setIsEmotional(!isEmotional)}
+                className={cn(
+                  'w-full p-3 rounded-xl border-2 transition-all flex items-center gap-3',
+                  isEmotional
+                    ? 'border-rose-500/50 bg-rose-500/10'
+                    : 'border-border bg-muted/30 hover:border-muted-foreground/30'
+                )}
+              >
+                <div className={cn(
+                  'h-10 w-10 rounded-lg flex items-center justify-center transition-colors',
+                  isEmotional ? 'bg-rose-500/20' : 'bg-muted'
+                )}>
+                  <Heart className={cn(
+                    'h-5 w-5 transition-colors',
+                    isEmotional ? 'text-rose-400 fill-rose-400' : 'text-muted-foreground'
+                  )} />
+                </div>
+                <div className="flex-1 text-left">
+                  <span className={cn(
+                    'font-medium transition-colors',
+                    isEmotional ? 'text-rose-400' : 'text-foreground'
+                  )}>
+                    Refeição emocional
+                  </span>
+                  <p className="text-xs text-muted-foreground">
+                    Marque se comeu por motivo emocional
+                  </p>
+                </div>
+              </button>
 
               <div className="flex gap-2 pt-2">
                 <Button variant="ghost" onClick={handleBack} className="flex-1">
