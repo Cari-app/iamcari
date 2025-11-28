@@ -36,18 +36,7 @@ export function BottomNav() {
               >
                 {({ isActive }) => (
                   <>
-                    <div className="relative">
-                      <item.icon className="h-6 w-6" strokeWidth={isActive ? 2.5 : 2} />
-                      {isActive && (
-                        <motion.div
-                          layoutId="activeIndicator"
-                          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                        />
-                      )}
-                    </div>
+                    <item.icon className="h-6 w-6" strokeWidth={isActive ? 2.5 : 2} />
                     <span className={cn(
                       'text-xs font-medium transition-all',
                       isActive ? 'opacity-100' : 'opacity-70'
