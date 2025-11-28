@@ -5,6 +5,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
 import { WeightInputDialog } from '@/components/diary/WeightInputDialog';
+import { MealInputDialog } from '@/components/diary/MealInputDialog';
 import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { Calendar, Camera } from 'lucide-react';
@@ -80,6 +81,7 @@ const mockTimeline: TimelineEntry[] = [
 export default function Diary() {
   const [moodDrawerOpen, setMoodDrawerOpen] = useState(false);
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
+  const [mealDialogOpen, setMealDialogOpen] = useState(false);
   const [timeline, setTimeline] = useState<TimelineEntry[]>(mockTimeline);
   const [waterTotal, setWaterTotal] = useState(500); // Sum from mock data
   const [lastWeight, setLastWeight] = useState(75.4);
@@ -142,11 +144,26 @@ export default function Diary() {
     });
   };
 
-  const handleMealClick = () => {
-    // This would open the existing meal logging modal
+  const handleMealSubmit = (data: { 
+    method: 'ai' | 'manual';
+    description: string;
+    calories?: number;
+  }) => {
+    const now = new Date();
+    const newEntry: TimelineEntry = {
+      id: Date.now().toString(),
+      type: 'meal',
+      time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      created_at: now.toISOString(),
+      entry_method: data.method,
+      food_name: data.description,
+      calories: data.calories || 0,
+      is_emotional: false,
+    };
+    setTimeline(prev => [newEntry, ...prev]);
     toast({
-      title: '🍎 Adicionar Refeição',
-      description: 'Funcionalidade de adicionar refeição',
+      title: data.method === 'ai' ? '📸 Refeição analisada' : '🍎 Refeição registrada',
+      description: `${data.description}${data.calories ? ` - ${data.calories} kcal` : ''}`,
     });
   };
 
@@ -236,7 +253,7 @@ export default function Diary() {
             onMoodClick={() => setMoodDrawerOpen(true)}
             onWaterClick={handleWaterClick}
             onWeightClick={() => setWeightDialogOpen(true)}
-            onMealClick={handleMealClick}
+            onMealClick={() => setMealDialogOpen(true)}
           />
 
           {/* Timeline */}
@@ -297,6 +314,12 @@ export default function Diary() {
         onOpenChange={setWeightDialogOpen}
         onSubmit={handleWeightSubmit}
         lastWeight={lastWeight}
+      />
+
+      <MealInputDialog
+        open={mealDialogOpen}
+        onOpenChange={setMealDialogOpen}
+        onSubmit={handleMealSubmit}
       />
 
       <BottomNav />
