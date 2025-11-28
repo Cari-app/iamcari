@@ -81,3 +81,42 @@ export const FASTING_PHASES: Record<FastingPhase, FastingPhaseInfo> = {
     minHours: 24,
   },
 };
+
+// Timeline Entry Types for Holistic Health Diary
+export type LogType = 'meal' | 'mood' | 'water' | 'weight';
+
+export type EmotionTag = 'ansioso' | 'focado' | 'estressado' | 'calmo' | 'feliz' | 'triste' | 'energizado' | 'cansado';
+
+export interface TimelineEntry {
+  id: string;
+  user_id?: string;
+  type: LogType;
+  created_at: string; // ISO Timestamp
+  time: string; // Display time HH:mm
+  
+  // Meal Props
+  image_url?: string;
+  calories?: number;
+  food_name?: string;
+  is_emotional?: boolean;
+  hunger_level?: number;
+  entry_method?: 'ai' | 'manual';
+  
+  // Mood Props
+  mood_score?: number; // 1-10
+  emotion_tag?: EmotionTag;
+  
+  // Water/Weight Props
+  value?: number; // ml or kg
+}
+
+export const EMOTION_TAGS: { value: EmotionTag; label: string; color: string }[] = [
+  { value: 'calmo', label: 'Calmo', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
+  { value: 'focado', label: 'Focado', color: 'bg-violet-500/20 text-violet-400 border-violet-500/30' },
+  { value: 'feliz', label: 'Feliz', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
+  { value: 'energizado', label: 'Energizado', color: 'bg-sky-500/20 text-sky-400 border-sky-500/30' },
+  { value: 'ansioso', label: 'Ansioso', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+  { value: 'estressado', label: 'Estressado', color: 'bg-rose-500/20 text-rose-400 border-rose-500/30' },
+  { value: 'cansado', label: 'Cansado', color: 'bg-slate-500/20 text-slate-400 border-slate-500/30' },
+  { value: 'triste', label: 'Triste', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+];
