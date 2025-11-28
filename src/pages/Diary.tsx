@@ -1,45 +1,167 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
-import { Calendar, Camera, Pencil, Heart, Clock } from 'lucide-react';
+import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
+import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
+import { WeightInputDialog } from '@/components/diary/WeightInputDialog';
+import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
+import { Calendar, Camera } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { TimelineEntry, EmotionTag } from '@/types';
 
-const mockMeals = [
+// Mock timeline data with mixed entry types
+const mockTimeline: TimelineEntry[] = [
   {
-    id: 1,
+    id: '1',
+    type: 'mood',
+    time: '07:30',
+    created_at: new Date().toISOString(),
+    mood_score: 7,
+    emotion_tag: 'focado',
+  },
+  {
+    id: '2',
+    type: 'water',
+    time: '08:00',
+    created_at: new Date().toISOString(),
+    value: 250,
+  },
+  {
+    id: '3',
+    type: 'meal',
     time: '12:30',
-    type: 'ai',
-    description: 'Salada com frango grelhado',
+    created_at: new Date().toISOString(),
+    entry_method: 'ai',
+    food_name: 'Salada com frango grelhado',
     calories: 450,
-    isEmotional: false,
-    hungerLevel: 3,
+    is_emotional: false,
+    hunger_level: 3,
   },
   {
-    id: 2,
+    id: '4',
+    type: 'water',
+    time: '14:00',
+    created_at: new Date().toISOString(),
+    value: 250,
+  },
+  {
+    id: '5',
+    type: 'meal',
     time: '15:45',
-    type: 'manual',
-    description: 'Lanche da tarde - Maçã com pasta de amendoim',
+    created_at: new Date().toISOString(),
+    entry_method: 'manual',
+    food_name: 'Lanche da tarde - Maçã com pasta de amendoim',
     calories: 180,
-    isEmotional: true,
-    hungerLevel: 7,
+    is_emotional: true,
+    hunger_level: 7,
   },
   {
-    id: 3,
+    id: '6',
+    type: 'weight',
+    time: '18:00',
+    created_at: new Date().toISOString(),
+    value: 75.4,
+  },
+  {
+    id: '7',
+    type: 'meal',
     time: '19:00',
-    type: 'ai',
-    description: 'Peixe grelhado com legumes',
+    created_at: new Date().toISOString(),
+    entry_method: 'ai',
+    food_name: 'Peixe grelhado com legumes',
     calories: 380,
-    isEmotional: false,
-    hungerLevel: 4,
+    is_emotional: false,
+    hunger_level: 4,
   },
 ];
 
 export default function Diary() {
+  const [moodDrawerOpen, setMoodDrawerOpen] = useState(false);
+  const [weightDialogOpen, setWeightDialogOpen] = useState(false);
+  const [timeline, setTimeline] = useState<TimelineEntry[]>(mockTimeline);
+  const [waterTotal, setWaterTotal] = useState(500); // Sum from mock data
+  const [lastWeight, setLastWeight] = useState(75.4);
+
+  // Calculate totals from timeline
+  const todayCalories = timeline
+    .filter(e => e.type === 'meal' && e.calories)
+    .reduce((sum, e) => sum + (e.calories || 0), 0);
+  
+  const todayMeals = timeline.filter(e => e.type === 'meal').length;
+
+  const handleMoodSubmit = (data: { energyLevel: number; emotion: EmotionTag }) => {
+    const now = new Date();
+    const newEntry: TimelineEntry = {
+      id: Date.now().toString(),
+      type: 'mood',
+      time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      created_at: now.toISOString(),
+      mood_score: data.energyLevel,
+      emotion_tag: data.emotion,
+    };
+    setTimeline(prev => [newEntry, ...prev]);
+    toast({
+      title: '🧠 Check-in registrado',
+      description: `Sentindo-se ${data.emotion} com energia ${data.energyLevel}/10`,
+    });
+  };
+
+  const handleWaterClick = () => {
+    const now = new Date();
+    const newEntry: TimelineEntry = {
+      id: Date.now().toString(),
+      type: 'water',
+      time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      created_at: now.toISOString(),
+      value: 250,
+    };
+    setTimeline(prev => [newEntry, ...prev]);
+    setWaterTotal(prev => prev + 250);
+    toast({
+      title: '💧 +250ml registrado',
+      description: `Total hoje: ${waterTotal + 250}ml`,
+    });
+  };
+
+  const handleWeightSubmit = (weight: number) => {
+    const now = new Date();
+    const newEntry: TimelineEntry = {
+      id: Date.now().toString(),
+      type: 'weight',
+      time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      created_at: now.toISOString(),
+      value: weight,
+    };
+    setTimeline(prev => [newEntry, ...prev]);
+    setLastWeight(weight);
+    toast({
+      title: '⚖️ Peso registrado',
+      description: `${weight}kg`,
+    });
+  };
+
+  const handleMealClick = () => {
+    // This would open the existing meal logging modal
+    toast({
+      title: '🍎 Adicionar Refeição',
+      description: 'Funcionalidade de adicionar refeição',
+    });
+  };
+
+  // Sort timeline by time (most recent first for display purposes)
+  const sortedTimeline = [...timeline].sort((a, b) => {
+    const timeA = a.time.split(':').map(Number);
+    const timeB = b.time.split(':').map(Number);
+    return (timeB[0] * 60 + timeB[1]) - (timeA[0] * 60 + timeA[1]);
+  });
+
   return (
     <div className="min-h-screen bg-background pb-24 pt-20">
       <Navbar />
       
       <main className="px-4 py-6">
-        <div className="mx-auto max-w-lg space-y-6">
+        <div className="mx-auto max-w-lg space-y-4">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -48,7 +170,7 @@ export default function Diary() {
           >
             <div>
               <h1 className="text-2xl font-bold text-foreground">Diário</h1>
-              <p className="text-muted-foreground">Suas refeições de hoje</p>
+              <p className="text-muted-foreground">Linha do tempo de hoje</p>
             </div>
             <button className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center press-effect">
               <Calendar className="h-5 w-5 text-muted-foreground" />
@@ -66,13 +188,13 @@ export default function Diary() {
               <div>
                 <p className="text-sm text-muted-foreground">Calorias hoje</p>
                 <p className="text-3xl font-bold text-foreground tabular-nums">
-                  1.010
+                  {todayCalories.toLocaleString('pt-BR')}
                   <span className="text-lg font-medium text-foreground/60">/1.800</span>
                 </p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">Refeições</p>
-                <p className="text-3xl font-bold text-secondary tabular-nums">3</p>
+                <p className="text-3xl font-bold text-secondary tabular-nums">{todayMeals}</p>
               </div>
             </div>
             
@@ -80,61 +202,45 @@ export default function Diary() {
             <div className="mt-4 h-2 rounded-full bg-muted overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: '56%' }}
+                animate={{ width: `${Math.min((todayCalories / 1800) * 100, 100)}%` }}
                 transition={{ delay: 0.3, duration: 0.8, ease: 'easeOut' }}
                 className="h-full rounded-full gradient-primary"
               />
             </div>
+
+            {/* Water indicator */}
+            <div className="mt-3 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">💧 Hidratação</span>
+              <span className="text-sky-400 font-medium tabular-nums">{waterTotal}ml</span>
+            </div>
           </motion.div>
 
-          {/* Meals List */}
+          {/* Quick Assessment Bar */}
+          <QuickAssessmentBar
+            onMoodClick={() => setMoodDrawerOpen(true)}
+            onWaterClick={handleWaterClick}
+            onWeightClick={() => setWeightDialogOpen(true)}
+            onMealClick={handleMealClick}
+          />
+
+          {/* Timeline */}
           <div className="space-y-3">
-            {mockMeals.map((meal, index) => (
-              <motion.div
-                key={meal.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + index * 0.1 }}
-                className="p-4 rounded-2xl bg-card border border-border press-effect cursor-pointer"
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    meal.type === 'ai' ? 'gradient-primary' : 'bg-muted'
-                  }`}>
-                    {meal.type === 'ai' ? (
-                      <Camera className="h-5 w-5 text-white" />
-                    ) : (
-                      <Pencil className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground tabular-nums">
-                        {meal.time}
-                      </span>
-                      {meal.isEmotional && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-xs">
-                          <Heart className="h-3 w-3" />
-                          Emocional
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-1 text-foreground font-medium truncate">
-                      {meal.description}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {meal.calories} kcal
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
+            <motion.h2
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.25 }}
+              className="text-sm font-medium text-muted-foreground"
+            >
+              Linha do tempo
+            </motion.h2>
+            
+            {sortedTimeline.map((entry, index) => (
+              <TimelineEntryCard key={entry.id} entry={entry} index={index} />
             ))}
           </div>
 
-          {/* Empty state placeholder */}
-          {mockMeals.length === 0 && (
+          {/* Empty state */}
+          {sortedTimeline.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -144,15 +250,29 @@ export default function Diary() {
                 <Camera className="h-8 w-8 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground">
-                Nenhuma refeição registrada hoje
+                Nenhum registro hoje
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                Use o botão + para adicionar
+                Use os botões acima para começar
               </p>
             </motion.div>
           )}
         </div>
       </main>
+
+      {/* Modals */}
+      <MoodCheckInDrawer
+        open={moodDrawerOpen}
+        onOpenChange={setMoodDrawerOpen}
+        onSubmit={handleMoodSubmit}
+      />
+      
+      <WeightInputDialog
+        open={weightDialogOpen}
+        onOpenChange={setWeightDialogOpen}
+        onSubmit={handleWeightSubmit}
+        lastWeight={lastWeight}
+      />
 
       <BottomNav />
     </div>
