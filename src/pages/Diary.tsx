@@ -67,7 +67,7 @@ export default function Diary() {
                 <p className="text-sm text-muted-foreground">Calorias hoje</p>
                 <p className="text-3xl font-bold text-foreground tabular-nums">
                   1.010
-                  <span className="text-base font-normal text-muted-foreground">/1.800</span>
+                  <span className="text-lg font-medium text-foreground/60">/1.800</span>
                 </p>
               </div>
               <div className="text-right">

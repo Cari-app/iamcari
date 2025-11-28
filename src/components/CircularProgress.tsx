@@ -12,7 +12,7 @@ interface CircularProgressProps {
 export function CircularProgress({ 
   progress, 
   size = 280, 
-  strokeWidth = 12,
+  strokeWidth = 20,
   children,
   className 
 }: CircularProgressProps) {
@@ -27,7 +27,30 @@ export function CircularProgress({
         height={size}
         className="transform -rotate-90"
       >
-        {/* Background circle */}
+        {/* Gradient definition */}
+        <defs>
+          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="hsl(263 70% 58%)" />
+            <stop offset="100%" stopColor="hsl(168 76% 48%)" />
+          </linearGradient>
+          
+          {/* Stronger glow filter */}
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          
+          {/* Outer glow for the ring */}
+          <filter id="outerGlow" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="8" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          </filter>
+        </defs>
+
+        {/* Background circle - thicker and more visible */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -35,27 +58,10 @@ export function CircularProgress({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-muted/30"
+          className="text-muted/20"
         />
         
-        {/* Gradient definition */}
-        <defs>
-          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(var(--primary))" />
-            <stop offset="100%" stopColor="hsl(var(--secondary))" />
-          </linearGradient>
-          
-          {/* Glow filter */}
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        
-        {/* Progress circle with gradient */}
+        {/* Progress circle with gradient and glow */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}
@@ -67,22 +73,27 @@ export function CircularProgress({
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           filter="url(#glow)"
+          style={{ 
+            filter: 'drop-shadow(0 0 12px hsl(263 70% 58% / 0.5)) drop-shadow(0 0 24px hsl(168 76% 48% / 0.3))'
+          }}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
         />
         
-        {/* Progress head glow */}
+        {/* Progress head glow - enhanced */}
         {progress > 0 && (
           <motion.circle
             cx={size / 2 + radius * Math.sin((progress / 100) * 2 * Math.PI)}
             cy={size / 2 - radius * Math.cos((progress / 100) * 2 * Math.PI)}
-            r={strokeWidth / 2 + 4}
-            fill="hsl(var(--secondary))"
-            className="opacity-50"
-            filter="url(#glow)"
+            r={strokeWidth / 2 + 6}
+            fill="hsl(168 76% 48%)"
+            className="opacity-60"
+            style={{ 
+              filter: 'drop-shadow(0 0 8px hsl(168 76% 48% / 0.8))'
+            }}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
+            animate={{ opacity: 0.7 }}
           />
         )}
       </svg>
