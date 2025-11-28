@@ -66,7 +66,7 @@ export default function Profile() {
     const fetchProfile = async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('email, whatsapp_number, token_balance, tier')
+        .select('email, full_name, avatar_url, whatsapp_number, token_balance, tier')
         .eq('id', user.id)
         .single();
 
@@ -82,10 +82,8 @@ export default function Profile() {
       }
 
       if (data) {
-        // Since full_name and avatar_url might not exist in the schema yet,
-        // we'll use email as fallback for name and null for avatar
-        setFullName(user.email?.split('@')[0] || 'Usuário');
-        setAvatarUrl(null);
+        setFullName(data.full_name || user.email?.split('@')[0] || 'Usuário');
+        setAvatarUrl(data.avatar_url);
       }
 
       setLoading(false);
@@ -140,9 +138,17 @@ export default function Profile() {
         .from('avatars')
         .getPublicUrl(fileName);
 
-      // For now, we'll just update local state since avatar_url column might not exist
-      // In a real scenario, you'd update the profiles table here
-      setAvatarUrl(urlData.publicUrl);
+      const publicUrl = urlData.publicUrl;
+
+      // Update profiles table with new avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      setAvatarUrl(publicUrl);
 
       toast({
         title: '✅ Avatar atualizado',
@@ -171,8 +177,13 @@ export default function Profile() {
     setSavingName(true);
 
     try {
-      // For now, we'll just update local state since full_name column might not exist
-      // In a real scenario, you'd update the profiles table here
+      const { error } = await supabase
+        .from('profiles')
+        .update({ full_name: editNameValue.trim() })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
       setFullName(editNameValue.trim());
       setIsEditNameOpen(false);
 
