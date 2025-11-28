@@ -15,95 +15,32 @@ import { TimelineEntry, EmotionTag } from '@/types';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Mock timeline data with mixed entry types
-const mockTimeline: TimelineEntry[] = [
-  {
-    id: '1',
-    type: 'mood',
-    time: '07:30',
-    created_at: new Date().toISOString(),
-    mood_score: 7,
-    emotion_tag: 'focado',
-  },
-  {
-    id: '2',
-    type: 'water',
-    time: '08:00',
-    created_at: new Date().toISOString(),
-    value: 250,
-  },
-  {
-    id: '3',
-    type: 'meal',
-    time: '12:30',
-    created_at: new Date().toISOString(),
-    entry_method: 'ai',
-    food_name: 'Salada com frango grelhado',
-    calories: 450,
-    is_emotional: false,
-    hunger_level: 3,
-  },
-  {
-    id: '4',
-    type: 'water',
-    time: '14:00',
-    created_at: new Date().toISOString(),
-    value: 250,
-  },
-  {
-    id: '5',
-    type: 'meal',
-    time: '15:45',
-    created_at: new Date().toISOString(),
-    entry_method: 'manual',
-    food_name: 'Lanche da tarde - Maçã com pasta de amendoim',
-    calories: 180,
-    is_emotional: true,
-    hunger_level: 7,
-  },
-  {
-    id: '6',
-    type: 'weight',
-    time: '18:00',
-    created_at: new Date().toISOString(),
-    value: 75.4,
-  },
-  {
-    id: '7',
-    type: 'meal',
-    time: '19:00',
-    created_at: new Date().toISOString(),
-    entry_method: 'ai',
-    food_name: 'Peixe grelhado com legumes',
-    calories: 380,
-    is_emotional: false,
-    hunger_level: 4,
-  },
-];
-
 export default function Diary() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [moodDrawerOpen, setMoodDrawerOpen] = useState(false);
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
   const [waterDialogOpen, setWaterDialogOpen] = useState(false);
   const [mealDialogOpen, setMealDialogOpen] = useState(false);
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [waterTotal, setWaterTotal] = useState(0);
-  const [lastWeight, setLastWeight] = useState(0);
 
-  // Fetch meal logs from Supabase
+  // Fetch today's meal logs from Supabase
   useEffect(() => {
     if (!user) {
       setLoading(false);
       return;
     }
 
-    const fetchLogs = async () => {
+    const fetchTodayLogs = async () => {
+      // Get start of today in user's timezone
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
       const { data, error } = await supabase
         .from('meal_logs')
         .select('*')
         .eq('user_id', user.id)
+        .gte('created_at', today.toISOString())
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -113,27 +50,58 @@ export default function Diary() {
       }
 
       if (data) {
-        const entries: TimelineEntry[] = data.map(log => ({
-          id: log.id,
-          type: 'meal',
-          time: new Date(log.created_at).toLocaleTimeString('pt-BR', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          }),
-          created_at: log.created_at,
-          entry_method: log.entry_type as 'ai' | 'manual',
-          food_name: log.food_name || '',
-          calories: log.calories || 0,
-          image_url: log.image_url,
-          is_emotional: log.is_emotional || false,
-          hunger_level: log.hunger_level,
-        }));
+        const entries: TimelineEntry[] = data.map(log => {
+          const baseEntry = {
+            id: log.id,
+            time: new Date(log.created_at).toLocaleTimeString('pt-BR', { 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            }),
+            created_at: log.created_at,
+          };
+
+          // Map based on entry_type
+          if (log.entry_type === 'meal') {
+            return {
+              ...baseEntry,
+              type: 'meal' as const,
+              entry_method: log.image_url ? 'ai' as const : 'manual' as const,
+              food_name: log.food_name || '',
+              calories: log.calories || 0,
+              image_url: log.image_url,
+              is_emotional: log.is_emotional || false,
+              hunger_level: log.hunger_level,
+            };
+          } else if (log.entry_type === 'water') {
+            return {
+              ...baseEntry,
+              type: 'water' as const,
+              value: log.metric_value || 0,
+            };
+          } else if (log.entry_type === 'weight') {
+            return {
+              ...baseEntry,
+              type: 'weight' as const,
+              value: log.metric_value || 0,
+            };
+          } else if (log.entry_type === 'mood') {
+            return {
+              ...baseEntry,
+              type: 'mood' as const,
+              mood_score: log.hunger_level || 5,
+              emotion_tag: (log.mood_tag || 'calmo') as EmotionTag,
+            };
+          }
+
+          return baseEntry as TimelineEntry;
+        });
+        
         setTimeline(entries);
       }
       setLoading(false);
     };
 
-    fetchLogs();
+    fetchTodayLogs();
   }, [user]);
 
   // Calculate totals from timeline
@@ -142,56 +110,159 @@ export default function Diary() {
     .reduce((sum, e) => sum + (e.calories || 0), 0);
   
   const todayMeals = timeline.filter(e => e.type === 'meal').length;
+  
+  const waterTotal = timeline
+    .filter(e => e.type === 'water')
+    .reduce((sum, e) => sum + (e.value || 0), 0);
+  
+  const lastWeight = timeline
+    .filter(e => e.type === 'weight')
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.value || 0;
 
-  const handleMoodSubmit = (data: { energyLevel: number; emotion: EmotionTag }) => {
-    const now = new Date();
-    const newEntry: TimelineEntry = {
-      id: Date.now().toString(),
-      type: 'mood',
-      time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      created_at: now.toISOString(),
-      mood_score: data.energyLevel,
-      emotion_tag: data.emotion,
-    };
-    setTimeline(prev => [newEntry, ...prev]);
-    toast({
-      title: '🧠 Check-in registrado',
-      description: `Sentindo-se ${data.emotion} com energia ${data.energyLevel}/10`,
-    });
+  const handleMoodSubmit = async (data: { energyLevel: number; emotion: EmotionTag }) => {
+    if (!user) return;
+
+    const { data: logData, error } = await supabase
+      .from('meal_logs')
+      .insert({
+        user_id: user.id,
+        entry_type: 'mood',
+        hunger_level: data.energyLevel,
+        mood_tag: data.emotion,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error inserting mood:', error);
+      toast({
+        title: '❌ Erro ao salvar',
+        description: 'Não foi possível salvar o check-in',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (logData) {
+      const newEntry: TimelineEntry = {
+        id: logData.id,
+        type: 'mood',
+        time: new Date(logData.created_at).toLocaleTimeString('pt-BR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        created_at: logData.created_at,
+        mood_score: data.energyLevel,
+        emotion_tag: data.emotion,
+      };
+      
+      setTimeline(prev => [newEntry, ...prev]);
+      
+      toast({
+        title: '🧠 Check-in registrado',
+        description: `Sentindo-se ${data.emotion} com energia ${data.energyLevel}/10`,
+      });
+    }
   };
 
-  const handleWaterSubmit = (amount: number) => {
-    const now = new Date();
-    const newEntry: TimelineEntry = {
-      id: Date.now().toString(),
-      type: 'water',
-      time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      created_at: now.toISOString(),
-      value: amount,
-    };
-    setTimeline(prev => [newEntry, ...prev]);
-    setWaterTotal(prev => prev + amount);
-    toast({
-      title: '💧 Água registrada',
-      description: `+${amount}ml • Total hoje: ${waterTotal + amount}ml`,
-    });
+  const handleWaterSubmit = async (amount: number) => {
+    if (!user) return;
+
+    const { data: logData, error } = await supabase
+      .from('meal_logs')
+      .insert({
+        user_id: user.id,
+        entry_type: 'water',
+        metric_value: amount,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error inserting water:', error);
+      toast({
+        title: '❌ Erro ao salvar',
+        description: 'Não foi possível salvar a hidratação',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (logData) {
+      const newEntry: TimelineEntry = {
+        id: logData.id,
+        type: 'water',
+        time: new Date(logData.created_at).toLocaleTimeString('pt-BR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        created_at: logData.created_at,
+        value: amount,
+      };
+      
+      setTimeline(prev => [newEntry, ...prev]);
+      
+      const newTotal = waterTotal + amount;
+      toast({
+        title: '💧 Água registrada',
+        description: `+${amount}ml • Total hoje: ${newTotal}ml`,
+      });
+    }
   };
 
-  const handleWeightSubmit = (weight: number) => {
-    const now = new Date();
-    const newEntry: TimelineEntry = {
-      id: Date.now().toString(),
-      type: 'weight',
-      time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      created_at: now.toISOString(),
-      value: weight,
-    };
-    setTimeline(prev => [newEntry, ...prev]);
-    setLastWeight(weight);
-    toast({
-      title: '⚖️ Peso registrado',
-      description: `${weight}kg`,
-    });
+  const handleWeightSubmit = async (weight: number) => {
+    if (!user) return;
+
+    // Insert weight log
+    const { data: logData, error: logError } = await supabase
+      .from('meal_logs')
+      .insert({
+        user_id: user.id,
+        entry_type: 'weight',
+        metric_value: weight,
+      })
+      .select()
+      .single();
+
+    if (logError) {
+      console.error('Error inserting weight:', logError);
+      toast({
+        title: '❌ Erro ao salvar',
+        description: 'Não foi possível salvar o peso',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Update profile weight
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ weight })
+      .eq('id', user.id);
+
+    if (profileError) {
+      console.error('Error updating profile weight:', profileError);
+    }
+
+    if (logData) {
+      const newEntry: TimelineEntry = {
+        id: logData.id,
+        type: 'weight',
+        time: new Date(logData.created_at).toLocaleTimeString('pt-BR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        created_at: logData.created_at,
+        value: weight,
+      };
+      
+      setTimeline(prev => [newEntry, ...prev]);
+      
+      toast({
+        title: '⚖️ Peso registrado',
+        description: `${weight}kg`,
+      });
+    }
   };
 
   const handleMealSubmit = async (data: { 
@@ -207,11 +278,11 @@ export default function Diary() {
       .from('meal_logs')
       .insert({
         user_id: user.id,
+        entry_type: 'meal',
         food_name: data.description,
         calories: data.calories || 0,
         image_url: data.imageUrl || null,
         is_emotional: data.isEmotional || false,
-        entry_type: data.method,
       })
       .select()
       .single();
@@ -235,9 +306,10 @@ export default function Diary() {
           minute: '2-digit' 
         }),
         created_at: logData.created_at,
-        entry_method: logData.entry_type as 'ai' | 'manual',
+        entry_method: data.method,
         food_name: logData.food_name || '',
         calories: logData.calories || 0,
+        image_url: logData.image_url,
         is_emotional: logData.is_emotional || false,
       };
       
@@ -315,7 +387,9 @@ export default function Diary() {
                 <p className="text-sm text-muted-foreground">Calorias hoje</p>
                 <p className="text-3xl font-bold text-foreground tabular-nums">
                   {todayCalories.toLocaleString('pt-BR')}
-                  <span className="text-lg font-medium text-foreground/60">/1.800</span>
+                  <span className="text-lg font-medium text-foreground/60">
+                    /{(profile?.daily_calories_target || 2000).toLocaleString('pt-BR')}
+                  </span>
                 </p>
               </div>
               <div className="text-right">
@@ -328,7 +402,9 @@ export default function Diary() {
             <div className="mt-4 h-2 rounded-full bg-muted overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${Math.min((todayCalories / 1800) * 100, 100)}%` }}
+                animate={{ 
+                  width: `${Math.min((todayCalories / (profile?.daily_calories_target || 2000)) * 100, 100)}%` 
+                }}
                 transition={{ delay: 0.3, duration: 0.8, ease: 'easeOut' }}
                 className="h-full rounded-full gradient-primary"
               />
