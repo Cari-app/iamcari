@@ -247,7 +247,7 @@ export function MealInputDialog({
                     Refeição emocional
                   </span>
                   <p className="text-xs text-muted-foreground">
-                    Marque se comeu por motivo emocional
+                    Marque se essa refeição não faz parte do plano de alimentação
                   </p>
                 </div>
               </button>
