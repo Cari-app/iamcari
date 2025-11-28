@@ -21,11 +21,12 @@ export function CircularProgress({
   const offset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className={cn('relative inline-flex items-center justify-center', className)}>
+    <div className={cn('relative inline-flex items-center justify-center overflow-visible p-4', className)}>
       <svg
         width={size}
         height={size}
-        className="transform -rotate-90"
+        className="transform -rotate-90 overflow-visible"
+        style={{ overflow: 'visible' }}
       >
         {/* Gradient definition */}
         <defs>
