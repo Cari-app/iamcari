@@ -1,4 +1,4 @@
-import { Camera, Pencil, Heart, Clock, Droplet, Scale, BrainCircuit } from 'lucide-react';
+import { Camera, Pencil, Heart, Clock, Droplet, Scale, BrainCircuit, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TimelineEntry, EMOTION_TAGS } from '@/types';
 
@@ -31,10 +31,15 @@ export function TimelineEntryCard({ entry }: TimelineEntryCardProps) {
                   {entry.time}
                 </span>
               </div>
-              {entry.is_emotional && (
+              {entry.is_emotional ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 text-xs font-medium">
                   <Heart className="h-3 w-3" />
                   Emocional
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary/15 text-secondary text-xs font-medium">
+                  <Star className="h-3 w-3 fill-secondary" />
+                  Planejada
                 </span>
               )}
             </div>
