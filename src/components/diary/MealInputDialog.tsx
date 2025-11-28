@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Camera, Pencil, Utensils, Sparkles, Heart, Star } from 'lucide-react';
+import { supabase } from '@/integrations/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -31,16 +34,24 @@ export function MealInputDialog({
   onOpenChange,
   onSubmit,
 }: MealInputDialogProps) {
+  const { user } = useAuth();
   const [method, setMethod] = useState<InputMethod>('select');
   const [description, setDescription] = useState('');
   const [calories, setCalories] = useState('');
   const [isEmotional, setIsEmotional] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetState = () => {
     setMethod('select');
     setDescription('');
     setCalories('');
     setIsEmotional(false);
+    setSelectedImage(null);
+    setImagePreview(null);
+    setUploading(false);
   };
 
   const handleClose = () => {
@@ -48,16 +59,70 @@ export function MealInputDialog({
     onOpenChange(false);
   };
 
-  const handleCameraSubmit = () => {
-    // In a real implementation, this would open the camera
-    // For now, simulate AI analysis
-    onSubmit({
-      method: 'ai',
-      description: 'Refeição analisada por IA',
-      calories: 0, // Would be filled by AI
-      isEmotional,
-    });
-    handleClose();
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCameraSubmit = async () => {
+    if (!user || !selectedImage) {
+      toast({
+        title: '❌ Erro',
+        description: 'Selecione uma imagem primeiro',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      // Upload to Supabase Storage
+      const timestamp = Date.now();
+      const fileExt = selectedImage.name.split('.').pop();
+      const filePath = `${user.id}/${timestamp}.${fileExt}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('meal_photos')
+        .upload(filePath, selectedImage);
+
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('meal_photos')
+        .getPublicUrl(filePath);
+
+      console.log('Image uploaded successfully:', publicUrl);
+
+      onSubmit({
+        method: 'ai',
+        description: 'Refeição analisada por IA',
+        calories: 0, // Would be filled by AI in real implementation
+        imageUrl: publicUrl,
+        isEmotional,
+      });
+      handleClose();
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: '❌ Erro no upload',
+        description: 'Não foi possível enviar a imagem',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleManualSubmit = () => {
@@ -158,16 +223,34 @@ export function MealInputDialog({
           {/* Camera Mode */}
           {method === 'camera' && (
             <div className="space-y-4">
-              <div className="aspect-[4/3] rounded-2xl bg-muted/50 border-2 border-dashed border-border flex flex-col items-center justify-center gap-3">
-                <div className="h-16 w-16 rounded-full bg-violet-500/20 flex items-center justify-center">
-                  <Camera className="h-8 w-8 text-violet-400" />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium text-foreground">Toque para tirar foto</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    A IA analisará automaticamente
-                  </p>
-                </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+              
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="aspect-[4/3] rounded-2xl bg-muted/50 border-2 border-dashed border-border flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-violet-500/50 transition-colors overflow-hidden"
+              >
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded-2xl" />
+                ) : (
+                  <>
+                    <div className="h-16 w-16 rounded-full bg-violet-500/20 flex items-center justify-center">
+                      <Camera className="h-8 w-8 text-violet-400" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-foreground">Toque para tirar foto</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        A IA analisará automaticamente
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="flex items-center gap-2 p-3 rounded-xl bg-violet-500/10 border border-violet-500/20">
@@ -178,12 +261,16 @@ export function MealInputDialog({
               </div>
 
               <div className="flex gap-2">
-                <Button variant="ghost" onClick={handleBack} className="flex-1">
+                <Button variant="ghost" onClick={handleBack} className="flex-1" disabled={uploading}>
                   Voltar
                 </Button>
-                <Button onClick={handleCameraSubmit} className="flex-1 gradient-primary text-white">
+                <Button 
+                  onClick={handleCameraSubmit} 
+                  disabled={!selectedImage || uploading}
+                  className="flex-1 gradient-primary text-white"
+                >
                   <Camera className="h-4 w-4 mr-2" />
-                  Capturar
+                  {uploading ? 'Enviando...' : 'Capturar'}
                 </Button>
               </div>
             </div>

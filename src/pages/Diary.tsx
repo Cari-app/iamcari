@@ -106,7 +106,13 @@ export default function Diary() {
         .eq('user_id', user.id)
         .order('logged_at', { ascending: false });
 
-      if (!error && data) {
+      if (error) {
+        console.error('Error fetching meal logs:', error);
+        setLoading(false);
+        return;
+      }
+
+      if (data) {
         const entries: TimelineEntry[] = data.map(log => ({
           id: log.id,
           type: 'meal',
@@ -192,6 +198,7 @@ export default function Diary() {
     method: 'ai' | 'manual';
     description: string;
     calories?: number;
+    imageUrl?: string;
     isEmotional?: boolean;
   }) => {
     if (!user) return;
@@ -202,6 +209,7 @@ export default function Diary() {
         user_id: user.id,
         description: data.description,
         calories: data.calories || 0,
+        image_url: data.imageUrl || null,
         is_emotional: data.isEmotional || false,
         entry_method: data.method,
         logged_at: new Date().toISOString(),
@@ -209,7 +217,17 @@ export default function Diary() {
       .select()
       .single();
 
-    if (!error && logData) {
+    if (error) {
+      console.error('Error inserting meal log:', error);
+      toast({
+        title: '❌ Erro ao salvar',
+        description: 'Não foi possível salvar a refeição',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (logData) {
       const newEntry: TimelineEntry = {
         id: logData.id,
         type: 'meal',
@@ -241,13 +259,21 @@ export default function Diary() {
       .delete()
       .eq('id', id);
 
-    if (!error) {
-      setTimeline(prev => prev.filter(e => e.id !== id));
+    if (error) {
+      console.error('Error deleting meal log:', error);
       toast({
-        title: '🗑️ Registro apagado',
-        description: 'O registro foi removido da timeline',
+        title: '❌ Erro ao deletar',
+        description: 'Não foi possível remover o registro',
+        variant: 'destructive',
       });
+      return;
     }
+
+    setTimeline(prev => prev.filter(e => e.id !== id));
+    toast({
+      title: '🗑️ Registro apagado',
+      description: 'O registro foi removido da timeline',
+    });
   };
 
   // Sort timeline by time (most recent first for display purposes)
