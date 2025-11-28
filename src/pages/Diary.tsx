@@ -148,6 +148,7 @@ export default function Diary() {
     method: 'ai' | 'manual';
     description: string;
     calories?: number;
+    isEmotional?: boolean;
   }) => {
     const now = new Date();
     const newEntry: TimelineEntry = {
@@ -158,7 +159,7 @@ export default function Diary() {
       entry_method: data.method,
       food_name: data.description,
       calories: data.calories || 0,
-      is_emotional: false,
+      is_emotional: data.isEmotional || false,
     };
     setTimeline(prev => [newEntry, ...prev]);
     toast({
