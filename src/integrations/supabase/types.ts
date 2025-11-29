@@ -66,7 +66,7 @@ export type Database = {
           macros: Json | null
           metric_value: number | null
           mood_tag: string | null
-          status: string
+          status: Database["public"]["Enums"]["meal_status"]
           user_id: string
         }
         Insert: {
@@ -82,7 +82,7 @@ export type Database = {
           macros?: Json | null
           metric_value?: number | null
           mood_tag?: string | null
-          status?: string
+          status?: Database["public"]["Enums"]["meal_status"]
           user_id: string
         }
         Update: {
@@ -98,41 +98,12 @@ export type Database = {
           macros?: Json | null
           metric_value?: number | null
           mood_tag?: string | null
-          status?: string
+          status?: Database["public"]["Enums"]["meal_status"]
           user_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "meal_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      meal_photos: {
-        Row: {
-          created_at: string
-          id: string
-          storage_path: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          storage_path: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          storage_path?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "meal_photos_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -237,7 +208,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      meal_status: "manual" | "pending" | "analyzed" | "error"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -364,6 +335,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      meal_status: ["manual", "pending", "analyzed", "error"],
+    },
   },
 } as const
