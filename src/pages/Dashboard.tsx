@@ -169,9 +169,9 @@ export default function Dashboard() {
   };
 
   const handlePhotoSubmitted = () => {
-    // Após foto ser enviada, redireciona para /diario
+    // Após foto ser enviada, redireciona para /diary
     setIsModalOpen(false);
-    navigate('/diario');
+    navigate('/diary');
   };
 
   const time = formatTime(elapsedSeconds);
