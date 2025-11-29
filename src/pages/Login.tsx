@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase';
-import { Moon, Sun, Mail, ArrowRight, Sparkles, Lock } from 'lucide-react';
+import { Moon, Sun, Mail, ArrowRight, Sparkles, Lock, Phone, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 export default function Login() {
@@ -18,9 +18,16 @@ export default function Login() {
   const { user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+
+  // Sanitize phone number to only digits
+  const sanitizePhone = (phone: string): string => {
+    return phone.replace(/\D/g, '');
+  };
 
   // Redirect if already logged in
   useEffect(() => {
@@ -64,10 +71,21 @@ export default function Login() {
     e.preventDefault();
     if (!email || !password) return;
 
+    // Additional validation for sign up
+    if (isSignUp && (!fullName || !whatsapp)) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha todos os campos para criar sua conta.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     
     if (isSignUp) {
-      const { error } = await supabase.auth.signUp({
+      // Step 1: Create auth user
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -75,18 +93,42 @@ export default function Login() {
         },
       });
       
-      if (error) {
-        console.error('Sign up error:', error);
+      if (signUpError) {
+        console.error('Sign up error:', signUpError);
         toast({
           title: "Erro ao criar conta",
-          description: error.message,
+          description: signUpError.message,
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Conta criada! ✨",
-          description: "Verifique seu email para confirmar.",
-        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Step 2: Immediately update profile with full_name and whatsapp_number
+      if (authData?.user) {
+        const cleanPhone = sanitizePhone(whatsapp);
+        
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            full_name: fullName,
+            whatsapp_number: cleanPhone,
+          })
+          .eq('id', authData.user.id);
+
+        if (profileError) {
+          console.error('Profile update error:', profileError);
+          toast({
+            title: "Erro ao salvar dados",
+            description: "Conta criada, mas houve erro ao salvar seus dados. Tente atualizar no perfil.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Conta criada! Bem-vindo ao LeveStay. 🎉",
+            description: "Redirecionando para o onboarding...",
+          });
+        }
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({
@@ -241,6 +283,34 @@ export default function Login() {
             <TabsContent value="password">
               <form onSubmit={handlePassword} className="space-y-4">
                 <div className="space-y-4">
+                  {isSignUp && (
+                    <>
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input
+                          type="text"
+                          placeholder="Nome Completo"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          className="h-12 pl-12 pr-4 rounded-2xl text-base bg-card border-border focus:border-primary"
+                          required
+                        />
+                      </div>
+
+                      <div className="relative">
+                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input
+                          type="tel"
+                          placeholder="11999999999"
+                          value={whatsapp}
+                          onChange={(e) => setWhatsapp(e.target.value)}
+                          className="h-12 pl-12 pr-4 rounded-2xl text-base bg-card border-border focus:border-primary"
+                          required
+                        />
+                      </div>
+                    </>
+                  )}
+
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
