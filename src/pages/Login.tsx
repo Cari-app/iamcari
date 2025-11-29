@@ -6,11 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase';
-import { Moon, Sun, Mail, ArrowRight, Sparkles, Lock, Phone, User } from 'lucide-react';
+import { Moon, Sun, Mail, ArrowRight, Sparkles, Lock, Phone, User, Eye, EyeOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { z } from 'zod';
+
+// Validation schemas
+const emailSchema = z.string().email('Email inválido');
+const phoneSchema = z.string().regex(/^\d{10,11}$/, 'Telefone deve ter 10 ou 11 dígitos');
+const passwordSchema = z.string().min(6, 'Senha deve ter no mínimo 6 caracteres');
 
 export default function Login() {
   const navigate = useNavigate();
@@ -18,8 +25,12 @@ export default function Login() {
   const { user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -27,6 +38,75 @@ export default function Login() {
   // Sanitize phone number to only digits
   const sanitizePhone = (phone: string): string => {
     return phone.replace(/\D/g, '');
+  };
+
+  // Validate sign up form
+  const validateSignUpForm = (): boolean => {
+    // Check if all fields are filled
+    if (!fullName.trim()) {
+      toast({
+        title: "Nome obrigatório",
+        description: "Por favor, informe seu nome completo.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Validate phone
+    const cleanPhone = sanitizePhone(whatsapp);
+    const phoneValidation = phoneSchema.safeParse(cleanPhone);
+    if (!phoneValidation.success) {
+      toast({
+        title: "Telefone inválido",
+        description: "Digite um número de telefone válido (10 ou 11 dígitos).",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Validate email
+    const emailValidation = emailSchema.safeParse(email);
+    if (!emailValidation.success) {
+      toast({
+        title: "Email inválido",
+        description: "Digite um email válido.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Validate password
+    const passwordValidation = passwordSchema.safeParse(password);
+    if (!passwordValidation.success) {
+      toast({
+        title: "Senha inválida",
+        description: passwordValidation.error.errors[0].message,
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Check password confirmation
+    if (password !== confirmPassword) {
+      toast({
+        title: "Senhas não conferem",
+        description: "A senha e a confirmação devem ser iguais.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Check terms acceptance
+    if (!acceptedTerms) {
+      toast({
+        title: "Aceite os termos",
+        description: "Você precisa aceitar os termos de uso e política de privacidade.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
   };
 
   // Redirect if already logged in
@@ -71,14 +151,11 @@ export default function Login() {
     e.preventDefault();
     if (!email || !password) return;
 
-    // Additional validation for sign up
-    if (isSignUp && (!fullName || !whatsapp)) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Preencha todos os campos para criar sua conta.",
-        variant: "destructive",
-      });
-      return;
+    // Validate sign up form with all security checks
+    if (isSignUp) {
+      if (!validateSignUpForm()) {
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -326,15 +403,76 @@ export default function Login() {
                   <div className="relative">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Senha"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-12 pl-12 pr-4 rounded-2xl text-base bg-card border-border focus:border-primary"
+                      className="h-12 pl-12 pr-12 rounded-2xl text-base bg-card border-border focus:border-primary"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
                   </div>
+
+                  {isSignUp && (
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirmar Senha"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="h-12 pl-12 pr-12 rounded-2xl text-base bg-card border-border focus:border-primary"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  )}
                 </div>
+
+                {isSignUp && (
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-card/50 border border-border/50">
+                    <Checkbox
+                      id="terms"
+                      checked={acceptedTerms}
+                      onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                      className="mt-0.5"
+                    />
+                    <label
+                      htmlFor="terms"
+                      className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
+                    >
+                      Ao criar uma conta, você aceita nossos{' '}
+                      <button
+                        type="button"
+                        onClick={() => window.open('/terms', '_blank')}
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Termos de Uso
+                      </button>
+                      {' '}e{' '}
+                      <button
+                        type="button"
+                        onClick={() => window.open('/privacy', '_blank')}
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Política de Privacidade
+                      </button>
+                      , incluindo o uso de seus dados para análise de IA.
+                    </label>
+                  </div>
+                )}
 
                 <Button
                   type="submit"
