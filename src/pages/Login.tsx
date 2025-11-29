@@ -56,6 +56,20 @@ export default function Login() {
     return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
   };
 
+  // Format WhatsApp number for backend (add country code 55 if not present)
+  const formatWhatsAppNumber = (input: string): string => {
+    // Strip all non-numeric characters
+    const digitsOnly = input.replace(/\D/g, '');
+    
+    // Check if it starts with 55 (Brazil country code)
+    if (digitsOnly.startsWith('55')) {
+      return digitsOnly;
+    }
+    
+    // Prepend 55 if not present
+    return '55' + digitsOnly;
+  };
+
   // Validate sign up form
   const validateSignUpForm = (): boolean => {
     // Check if all fields are filled
@@ -199,13 +213,13 @@ export default function Login() {
 
       // Step 2: Immediately update profile with full_name and whatsapp_number
       if (authData?.user) {
-        const cleanPhone = sanitizePhone(whatsapp);
+        const formattedPhone = formatWhatsAppNumber(whatsapp);
         
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
             full_name: fullName,
-            whatsapp_number: cleanPhone,
+            whatsapp_number: formattedPhone,
           })
           .eq('id', authData.user.id);
 
