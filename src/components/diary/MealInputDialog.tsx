@@ -25,6 +25,7 @@ interface MealInputDialogProps {
     imageUrl?: string;
     isEmotional?: boolean;
   }) => void;
+  onPhotoSubmitted?: () => void; // Callback para refetch após foto ser enviada
 }
 
 type InputMethod = 'select' | 'camera' | 'manual';
@@ -33,6 +34,7 @@ export function MealInputDialog({
   open,
   onOpenChange,
   onSubmit,
+  onPhotoSubmitted,
 }: MealInputDialogProps) {
   const { user } = useAuth();
   const [method, setMethod] = useState<InputMethod>('select');
@@ -84,12 +86,12 @@ export function MealInputDialog({
     setUploading(true);
 
     try {
-      // Upload to Supabase Storage
+      // Step 1: Upload to Supabase Storage
       const timestamp = Date.now();
       const fileExt = selectedImage.name.split('.').pop();
       const filePath = `${user.id}/${timestamp}.${fileExt}`;
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('meal_photos')
         .upload(filePath, selectedImage);
 
@@ -98,26 +100,47 @@ export function MealInputDialog({
         throw uploadError;
       }
 
-      // Get public URL
+      // Step 2: Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('meal_photos')
         .getPublicUrl(filePath);
 
       console.log('Image uploaded successfully:', publicUrl);
 
-      onSubmit({
-        method: 'ai',
-        description: 'Refeição analisada por IA',
-        calories: 0, // Would be filled by AI in real implementation
-        imageUrl: publicUrl,
-        isEmotional,
+      // Step 3: Insert initial record into meal_logs with status 'pending'
+      const { error: insertError } = await supabase
+        .from('meal_logs')
+        .insert({
+          user_id: user.id,
+          entry_type: 'meal',
+          image_url: publicUrl,
+          status: 'pending',
+          food_name: 'Aguardando análise de imagem...',
+          is_emotional: isEmotional,
+        });
+
+      if (insertError) {
+        console.error('Database insert error:', insertError);
+        throw insertError;
+      }
+
+      // Success!
+      toast({
+        title: '📸 Foto enviada com sucesso!',
+        description: 'Aguarde a análise da Dona.',
       });
+
+      // Trigger refetch in parent component
+      if (onPhotoSubmitted) {
+        onPhotoSubmitted();
+      }
+
       handleClose();
     } catch (error) {
       console.error('Error uploading image:', error);
       toast({
-        title: '❌ Erro no upload',
-        description: 'Não foi possível enviar a imagem',
+        title: '❌ Erro no envio',
+        description: 'Não foi possível enviar a foto. Tente novamente.',
         variant: 'destructive',
       });
     } finally {
@@ -143,8 +166,19 @@ export function MealInputDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-[340px] bg-card border-border p-0 overflow-hidden">
+    <>
+      {/* Loading Overlay */}
+      {uploading && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="h-16 w-16 mx-auto rounded-full gradient-primary animate-spin border-4 border-transparent border-t-white" />
+            <p className="text-white text-lg font-medium">Processando imagem...</p>
+          </div>
+        </div>
+      )}
+
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="max-w-[340px] bg-card border-border p-0 overflow-hidden">
         {/* Header */}
         <DialogHeader className="p-4 pb-0">
           <div className="flex items-center gap-3">
@@ -357,5 +391,6 @@ export function MealInputDialog({
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 }

@@ -26,6 +26,7 @@ export default function Diary() {
   const [editingMeal, setEditingMeal] = useState<TimelineEntry | null>(null);
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   // Fetch today's meal logs from Supabase
   useEffect(() => {
@@ -105,7 +106,7 @@ export default function Diary() {
     };
 
     fetchTodayLogs();
-  }, [user]);
+  }, [user, refetchTrigger]);
 
   // Calculate totals from timeline
   const todayCalories = timeline
@@ -277,6 +278,7 @@ export default function Diary() {
   }) => {
     if (!user) return;
 
+    // Para entrada manual, insere no banco
     const { data: logData, error } = await supabase
       .from('meal_logs')
       .insert({
@@ -286,6 +288,7 @@ export default function Diary() {
         calories: data.calories || 0,
         image_url: data.imageUrl || null,
         is_emotional: data.isEmotional || false,
+        status: 'manual',
       })
       .select()
       .single();
@@ -319,10 +322,15 @@ export default function Diary() {
       setTimeline(prev => [newEntry, ...prev]);
       
       toast({
-        title: data.method === 'ai' ? '📸 Refeição analisada' : '🍎 Refeição registrada',
+        title: '🍎 Refeição registrada',
         description: `${data.description}${data.calories ? ` - ${data.calories} kcal` : ''}`,
       });
     }
+  };
+
+  const handlePhotoSubmitted = () => {
+    // Refetch timeline após foto ser enviada
+    setRefetchTrigger(prev => prev + 1);
   };
 
   const handleDeleteEntry = async (id: string) => {
@@ -550,6 +558,7 @@ export default function Diary() {
         open={mealDialogOpen}
         onOpenChange={setMealDialogOpen}
         onSubmit={handleMealSubmit}
+        onPhotoSubmitted={handlePhotoSubmitted}
       />
 
       <MealEditDialog
