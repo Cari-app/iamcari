@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
 import { CircularProgress } from '@/components/CircularProgress';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
-import { MealLogModal } from '@/components/MealLogModal';
+import { MealInputDialog } from '@/components/diary/MealInputDialog';
 import { ProtocolSelector } from '@/components/dashboard/ProtocolSelector';
 import { BentoStats } from '@/components/dashboard/BentoStats';
 import { useFastingTimer } from '@/hooks/useFastingTimer';
@@ -16,6 +17,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function Dashboard() {
   const { user, profile, refreshProfile } = useAuth();
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProtocolOpen, setIsProtocolOpen] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState(16);
@@ -153,6 +155,23 @@ export default function Dashboard() {
       // Refresh profile context
       refreshProfile?.();
     }
+  };
+
+  const handleMealSubmit = async (data: { 
+    method: 'ai' | 'manual';
+    description: string;
+    calories?: number;
+    imageUrl?: string;
+    isEmotional?: boolean;
+  }) => {
+    // Não fazemos nada aqui, apenas para entrada manual
+    // A captura de foto já insere diretamente no banco
+  };
+
+  const handlePhotoSubmitted = () => {
+    // Após foto ser enviada, redireciona para /diario
+    setIsModalOpen(false);
+    navigate('/diario');
   };
 
   const time = formatTime(elapsedSeconds);
@@ -357,7 +376,13 @@ export default function Dashboard() {
 
       <FloatingActionButton onClick={() => setIsModalOpen(true)} />
       <BottomNav />
-      <MealLogModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      
+      <MealInputDialog
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSubmit={handleMealSubmit}
+        onPhotoSubmitted={handlePhotoSubmitted}
+      />
     </div>
   );
 }
