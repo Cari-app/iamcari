@@ -40,6 +40,22 @@ export default function Login() {
     return phone.replace(/\D/g, '');
   };
 
+  // Format phone number with mask (33) 99999-9999
+  const formatPhoneNumber = (value: string): string => {
+    const numbers = value.replace(/\D/g, '');
+    
+    if (numbers.length <= 2) {
+      return numbers;
+    }
+    if (numbers.length <= 7) {
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+    }
+    if (numbers.length <= 11) {
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
+    }
+    return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
+  };
+
   // Validate sign up form
   const validateSignUpForm = (): boolean => {
     // Check if all fields are filled
@@ -378,10 +394,11 @@ export default function Login() {
                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                         <Input
                           type="tel"
-                          placeholder="11999999999"
+                          placeholder="(33) 99999-9999"
                           value={whatsapp}
-                          onChange={(e) => setWhatsapp(e.target.value)}
+                          onChange={(e) => setWhatsapp(formatPhoneNumber(e.target.value))}
                           className="h-12 pl-12 pr-4 rounded-2xl text-base bg-card border-border focus:border-primary"
+                          maxLength={15}
                           required
                         />
                       </div>
