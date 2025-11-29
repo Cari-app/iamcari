@@ -10,9 +10,11 @@ interface TimelineEntryCardProps {
 export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
   // Meal Entry Card
   if (entry.type === 'meal') {
+    const isPending = entry.food_name === 'Aguardando análise de imagem...';
+    
     return (
       <div className="p-4 bg-card border border-border rounded-2xl relative group">
-        {onEdit && (
+        {onEdit && !isPending && (
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -45,7 +47,12 @@ export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
                   {entry.time}
                 </span>
               </div>
-              {entry.is_emotional ? (
+              {isPending ? (
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-400 text-xs font-medium">
+                  <div className="h-2 w-2 rounded-full bg-violet-400 animate-pulse" />
+                  Processando
+                </span>
+              ) : entry.is_emotional ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 text-xs font-medium">
                   <Heart className="h-3 w-3" />
                   Emocional
@@ -57,13 +64,25 @@ export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
                 </span>
               )}
             </div>
-            <p className="mt-1.5 text-foreground font-medium leading-snug line-clamp-2">
+            <p className={cn(
+              'mt-1.5 font-medium leading-snug line-clamp-2',
+              isPending ? 'text-muted-foreground italic' : 'text-foreground'
+            )}>
               {entry.food_name}
             </p>
-            {entry.calories && (
+            {entry.calories > 0 && (
               <p className="mt-1 text-sm text-muted-foreground tabular-nums">
                 {entry.calories} kcal
               </p>
+            )}
+            {entry.image_url && (
+              <div className="mt-2 rounded-xl overflow-hidden">
+                <img 
+                  src={entry.image_url} 
+                  alt="Foto da refeição" 
+                  className="w-full h-auto max-h-48 object-cover"
+                />
+              </div>
             )}
           </div>
         </div>
