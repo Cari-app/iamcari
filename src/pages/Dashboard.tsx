@@ -14,13 +14,9 @@ import { Play, Pause, RotateCcw, Flame, Zap, Sparkles, Target } from 'lucide-rea
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { useDate } from '@/contexts/DateContext';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 export default function Dashboard() {
   const { user, profile, refreshProfile } = useAuth();
-  const { selectedDate, getStartOfDay, getEndOfDay, isSelectedToday } = useDate();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProtocolOpen, setIsProtocolOpen] = useState(false);
@@ -56,17 +52,15 @@ export default function Dashboard() {
     if (!user) return;
     
     const fetchDashboardData = async () => {
-      const startOfDay = getStartOfDay();
-      const endOfDay = getEndOfDay();
+      const today = new Date().toISOString().split('T')[0];
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       
-      // Fetch selected day's meals
+      // Fetch today's meals
       const { data: mealsData } = await supabase
         .from('meal_logs')
         .select('calories, is_emotional, created_at')
         .eq('user_id', user.id)
-        .gte('created_at', startOfDay.toISOString())
-        .lte('created_at', endOfDay.toISOString())
+        .gte('created_at', `${today}T00:00:00`)
         .order('created_at', { ascending: false });
       
       if (mealsData) {
@@ -143,7 +137,7 @@ export default function Dashboard() {
     };
     
     fetchDashboardData();
-  }, [user, selectedDate]);
+  }, [user]);
 
   const handleProtocolSelect = async (hours: number) => {
     setSelectedProtocol(hours);
@@ -208,10 +202,7 @@ export default function Dashboard() {
               {isActive ? 'Jejum em andamento' : 'Pronto para começar?'}
             </h1>
             <p className="text-muted-foreground mt-1">
-              {isSelectedToday 
-                ? (isActive ? `Meta: ${targetHours}h de jejum` : 'Inicie seu jejum quando estiver pronto')
-                : format(selectedDate, "d 'de' MMMM", { locale: ptBR })
-              }
+              {isActive ? `Meta: ${targetHours}h de jejum` : 'Inicie seu jejum quando estiver pronto'}
             </p>
           </motion.div>
 
