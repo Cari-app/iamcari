@@ -26,7 +26,7 @@ export function TimelineEntryCard({ entry, onEdit, onRefresh }: TimelineEntryCar
                   e.stopPropagation();
                   onRefresh();
                 }}
-                className="h-8 w-8 rounded-lg bg-muted/80 hover:bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity press-effect"
+                className="h-8 w-8 rounded-lg bg-muted/80 hover:bg-muted flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity press-effect"
                 aria-label="Atualizar análise"
               >
                 <RefreshCw className="h-4 w-4 text-muted-foreground" />
@@ -38,7 +38,7 @@ export function TimelineEntryCard({ entry, onEdit, onRefresh }: TimelineEntryCar
                   e.stopPropagation();
                   onEdit();
                 }}
-                className="h-8 w-8 rounded-lg bg-muted/80 hover:bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity press-effect"
+                className="h-8 w-8 rounded-lg bg-muted/80 hover:bg-muted flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity press-effect"
                 aria-label="Editar refeição"
               >
                 <Edit className="h-4 w-4 text-muted-foreground" />
