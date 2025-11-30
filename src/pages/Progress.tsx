@@ -2,10 +2,15 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
-import { Flame, Target, Trophy, TrendingUp } from 'lucide-react';
+import { Flame, Target, Trophy, TrendingUp, Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { toast } from '@/hooks/use-toast';
 
 interface DayActivity {
   date: Date;
@@ -22,6 +27,8 @@ export default function Progress() {
   const [successRate, setSuccessRate] = useState('--');
   const [heatmapData, setHeatmapData] = useState<DayActivity[]>([]);
   const [achievements, setAchievements] = useState<Array<{ emoji: string; title: string; description: string }>>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -30,8 +37,9 @@ export default function Progress() {
     }
 
     const fetchData = async () => {
-      const today = new Date();
-      const ninetyDaysAgo = new Date(today);
+      const referenceDate = new Date(selectedDate);
+      referenceDate.setHours(23, 59, 59, 999);
+      const ninetyDaysAgo = new Date(referenceDate);
       ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
       // Fetch fasting sessions
@@ -72,7 +80,7 @@ export default function Progress() {
 
       // Calculate current streak
       let streak = 0;
-      let checkDate = new Date();
+      let checkDate = new Date(selectedDate);
       checkDate.setHours(0, 0, 0, 0);
       
       while (true) {
@@ -113,7 +121,7 @@ export default function Progress() {
       setBestStreak(maxStreak);
 
       // Calculate weekly goal
-      const startOfWeek = new Date(today);
+      const startOfWeek = new Date(selectedDate);
       const dayOfWeek = startOfWeek.getDay();
       const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
       startOfWeek.setDate(startOfWeek.getDate() + diff);
@@ -138,7 +146,7 @@ export default function Progress() {
       // Generate heatmap data
       const heatmap: DayActivity[] = [];
       for (let i = 0; i < 91; i++) {
-        const date = new Date(today);
+        const date = new Date(referenceDate);
         date.setDate(date.getDate() - (90 - i));
         date.setHours(0, 0, 0, 0);
         const dateStr = date.toDateString();
@@ -178,7 +186,40 @@ export default function Progress() {
     };
 
     fetchData();
-  }, [user]);
+
+    // Set up realtime subscription for automatic updates
+    const channel = supabase
+      .channel('progress-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'fasting_sessions',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'meal_logs',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, selectedDate]);
 
   // Group heatmap data into weeks
   const weeks: DayActivity[][] = [];
@@ -203,9 +244,41 @@ export default function Progress() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-between"
           >
-            <h1 className="text-2xl font-bold text-foreground">Progresso</h1>
-            <p className="text-muted-foreground">Seus últimos 90 dias</p>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Progresso</h1>
+              <p className="text-muted-foreground">
+                Últimos 90 dias até {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
+                {selectedDate.toDateString() === new Date().toDateString() && ' (Hoje)'}
+              </p>
+            </div>
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <button className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center press-effect hover:bg-accent transition-colors">
+                  <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setSelectedDate(date);
+                      setCalendarOpen(false);
+                      toast({
+                        title: '📅 Data selecionada',
+                        description: `Mostrando progresso até ${format(date, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}`,
+                      });
+                    }
+                  }}
+                  disabled={(date) => date > new Date()}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </motion.div>
 
           {/* Stats Grid */}
