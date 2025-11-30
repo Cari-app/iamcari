@@ -76,6 +76,7 @@ export default function Diary() {
               is_emotional: log.is_emotional || false,
               hunger_level: log.hunger_level,
               ai_analysis: log.ai_analysis,
+              status: log.status || 'manual',
             };
           } else if (log.entry_type === 'water') {
             return {
@@ -137,6 +138,7 @@ export default function Diary() {
                   is_emotional: updatedLog.is_emotional || false,
                   hunger_level: updatedLog.hunger_level,
                   ai_analysis: updatedLog.ai_analysis,
+                  status: updatedLog.status || 'manual',
                 };
                 
                 // Show toast when AI analysis is complete

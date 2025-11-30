@@ -11,8 +11,10 @@ interface TimelineEntryCardProps {
 export function TimelineEntryCard({ entry, onEdit, onRefresh }: TimelineEntryCardProps) {
   // Meal Entry Card
   if (entry.type === 'meal') {
-    const isPending = !entry.ai_analysis && entry.food_name === 'Aguardando análise de imagem...';
+    // Consider it analyzed if we have ai_analysis, regardless of status field
     const hasAnalysis = typeof entry.ai_analysis === 'string' && entry.ai_analysis.trim().length > 0;
+    const isPending = !hasAnalysis && (entry.status === 'pending' || entry.image_url);
+    const isAnalyzed = hasAnalysis;
     
     return (
       <div className="p-4 bg-card border border-border rounded-2xl relative group">

@@ -102,6 +102,7 @@ export interface TimelineEntry {
   hunger_level?: number;
   entry_method?: 'ai' | 'manual';
   ai_analysis?: AIAnalysis | string;
+  status?: 'manual' | 'pending' | 'analyzed' | 'error';
   
   // Mood Props
   mood_score?: number; // 1-10
