@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
-import { CalendarStrip } from '@/components/CalendarStrip';
 import { DatePickerButton } from '@/components/DatePickerButton';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
@@ -551,7 +550,6 @@ export default function Diary() {
   return (
     <div className="min-h-screen bg-background pb-24 pt-20">
       <Navbar />
-      <CalendarStrip />
       
       <main className="px-4 py-6">
         <div className="mx-auto max-w-lg space-y-4">

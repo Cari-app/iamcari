@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
-import { CalendarStrip } from '@/components/CalendarStrip';
 import { CircularProgress } from '@/components/CircularProgress';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { MealInputDialog } from '@/components/diary/MealInputDialog';
@@ -196,7 +195,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-[100dvh] bg-background pb-24 pt-20 overflow-x-clip overflow-y-visible">
       <Navbar />
-      <CalendarStrip />
       
       <main className="px-4 py-6 overflow-visible">
         <div className="mx-auto max-w-lg space-y-6 overflow-visible">
