@@ -57,6 +57,7 @@ export type Database = {
           ai_analysis: Json | null
           calories: number | null
           created_at: string
+          description: string | null
           entry_type: string | null
           food_name: string | null
           hunger_level: number | null
@@ -73,6 +74,7 @@ export type Database = {
           ai_analysis?: Json | null
           calories?: number | null
           created_at?: string
+          description?: string | null
           entry_type?: string | null
           food_name?: string | null
           hunger_level?: number | null
@@ -89,6 +91,7 @@ export type Database = {
           ai_analysis?: Json | null
           calories?: number | null
           created_at?: string
+          description?: string | null
           entry_type?: string | null
           food_name?: string | null
           hunger_level?: number | null

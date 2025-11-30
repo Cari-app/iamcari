@@ -68,7 +68,9 @@ export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
               'mt-1.5 font-medium leading-snug line-clamp-2',
               isPending ? 'text-muted-foreground italic' : 'text-foreground'
             )}>
-              {entry.food_name}
+              {entry.ai_analysis?.foods?.length 
+                ? entry.ai_analysis.foods.join(', ') 
+                : entry.food_name}
             </p>
             {entry.calories > 0 && (
               <p className="mt-1 text-sm text-muted-foreground tabular-nums">

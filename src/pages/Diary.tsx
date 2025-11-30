@@ -75,6 +75,7 @@ export default function Diary() {
               image_url: log.image_url,
               is_emotional: log.is_emotional || false,
               hunger_level: log.hunger_level,
+              ai_analysis: log.ai_analysis,
             };
           } else if (log.entry_type === 'water') {
             return {
