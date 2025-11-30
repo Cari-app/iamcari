@@ -34,38 +34,14 @@ export default function Onboarding() {
   const totalSteps = 4;
   const progress = (step / totalSteps) * 100;
 
-  const calculateBMR = (): number => {
-    const w = parseFloat(weight);
-    const h = parseFloat(height);
-    const a = parseFloat(age);
-
-    if (gender === 'male') {
-      return 10 * w + 6.25 * h - 5 * a + 5;
-    } else {
-      return 10 * w + 6.25 * h - 5 * a - 161;
-    }
-  };
-
-  const getActivityMultiplier = (): number => {
-    const multipliers = {
-      sedentary: 1.2,
-      light: 1.375,
-      moderate: 1.55,
-      intense: 1.725,
-    };
-    return multipliers[activityLevel];
-  };
-
   const handleComplete = async () => {
     if (!user) return;
 
     setLoading(true);
 
     try {
-      const bmr = calculateBMR();
-      const dailyCalories = Math.round(bmr * getActivityMultiplier());
-
-      const { error } = await supabase
+      // First, update profile with basic info and mark onboarding complete
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({
           weight: parseFloat(weight),
@@ -73,19 +49,38 @@ export default function Onboarding() {
           age: parseFloat(age),
           gender,
           activity_level: activityLevel,
-          daily_calories_target: dailyCalories,
           fasting_protocol: protocol,
           onboarding_completed: true,
         })
         .eq('id', user.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
+      // Create assessment - DB trigger will calculate BMR/TDEE and update profile.daily_calories_target
+      const { error: assessmentError } = await supabase
+        .from('assessments')
+        .insert({
+          user_id: user.id,
+          gender,
+          age: parseFloat(age),
+          height_cm: parseFloat(height),
+          weight_kg: parseFloat(weight),
+          activity_level: activityLevel,
+          goal_type: 'maintain', // Default goal
+          goal_speed: null,
+          target_weight_kg: null,
+        });
+
+      if (assessmentError) throw assessmentError;
+
+      // Wait a bit for the trigger to complete
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       await refreshProfile();
 
       toast({
         title: '✅ Perfil Configurado',
-        description: `Meta diária: ${dailyCalories} kcal | Protocolo: ${protocol}`,
+        description: `Protocolo: ${protocol} | Avaliação metabólica concluída`,
       });
 
       navigate('/dashboard');

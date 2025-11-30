@@ -10,7 +10,7 @@ import { ProtocolSelector } from '@/components/dashboard/ProtocolSelector';
 import { BentoStats } from '@/components/dashboard/BentoStats';
 import { useFastingTimer } from '@/hooks/useFastingTimer';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, RotateCcw, Flame, Zap, Sparkles } from 'lucide-react';
+import { Play, Pause, RotateCcw, Flame, Zap, Sparkles, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -269,6 +269,36 @@ export default function Dashboard() {
             caloriesTarget={profile?.daily_calories_target || 1800}
             lastCheckIn={lastCheckIn}
           />
+
+          {/* Warning: No Metabolic Assessment */}
+          {(!profile?.daily_calories_target || profile.daily_calories_target === 0) && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30"
+            >
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+                  <Target className="h-5 w-5 text-amber-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-amber-400 mb-1">
+                    Avaliação Metabólica Necessária
+                  </p>
+                  <p className="text-sm text-amber-300/80 mb-3">
+                    Complete sua avaliação para calcular suas metas calóricas personalizadas
+                  </p>
+                  <Button
+                    onClick={() => navigate('/assessment')}
+                    size="sm"
+                    className="bg-amber-500 hover:bg-amber-600 text-white"
+                  >
+                    Fazer Avaliação Agora
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Phase Info Card */}
           {isActive && (
