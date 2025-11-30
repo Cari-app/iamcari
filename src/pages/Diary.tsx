@@ -114,13 +114,69 @@ export default function Diary() {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'meal_logs',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const updatedLog = payload.new;
+          
+          // Update the specific item in timeline
+          setTimeline(prev => prev.map(entry => {
+            if (entry.id === updatedLog.id) {
+              // Map the updated log to timeline entry format
+              if (updatedLog.entry_type === 'meal') {
+                const updatedEntry = {
+                  ...entry,
+                  type: 'meal' as const,
+                  entry_method: updatedLog.image_url ? 'ai' as const : 'manual' as const,
+                  food_name: updatedLog.food_name || '',
+                  calories: updatedLog.calories || 0,
+                  image_url: updatedLog.image_url,
+                  is_emotional: updatedLog.is_emotional || false,
+                  hunger_level: updatedLog.hunger_level,
+                  ai_analysis: updatedLog.ai_analysis,
+                };
+                
+                // Show toast when AI analysis is complete
+                if (updatedLog.status === 'analyzed' && updatedLog.image_url) {
+                  toast({
+                    title: '✅ Análise concluída!',
+                    description: `${updatedLog.food_name} - ${updatedLog.calories} kcal`,
+                  });
+                }
+                
+                return updatedEntry;
+              }
+            }
+            return entry;
+          }));
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
           schema: 'public',
           table: 'meal_logs',
           filter: `user_id=eq.${user.id}`,
         },
         () => {
-          // Refetch data when changes occur
+          // Refetch for new entries
+          fetchTodayLogs();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'meal_logs',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          // Refetch for deletions
           fetchTodayLogs();
         }
       )
