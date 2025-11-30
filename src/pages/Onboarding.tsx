@@ -4,17 +4,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Slider } from '@/components/ui/slider';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase';
 import { toast } from '@/hooks/use-toast';
-import { Target, User, Activity, Clock, ChevronRight, ChevronLeft } from 'lucide-react';
+import { User, Activity, Target, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
-type Goal = 'Perder Peso' | 'Ganhar Energia' | 'Longevidade';
 type Gender = 'male' | 'female';
-type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'intense';
-type Protocol = '12h' | '16h' | '20h';
+type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'athlete';
+type GoalType = 'lose_weight' | 'maintain' | 'gain_weight';
+type GoalSpeed = 'slow' | 'moderate' | 'aggressive';
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -22,73 +22,70 @@ export default function Onboarding() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  // Form Data
-  const [goal, setGoal] = useState<Goal | ''>('');
+  // Step 1: Biometrics
   const [gender, setGender] = useState<Gender>('male');
   const [age, setAge] = useState('');
-  const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
-  const [activityLevel, setActivityLevel] = useState<ActivityLevel>('sedentary');
-  const [protocol, setProtocol] = useState<Protocol>('16h');
+  const [height, setHeight] = useState([170]);
+  const [weight, setWeight] = useState([75]);
 
-  const totalSteps = 4;
+  // Step 2: Activity Level
+  const [activityLevel, setActivityLevel] = useState<ActivityLevel | ''>('');
+
+  // Step 3: Goals
+  const [goalType, setGoalType] = useState<GoalType | ''>('');
+  const [targetWeight, setTargetWeight] = useState('');
+  const [goalSpeed, setGoalSpeed] = useState<GoalSpeed | ''>('');
+
+  const totalSteps = 3;
   const progress = (step / totalSteps) * 100;
 
-  const handleComplete = async () => {
+  const handleSubmit = async () => {
     if (!user) return;
 
     setLoading(true);
 
     try {
-      // First, update profile with basic info and mark onboarding complete
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          weight: parseFloat(weight),
-          height: parseFloat(height),
-          age: parseFloat(age),
-          gender,
-          activity_level: activityLevel,
-          fasting_protocol: protocol,
-          onboarding_completed: true,
-        })
-        .eq('id', user.id);
-
-      if (profileError) throw profileError;
-
-      // Create assessment - DB trigger will calculate BMR/TDEE and update profile.daily_calories_target
-      const { error: assessmentError } = await supabase
+      // Insert into assessments - DB trigger will calculate everything
+      const { error } = await supabase
         .from('assessments')
         .insert({
           user_id: user.id,
           gender,
           age: parseFloat(age),
-          height_cm: parseFloat(height),
-          weight_kg: parseFloat(weight),
+          height_cm: height[0],
+          weight_kg: weight[0],
           activity_level: activityLevel,
-          goal_type: 'maintain', // Default goal
-          goal_speed: null,
-          target_weight_kg: null,
+          goal_type: goalType,
+          goal_speed: goalType === 'maintain' ? null : goalSpeed,
+          target_weight_kg: targetWeight ? parseFloat(targetWeight) : null,
         });
 
-      if (assessmentError) throw assessmentError;
+      if (error) throw error;
 
-      // Wait a bit for the trigger to complete
+      // Update profile to mark onboarding as complete
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ onboarding_completed: true })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      // Wait for DB trigger to complete
       await new Promise(resolve => setTimeout(resolve, 500));
       
       await refreshProfile();
 
       toast({
-        title: '✅ Perfil Configurado',
-        description: `Protocolo: ${protocol} | Avaliação metabólica concluída`,
+        title: '✅ Avaliação Completa',
+        description: 'Seu plano metabólico foi calculado com sucesso',
       });
 
       navigate('/dashboard');
     } catch (error) {
-      console.error('Onboarding error:', error);
+      console.error('Assessment error:', error);
       toast({
         title: '❌ Erro',
-        description: 'Não foi possível completar a configuração',
+        description: 'Não foi possível completar a avaliação',
         variant: 'destructive',
       });
     } finally {
@@ -96,13 +93,32 @@ export default function Onboarding() {
     }
   };
 
-  const canProceedStep1 = goal !== '';
-  const canProceedStep2 = gender && age && weight && height;
-  const canProceedStep3 = activityLevel;
-  const canProceedStep4 = protocol;
+  const canProceedStep1 = gender && age && height[0] && weight[0];
+  const canProceedStep2 = activityLevel;
+  const canProceedStep3 = goalType && (goalType === 'maintain' || goalSpeed);
+
+  const activityOptions = [
+    { value: 'sedentary', label: 'Sedentário', desc: 'Pouco ou nenhum exercício' },
+    { value: 'light', label: 'Levemente Ativo', desc: 'Exercício leve 1-3 dias/semana' },
+    { value: 'moderate', label: 'Moderado', desc: 'Exercício moderado 3-5 dias/semana' },
+    { value: 'active', label: 'Muito Ativo', desc: 'Exercício intenso 6-7 dias/semana' },
+    { value: 'athlete', label: 'Atleta', desc: 'Exercício profissional ou diário intenso' },
+  ];
+
+  const goalOptions = [
+    { value: 'lose_weight', label: 'Emagrecer', desc: 'Reduzir peso corporal', icon: '📉' },
+    { value: 'maintain', label: 'Manter', desc: 'Manter peso atual', icon: '⚖️' },
+    { value: 'gain_weight', label: 'Ganhar', desc: 'Aumentar massa muscular', icon: '📈' },
+  ];
+
+  const speedOptions = [
+    { value: 'slow', label: 'Tranquilo', desc: '-10% das calorias' },
+    { value: 'moderate', label: 'Moderado', desc: '-20% das calorias' },
+    { value: 'aggressive', label: 'Rápido', desc: '-25% das calorias' },
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -110,61 +126,129 @@ export default function Onboarding() {
       >
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-50 mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Avaliação Metabólica
           </h1>
-          <p className="text-slate-400">
-            Vamos personalizar sua jornada de saúde
+          <p className="text-muted-foreground">
+            Configure seu plano personalizado de saúde
           </p>
         </div>
 
         {/* Progress Bar */}
         <div className="mb-8">
           <Progress value={progress} className="h-2" />
-          <p className="text-sm text-slate-400 mt-2 text-center">
+          <p className="text-sm text-muted-foreground mt-2 text-center">
             Etapa {step} de {totalSteps}
           </p>
         </div>
 
         {/* Steps */}
         <AnimatePresence mode="wait">
-          {/* STEP 1: Goal */}
+          {/* STEP 1: Biometria */}
           {step === 1 && (
             <motion.div
               key="step1"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="bg-slate-900 rounded-2xl p-8 border border-slate-800"
+              className="bg-card rounded-2xl p-8 border border-border"
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <Target className="h-6 w-6 text-primary" />
+                  <User className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-50">
-                    Qual seu objetivo principal?
+                  <h2 className="text-xl font-semibold text-foreground">
+                    Dados Biométricos
                   </h2>
-                  <p className="text-sm text-slate-400">
-                    Isso nos ajuda a personalizar sua experiência
+                  <p className="text-sm text-muted-foreground">
+                    Informações básicas para cálculos metabólicos
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {(['Perder Peso', 'Ganhar Energia', 'Longevidade'] as Goal[]).map((g) => (
-                  <button
-                    key={g}
-                    onClick={() => setGoal(g)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left font-medium ${
-                      goal === g
-                        ? 'border-primary bg-primary/10 text-slate-50'
-                        : 'border-slate-800 bg-slate-800/50 text-slate-300 hover:border-slate-700'
-                    }`}
-                  >
-                    {g}
-                  </button>
-                ))}
+              <div className="space-y-6">
+                {/* Gender */}
+                <div>
+                  <Label className="text-foreground mb-3 block">Gênero</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => setGender('male')}
+                      className={`p-6 rounded-xl border-2 transition-all ${
+                        gender === 'male'
+                          ? 'border-primary bg-primary/10 text-foreground'
+                          : 'border-border bg-card hover:border-muted'
+                      }`}
+                    >
+                      <div className="text-3xl mb-2">👨</div>
+                      <p className="font-medium">Masculino</p>
+                    </button>
+                    <button
+                      onClick={() => setGender('female')}
+                      className={`p-6 rounded-xl border-2 transition-all ${
+                        gender === 'female'
+                          ? 'border-primary bg-primary/10 text-foreground'
+                          : 'border-border bg-card hover:border-muted'
+                      }`}
+                    >
+                      <div className="text-3xl mb-2">👩</div>
+                      <p className="font-medium">Feminino</p>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Age */}
+                <div>
+                  <Label htmlFor="age" className="text-foreground">Idade (anos)</Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    placeholder="Ex: 30"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    className="mt-2 text-lg"
+                  />
+                </div>
+
+                {/* Height Slider */}
+                <div>
+                  <Label className="text-foreground flex justify-between items-center">
+                    <span>Altura (cm)</span>
+                    <span className="text-2xl font-bold text-primary">{height[0]}</span>
+                  </Label>
+                  <Slider
+                    value={height}
+                    onValueChange={setHeight}
+                    min={100}
+                    max={220}
+                    step={1}
+                    className="mt-4"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>100 cm</span>
+                    <span>220 cm</span>
+                  </div>
+                </div>
+
+                {/* Weight Slider */}
+                <div>
+                  <Label className="text-foreground flex justify-between items-center">
+                    <span>Peso (kg)</span>
+                    <span className="text-2xl font-bold text-primary">{weight[0]}</span>
+                  </Label>
+                  <Slider
+                    value={weight}
+                    onValueChange={setWeight}
+                    min={40}
+                    max={180}
+                    step={1}
+                    className="mt-4"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>40 kg</span>
+                    <span>180 kg</span>
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-end mt-6">
@@ -179,93 +263,51 @@ export default function Onboarding() {
             </motion.div>
           )}
 
-          {/* STEP 2: Biometrics */}
+          {/* STEP 2: Activity Level */}
           {step === 2 && (
             <motion.div
               key="step2"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="bg-slate-900 rounded-2xl p-8 border border-slate-800"
+              className="bg-card rounded-2xl p-8 border border-border"
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <User className="h-6 w-6 text-primary" />
+                  <Activity className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-50">
-                    Dados Biométricos
+                  <h2 className="text-xl font-semibold text-foreground">
+                    Estilo de Vida
                   </h2>
-                  <p className="text-sm text-slate-400">
-                    Para calcular suas metas metabólicas
+                  <p className="text-sm text-muted-foreground">
+                    Qual seu nível de atividade física?
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-slate-300 mb-2 block">Gênero</Label>
-                  <RadioGroup value={gender} onValueChange={(v) => setGender(v as Gender)}>
-                    <div className="flex gap-4">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="male" id="male" />
-                        <Label htmlFor="male" className="text-slate-300 cursor-pointer">
-                          Masculino
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="female" id="female" />
-                        <Label htmlFor="female" className="text-slate-300 cursor-pointer">
-                          Feminino
-                        </Label>
-                      </div>
-                    </div>
-                  </RadioGroup>
-                </div>
-
-                <div>
-                  <Label htmlFor="age" className="text-slate-300">Idade (anos)</Label>
-                  <Input
-                    id="age"
-                    type="number"
-                    placeholder="Ex: 30"
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    className="bg-slate-800 border-slate-700 text-slate-50 mt-2"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="weight" className="text-slate-300">Peso (kg)</Label>
-                    <Input
-                      id="weight"
-                      type="number"
-                      placeholder="Ex: 75"
-                      value={weight}
-                      onChange={(e) => setWeight(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-slate-50 mt-2"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="height" className="text-slate-300">Altura (cm)</Label>
-                    <Input
-                      id="height"
-                      type="number"
-                      placeholder="Ex: 175"
-                      value={height}
-                      onChange={(e) => setHeight(e.target.value)}
-                      className="bg-slate-800 border-slate-700 text-slate-50 mt-2"
-                    />
-                  </div>
-                </div>
+              <div className="space-y-3">
+                {activityOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setActivityLevel(option.value as ActivityLevel)}
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
+                      activityLevel === option.value
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border bg-card hover:border-muted'
+                    }`}
+                  >
+                    <p className="font-medium text-foreground">{option.label}</p>
+                    <p className="text-sm text-muted-foreground">{option.desc}</p>
+                  </button>
+                ))}
               </div>
 
               <div className="flex justify-between mt-6">
                 <Button
                   onClick={() => setStep(1)}
                   variant="ghost"
-                  className="text-slate-400"
+                  className="text-muted-foreground"
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" /> Voltar
                 </Button>
@@ -280,128 +322,105 @@ export default function Onboarding() {
             </motion.div>
           )}
 
-          {/* STEP 3: Activity Level */}
+          {/* STEP 3: Goals */}
           {step === 3 && (
             <motion.div
               key="step3"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="bg-slate-900 rounded-2xl p-8 border border-slate-800"
+              className="bg-card rounded-2xl p-8 border border-border"
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <Activity className="h-6 w-6 text-primary" />
+                  <Target className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold text-slate-50">
-                    Nível de Atividade
+                  <h2 className="text-xl font-semibold text-foreground">
+                    Objetivos
                   </h2>
-                  <p className="text-sm text-slate-400">
-                    Qual seu nível de atividade física?
+                  <p className="text-sm text-muted-foreground">
+                    Defina sua estratégia de saúde
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {[
-                  { value: 'sedentary', label: 'Sedentário', desc: 'Pouco ou nenhum exercício' },
-                  { value: 'light', label: 'Leve', desc: '1-3 dias/semana' },
-                  { value: 'moderate', label: 'Moderado', desc: '3-5 dias/semana' },
-                  { value: 'intense', label: 'Intenso', desc: '6-7 dias/semana' },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => setActivityLevel(option.value as ActivityLevel)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                      activityLevel === option.value
-                        ? 'border-primary bg-primary/10'
-                        : 'border-slate-800 bg-slate-800/50 hover:border-slate-700'
-                    }`}
-                  >
-                    <p className="font-medium text-slate-50">{option.label}</p>
-                    <p className="text-sm text-slate-400">{option.desc}</p>
-                  </button>
-                ))}
+              <div className="space-y-6">
+                {/* Goal Type */}
+                <div>
+                  <Label className="text-foreground mb-3 block">Objetivo Principal</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {goalOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => setGoalType(option.value as GoalType)}
+                        className={`p-4 rounded-xl border-2 transition-all ${
+                          goalType === option.value
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border bg-card hover:border-muted'
+                        }`}
+                      >
+                        <div className="text-3xl mb-2">{option.icon}</div>
+                        <p className="font-medium text-foreground text-sm">{option.label}</p>
+                        <p className="text-xs text-muted-foreground">{option.desc}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Target Weight (Optional) */}
+                <div>
+                  <Label htmlFor="targetWeight" className="text-foreground">
+                    Peso Alvo (kg) - Opcional
+                  </Label>
+                  <Input
+                    id="targetWeight"
+                    type="number"
+                    placeholder="Ex: 70"
+                    value={targetWeight}
+                    onChange={(e) => setTargetWeight(e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
+
+                {/* Goal Speed (Conditional) */}
+                {goalType && goalType !== 'maintain' && (
+                  <div>
+                    <Label className="text-foreground mb-3 block">Velocidade</Label>
+                    <div className="space-y-3">
+                      {speedOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => setGoalSpeed(option.value as GoalSpeed)}
+                          className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
+                            goalSpeed === option.value
+                              ? 'border-primary bg-primary/10'
+                              : 'border-border bg-card hover:border-muted'
+                          }`}
+                        >
+                          <p className="font-medium text-foreground">{option.label}</p>
+                          <p className="text-sm text-muted-foreground">{option.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-between mt-6">
                 <Button
                   onClick={() => setStep(2)}
                   variant="ghost"
-                  className="text-slate-400"
+                  className="text-muted-foreground"
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" /> Voltar
                 </Button>
                 <Button
-                  onClick={() => setStep(4)}
-                  disabled={!canProceedStep3}
+                  onClick={handleSubmit}
+                  disabled={!canProceedStep3 || loading}
                   className="bg-primary hover:bg-primary/90"
                 >
-                  Continuar <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* STEP 4: Protocol */}
-          {step === 4 && (
-            <motion.div
-              key="step4"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="bg-slate-900 rounded-2xl p-8 border border-slate-800"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-slate-50">
-                    Protocolo de Jejum
-                  </h2>
-                  <p className="text-sm text-slate-400">
-                    Escolha o protocolo ideal para você
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {[
-                  { value: '12h', label: 'Iniciante (12h)', desc: 'Ideal para começar' },
-                  { value: '16h', label: 'Intermediário (16h)', desc: 'Protocolo mais popular' },
-                  { value: '20h', label: 'Guerreiro (20h)', desc: 'Para experientes' },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => setProtocol(option.value as Protocol)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                      protocol === option.value
-                        ? 'border-primary bg-primary/10'
-                        : 'border-slate-800 bg-slate-800/50 hover:border-slate-700'
-                    }`}
-                  >
-                    <p className="font-medium text-slate-50">{option.label}</p>
-                    <p className="text-sm text-slate-400">{option.desc}</p>
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex justify-between mt-6">
-                <Button
-                  onClick={() => setStep(3)}
-                  variant="ghost"
-                  className="text-slate-400"
-                >
-                  <ChevronLeft className="mr-2 h-4 w-4" /> Voltar
-                </Button>
-                <Button
-                  onClick={handleComplete}
-                  disabled={!canProceedStep4 || loading}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  {loading ? 'Processando...' : 'Concluir'}
+                  {loading ? 'Calculando...' : 'Calcular Plano'}
                 </Button>
               </div>
             </motion.div>
