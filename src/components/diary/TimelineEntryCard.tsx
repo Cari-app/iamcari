@@ -1,13 +1,14 @@
-import { Camera, Utensils, Heart, Clock, Droplet, Scale, BrainCircuit, Star, Edit } from 'lucide-react';
+import { Camera, Utensils, Heart, Clock, Droplet, Scale, BrainCircuit, Star, Edit, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TimelineEntry, EMOTION_TAGS } from '@/types';
 
 interface TimelineEntryCardProps {
   entry: TimelineEntry;
   onEdit?: () => void;
+  onRefresh?: () => void;
 }
 
-export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
+export function TimelineEntryCard({ entry, onEdit, onRefresh }: TimelineEntryCardProps) {
   // Meal Entry Card
   if (entry.type === 'meal') {
     const isPending = !entry.ai_analysis && entry.food_name === 'Aguardando análise de imagem...';
@@ -15,17 +16,33 @@ export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
     
     return (
       <div className="p-4 bg-card border border-border rounded-2xl relative group">
-        {onEdit && !isPending && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-            className="absolute top-3 right-3 h-8 w-8 rounded-lg bg-muted/80 hover:bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity press-effect"
-            aria-label="Editar refeição"
-          >
-            <Edit className="h-4 w-4 text-muted-foreground" />
-          </button>
+        {!isPending && (
+          <div className="absolute top-3 right-3 flex items-center gap-1">
+            {entry.entry_method === 'ai' && entry.image_url && onRefresh && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRefresh();
+                }}
+                className="h-8 w-8 rounded-lg bg-muted/80 hover:bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity press-effect"
+                aria-label="Atualizar análise"
+              >
+                <RefreshCw className="h-4 w-4 text-muted-foreground" />
+              </button>
+            )}
+            {onEdit && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                className="h-8 w-8 rounded-lg bg-muted/80 hover:bg-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity press-effect"
+                aria-label="Editar refeição"
+              >
+                <Edit className="h-4 w-4 text-muted-foreground" />
+              </button>
+            )}
+          </div>
         )}
         
         <div className="flex items-start gap-3">
