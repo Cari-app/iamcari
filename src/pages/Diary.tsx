@@ -442,6 +442,33 @@ export default function Diary() {
     setMealEditDialogOpen(true);
   };
 
+  const handleRefreshMeal = async (entry: TimelineEntry) => {
+    if (!user || entry.type !== 'meal' || !entry.image_url) return;
+
+    toast({
+      title: '🔄 Reprocessando...',
+      description: 'A Dona está analisando a foto novamente',
+    });
+
+    // Update status to pending
+    const { error } = await supabase
+      .from('meal_logs')
+      .update({
+        status: 'pending',
+        ai_analysis: null,
+      })
+      .eq('id', entry.id);
+
+    if (error) {
+      console.error('Error updating meal log:', error);
+      toast({
+        title: '❌ Erro',
+        description: 'Não foi possível reprocessar a análise',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleMealEditSubmit = async (data: {
     food_name: string;
     calories: number;
@@ -586,6 +613,7 @@ export default function Diary() {
                   <TimelineEntryCard 
                     entry={entry} 
                     onEdit={entry.type === 'meal' ? () => handleEditMeal(entry) : undefined}
+                    onRefresh={entry.type === 'meal' && entry.entry_method === 'ai' ? () => handleRefreshMeal(entry) : undefined}
                   />
                 </SwipeableRow>
               </motion.div>
