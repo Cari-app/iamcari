@@ -101,6 +101,7 @@ export interface TimelineEntry {
   is_emotional?: boolean;
   hunger_level?: number;
   entry_method?: 'ai' | 'manual';
+  ai_analysis?: AIAnalysis;
   
   // Mood Props
   mood_score?: number; // 1-10
