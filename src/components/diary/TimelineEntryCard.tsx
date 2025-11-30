@@ -10,7 +10,8 @@ interface TimelineEntryCardProps {
 export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
   // Meal Entry Card
   if (entry.type === 'meal') {
-    const isPending = entry.food_name === 'Aguardando análise de imagem...';
+    const isPending = !entry.ai_analysis && entry.food_name === 'Aguardando análise de imagem...';
+    const hasAnalysis = typeof entry.ai_analysis === 'string' && entry.ai_analysis.trim().length > 0;
     
     return (
       <div className="p-4 bg-card border border-border rounded-2xl relative group">
@@ -64,21 +65,38 @@ export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
                 </span>
               )}
             </div>
-            <p className={cn(
-              'mt-1.5 font-medium leading-snug line-clamp-2',
-              isPending ? 'text-muted-foreground italic' : 'text-foreground'
-            )}>
-              {entry.ai_analysis?.foods?.length 
-                ? entry.ai_analysis.foods.join(', ') 
-                : entry.food_name}
-            </p>
-            {entry.calories > 0 && (
-              <p className="mt-1 text-sm text-muted-foreground tabular-nums">
-                {entry.calories} kcal
-              </p>
+            
+            {hasAnalysis ? (
+              <div className="mt-2 space-y-2">
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
+                    {typeof entry.ai_analysis === 'string' ? entry.ai_analysis : ''}
+                  </p>
+                </div>
+                {entry.calories > 0 && (
+                  <p className="text-xs text-muted-foreground tabular-nums">
+                    Total: {entry.calories} kcal
+                  </p>
+                )}
+              </div>
+            ) : (
+              <>
+                <p className={cn(
+                  'mt-1.5 font-medium leading-snug line-clamp-2',
+                  isPending ? 'text-muted-foreground italic' : 'text-foreground'
+                )}>
+                  {entry.food_name}
+                </p>
+                {entry.calories > 0 && (
+                  <p className="mt-1 text-sm text-muted-foreground tabular-nums">
+                    {entry.calories} kcal
+                  </p>
+                )}
+              </>
             )}
+            
             {entry.image_url && (
-              <div className="mt-2 rounded-xl overflow-hidden">
+              <div className="mt-3 rounded-xl overflow-hidden">
                 <img 
                   src={entry.image_url} 
                   alt="Foto da refeição" 
