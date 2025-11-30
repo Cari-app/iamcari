@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Camera, Pencil, Utensils, Sparkles, Heart, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { compressImage } from '@/lib/imageCompression';
 import {
   Dialog,
   DialogContent,
@@ -44,7 +45,26 @@ export function MealInputDialog({
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadStep, setUploadStep] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const uploadSteps = [
+    'Comprimindo imagem...',
+    'Enviando para a nuvem...',
+    'A Dona está analisando...',
+    'Calculando calorias...',
+  ];
+
+  // Cycle through upload steps
+  useEffect(() => {
+    if (!uploading) return;
+    
+    const interval = setInterval(() => {
+      setUploadStep((prev) => (prev + 1) % uploadSteps.length);
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, [uploading]);
 
   const resetState = () => {
     setMethod('select');
@@ -54,6 +74,7 @@ export function MealInputDialog({
     setSelectedImage(null);
     setImagePreview(null);
     setUploading(false);
+    setUploadStep(0);
   };
 
   const handleClose = () => {
@@ -84,30 +105,36 @@ export function MealInputDialog({
     }
 
     setUploading(true);
+    setUploadStep(0);
 
     try {
-      // Step 1: Upload to Supabase Storage
+      // Step 1: Compress image
+      const compressedBlob = await compressImage(selectedImage);
+
+      // Step 2: Upload compressed image to Supabase Storage
       const timestamp = Date.now();
-      const fileExt = selectedImage.name.split('.').pop();
-      const filePath = `${user.id}/${timestamp}.${fileExt}`;
+      const filePath = `${user.id}/${timestamp}.jpg`; // Always JPEG
 
       const { error: uploadError } = await supabase.storage
         .from('meal_photos')
-        .upload(filePath, selectedImage);
+        .upload(filePath, compressedBlob, {
+          contentType: 'image/jpeg',
+          cacheControl: '3600',
+        });
 
       if (uploadError) {
         console.error('Storage upload error:', uploadError);
         throw uploadError;
       }
 
-      // Step 2: Get public URL
+      // Step 3: Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('meal_photos')
         .getPublicUrl(filePath);
 
       console.log('Image uploaded successfully:', publicUrl);
 
-      // Step 3: Insert initial record into meal_logs with status 'pending'
+      // Step 4: Insert initial record into meal_logs with status 'pending'
       const { error: insertError } = await supabase
         .from('meal_logs')
         .insert({
@@ -145,6 +172,7 @@ export function MealInputDialog({
       });
     } finally {
       setUploading(false);
+      setUploadStep(0);
     }
   };
 
@@ -167,12 +195,32 @@ export function MealInputDialog({
 
   return (
     <>
-      {/* Loading Overlay */}
+      {/* Loading Overlay with Stepped Progress */}
       {uploading && (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <div className="h-16 w-16 mx-auto rounded-full gradient-primary animate-spin border-4 border-transparent border-t-white" />
-            <p className="text-white text-lg font-medium">Processando imagem...</p>
+        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center">
+          <div className="text-center space-y-6 px-6">
+            <div className="relative">
+              <div className="h-20 w-20 mx-auto rounded-full gradient-primary animate-spin border-4 border-transparent border-t-white" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Sparkles className="h-8 w-8 text-white animate-pulse" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-white text-xl font-semibold animate-pulse">
+                {uploadSteps[uploadStep]}
+              </p>
+              <div className="flex gap-1.5 justify-center">
+                {uploadSteps.map((_, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      'h-1.5 w-8 rounded-full transition-all duration-300',
+                      index === uploadStep ? 'bg-white' : 'bg-white/30'
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
