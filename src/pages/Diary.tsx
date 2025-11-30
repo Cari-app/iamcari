@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
 import { CalendarStrip } from '@/components/CalendarStrip';
+import { DatePickerButton } from '@/components/DatePickerButton';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
 import { WeightInputDialog } from '@/components/diary/WeightInputDialog';
@@ -569,6 +570,7 @@ export default function Diary() {
                 }
               </p>
             </div>
+            <DatePickerButton />
           </motion.div>
 
           {/* Today's Summary */}
