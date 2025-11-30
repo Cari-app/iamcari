@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
+import { CalendarStrip } from '@/components/CalendarStrip';
 import { CircularProgress } from '@/components/CircularProgress';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { MealInputDialog } from '@/components/diary/MealInputDialog';
@@ -14,9 +15,13 @@ import { Play, Pause, RotateCcw, Flame, Zap, Sparkles, Target } from 'lucide-rea
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDate } from '@/contexts/DateContext';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export default function Dashboard() {
   const { user, profile, refreshProfile } = useAuth();
+  const { selectedDate, getStartOfDay, getEndOfDay, isSelectedToday } = useDate();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProtocolOpen, setIsProtocolOpen] = useState(false);
@@ -52,15 +57,17 @@ export default function Dashboard() {
     if (!user) return;
     
     const fetchDashboardData = async () => {
-      const today = new Date().toISOString().split('T')[0];
+      const startOfDay = getStartOfDay();
+      const endOfDay = getEndOfDay();
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       
-      // Fetch today's meals
+      // Fetch selected day's meals
       const { data: mealsData } = await supabase
         .from('meal_logs')
         .select('calories, is_emotional, created_at')
         .eq('user_id', user.id)
-        .gte('created_at', `${today}T00:00:00`)
+        .gte('created_at', startOfDay.toISOString())
+        .lte('created_at', endOfDay.toISOString())
         .order('created_at', { ascending: false });
       
       if (mealsData) {
@@ -137,7 +144,7 @@ export default function Dashboard() {
     };
     
     fetchDashboardData();
-  }, [user]);
+  }, [user, selectedDate]);
 
   const handleProtocolSelect = async (hours: number) => {
     setSelectedProtocol(hours);
@@ -189,6 +196,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-[100dvh] bg-background pb-24 pt-20 overflow-x-clip overflow-y-visible">
       <Navbar />
+      <CalendarStrip />
       
       <main className="px-4 py-6 overflow-visible">
         <div className="mx-auto max-w-lg space-y-6 overflow-visible">
@@ -202,7 +210,10 @@ export default function Dashboard() {
               {isActive ? 'Jejum em andamento' : 'Pronto para começar?'}
             </h1>
             <p className="text-muted-foreground mt-1">
-              {isActive ? `Meta: ${targetHours}h de jejum` : 'Inicie seu jejum quando estiver pronto'}
+              {isSelectedToday 
+                ? (isActive ? `Meta: ${targetHours}h de jejum` : 'Inicie seu jejum quando estiver pronto')
+                : format(selectedDate, "d 'de' MMMM", { locale: ptBR })
+              }
             </p>
           </motion.div>
 

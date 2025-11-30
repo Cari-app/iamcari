@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
+import { CalendarStrip } from '@/components/CalendarStrip';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
 import { WeightInputDialog } from '@/components/diary/WeightInputDialog';
@@ -10,14 +11,18 @@ import { MealInputDialog } from '@/components/diary/MealInputDialog';
 import { MealEditDialog } from '@/components/diary/MealEditDialog';
 import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
-import { Calendar, Camera } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry, EmotionTag } from '@/types';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDate } from '@/contexts/DateContext';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export default function Diary() {
   const { user, profile } = useAuth();
+  const { selectedDate, getStartOfDay, getEndOfDay, isSelectedToday } = useDate();
   const [moodDrawerOpen, setMoodDrawerOpen] = useState(false);
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
   const [waterDialogOpen, setWaterDialogOpen] = useState(false);
@@ -28,7 +33,7 @@ export default function Diary() {
   const [loading, setLoading] = useState(true);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
-  // Fetch today's meal logs from Supabase
+  // Fetch selected day's meal logs from Supabase
   useEffect(() => {
     if (!user) {
       setLoading(false);
@@ -36,15 +41,15 @@ export default function Diary() {
     }
 
     const fetchTodayLogs = async () => {
-      // Get start of today in user's timezone
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const startOfDay = getStartOfDay();
+      const endOfDay = getEndOfDay();
       
       const { data, error } = await supabase
         .from('meal_logs')
         .select('*')
         .eq('user_id', user.id)
-        .gte('created_at', today.toISOString())
+        .gte('created_at', startOfDay.toISOString())
+        .lte('created_at', endOfDay.toISOString())
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -187,7 +192,7 @@ export default function Diary() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, refetchTrigger]);
+  }, [user, selectedDate, refetchTrigger]);
 
   // Calculate totals from timeline
   const todayCalories = timeline
@@ -545,6 +550,7 @@ export default function Diary() {
   return (
     <div className="min-h-screen bg-background pb-24 pt-20">
       <Navbar />
+      <CalendarStrip />
       
       <main className="px-4 py-6">
         <div className="mx-auto max-w-lg space-y-4">
@@ -556,11 +562,13 @@ export default function Diary() {
           >
             <div>
               <h1 className="text-2xl font-bold text-foreground">Diário</h1>
-              <p className="text-muted-foreground">Linha do tempo de hoje</p>
+              <p className="text-muted-foreground">
+                {isSelectedToday 
+                  ? 'Linha do tempo de hoje' 
+                  : format(selectedDate, "d 'de' MMMM", { locale: ptBR })
+                }
+              </p>
             </div>
-            <button className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center press-effect">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-            </button>
           </motion.div>
 
           {/* Today's Summary */}
@@ -653,10 +661,10 @@ export default function Diary() {
                 <Camera className="h-8 w-8 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground">
-                Nenhum registro hoje
+                Nenhum registro neste dia
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                Use os botões acima para começar
+                {isSelectedToday ? 'Use os botões acima para começar' : 'Selecione outro dia ou volte para hoje'}
               </p>
             </motion.div>
           )}
