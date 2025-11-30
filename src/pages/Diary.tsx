@@ -10,11 +10,16 @@ import { MealInputDialog } from '@/components/diary/MealInputDialog';
 import { MealEditDialog } from '@/components/diary/MealEditDialog';
 import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
-import { Calendar, Camera } from 'lucide-react';
+import { Calendar as CalendarIcon, Camera } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry, EmotionTag } from '@/types';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 export default function Diary() {
   const { user, profile } = useAuth();
@@ -27,24 +32,30 @@ export default function Diary() {
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
-  // Fetch today's meal logs from Supabase
+  // Fetch meal logs for selected date
   useEffect(() => {
     if (!user) {
       setLoading(false);
       return;
     }
 
-    const fetchTodayLogs = async () => {
-      // Get start of today in user's timezone
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+    const fetchLogsForDate = async () => {
+      // Get start and end of selected date
+      const startOfDay = new Date(selectedDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      
+      const endOfDay = new Date(selectedDate);
+      endOfDay.setHours(23, 59, 59, 999);
       
       const { data, error } = await supabase
         .from('meal_logs')
         .select('*')
         .eq('user_id', user.id)
-        .gte('created_at', today.toISOString())
+        .gte('created_at', startOfDay.toISOString())
+        .lte('created_at', endOfDay.toISOString())
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -107,7 +118,7 @@ export default function Diary() {
       setLoading(false);
     };
 
-    fetchTodayLogs();
+    fetchLogsForDate();
 
     // Set up realtime subscription for automatic updates
     const channel = supabase
@@ -166,7 +177,7 @@ export default function Diary() {
         },
         () => {
           // Refetch for new entries
-          fetchTodayLogs();
+          fetchLogsForDate();
         }
       )
       .on(
@@ -179,7 +190,7 @@ export default function Diary() {
         },
         () => {
           // Refetch for deletions
-          fetchTodayLogs();
+          fetchLogsForDate();
         }
       )
       .subscribe();
@@ -187,7 +198,7 @@ export default function Diary() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, refetchTrigger]);
+  }, [user, refetchTrigger, selectedDate]);
 
   // Calculate totals from timeline
   const todayCalories = timeline
@@ -556,11 +567,37 @@ export default function Diary() {
           >
             <div>
               <h1 className="text-2xl font-bold text-foreground">Diário</h1>
-              <p className="text-muted-foreground">Linha do tempo de hoje</p>
+              <p className="text-muted-foreground">
+                {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
+                {selectedDate.toDateString() === new Date().toDateString() && ' - Hoje'}
+              </p>
             </div>
-            <button className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center press-effect">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-            </button>
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <button className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center press-effect hover:bg-accent transition-colors">
+                  <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      setSelectedDate(date);
+                      setCalendarOpen(false);
+                      toast({
+                        title: '📅 Data selecionada',
+                        description: format(date, "d 'de' MMMM 'de' yyyy", { locale: ptBR }),
+                      });
+                    }
+                  }}
+                  disabled={(date) => date > new Date()}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </motion.div>
 
           {/* Today's Summary */}
