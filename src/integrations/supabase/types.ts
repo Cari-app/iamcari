@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessments: {
+        Row: {
+          activity_level: string | null
+          age: number | null
+          bmr: number | null
+          created_at: string
+          daily_calories_target: number | null
+          gender: string | null
+          goal_speed: string | null
+          goal_type: string | null
+          height_cm: number | null
+          id: string
+          protein_target_g: number | null
+          target_weight_kg: number | null
+          tdee: number | null
+          user_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          activity_level?: string | null
+          age?: number | null
+          bmr?: number | null
+          created_at?: string
+          daily_calories_target?: number | null
+          gender?: string | null
+          goal_speed?: string | null
+          goal_type?: string | null
+          height_cm?: number | null
+          id?: string
+          protein_target_g?: number | null
+          target_weight_kg?: number | null
+          tdee?: number | null
+          user_id: string
+          weight_kg?: number | null
+        }
+        Update: {
+          activity_level?: string | null
+          age?: number | null
+          bmr?: number | null
+          created_at?: string
+          daily_calories_target?: number | null
+          gender?: string | null
+          goal_speed?: string | null
+          goal_type?: string | null
+          height_cm?: number | null
+          id?: string
+          protein_target_g?: number | null
+          target_weight_kg?: number | null
+          tdee?: number | null
+          user_id?: string
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fasting_sessions: {
         Row: {
           created_at: string
