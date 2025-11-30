@@ -62,7 +62,6 @@ export default function Profile() {
   const [isBodyStatsOpen, setIsBodyStatsOpen] = useState(false);
   const [bodyWeight, setBodyWeight] = useState<number>(0);
   const [bodyHeight, setBodyHeight] = useState<number>(0);
-  const [caloriesTarget, setCaloriesTarget] = useState<number>(2000);
   const [savingBodyStats, setSavingBodyStats] = useState(false);
 
   // Fetch profile data on mount
@@ -95,7 +94,6 @@ export default function Profile() {
         setAvatarUrl(data.avatar_url);
         setBodyWeight(data.weight || 0);
         setBodyHeight(data.height || 0);
-        setCaloriesTarget(data.daily_calories_target || 2000);
       }
 
       setLoading(false);
@@ -243,22 +241,47 @@ export default function Profile() {
     setSavingBodyStats(true);
 
     try {
-      const { error } = await supabase
+      // Update profile basic info
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
           weight: bodyWeight,
           height: bodyHeight,
-          daily_calories_target: caloriesTarget
         })
         .eq('id', user.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Create new assessment to recalculate BMR/TDEE via DB trigger
+      const { data: latestAssessment } = await supabase
+        .from('assessments')
+        .select('gender, age, activity_level, goal_type, goal_speed, target_weight_kg')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const { error: assessmentError } = await supabase
+        .from('assessments')
+        .insert({
+          user_id: user.id,
+          gender: latestAssessment?.gender || profile?.gender || 'male',
+          age: latestAssessment?.age || profile?.age || 30,
+          height_cm: bodyHeight,
+          weight_kg: bodyWeight,
+          activity_level: latestAssessment?.activity_level || profile?.activity_level || 'moderate',
+          goal_type: latestAssessment?.goal_type || 'maintain',
+          goal_speed: latestAssessment?.goal_speed || null,
+          target_weight_kg: latestAssessment?.target_weight_kg || null,
+        });
+
+      if (assessmentError) throw assessmentError;
 
       setIsBodyStatsOpen(false);
 
       toast({
         title: '✅ Dados atualizados',
-        description: 'Suas informações corporais foram salvas',
+        description: 'Nova avaliação metabólica calculada',
       });
     } catch (error) {
       console.error('Error updating body stats:', error);
@@ -597,20 +620,10 @@ export default function Profile() {
               />
             </div>
 
-            <div>
-              <Label htmlFor="calories" className="text-foreground">
-                Meta de Calorias (kcal/dia)
-              </Label>
-              <Input
-                id="calories"
-                type="number"
-                value={caloriesTarget || ''}
-                onChange={(e) => setCaloriesTarget(Number(e.target.value))}
-                placeholder="Ex: 2000"
-                className="mt-2 bg-background"
-                min={0}
-                step={50}
-              />
+            <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+              <p className="text-sm text-muted-foreground">
+                💡 <strong className="text-foreground">Suas metas calóricas</strong> serão recalculadas automaticamente com base nos novos dados.
+              </p>
             </div>
           </div>
 

@@ -16,6 +16,11 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
 
+  // Redirect to assessment if no calorie target (needs metabolic assessment)
+  if (profile && !profile.daily_calories_target && window.location.pathname !== '/assessment' && window.location.pathname !== '/onboarding') {
+    return <Navigate to="/assessment" replace />;
+  }
+
   // Redirect to onboarding if not completed
   if (profile && !profile.onboarding_completed && window.location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;

@@ -107,6 +107,28 @@ export default function Diary() {
     };
 
     fetchTodayLogs();
+
+    // Set up realtime subscription for automatic updates
+    const channel = supabase
+      .channel('meal-logs-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'meal_logs',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          // Refetch data when changes occur
+          fetchTodayLogs();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user, refetchTrigger]);
 
   // Calculate totals from timeline
