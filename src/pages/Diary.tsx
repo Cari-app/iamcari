@@ -455,53 +455,6 @@ export default function Diary() {
     setMealEditDialogOpen(true);
   };
 
-  const handleRefreshMeal = async (entry: TimelineEntry) => {
-    if (!user || entry.type !== 'meal') return;
-
-    toast({
-      title: '🔄 Atualizando...',
-      description: 'Carregando dados mais recentes',
-    });
-
-    // Just refetch the data from database
-    const { data, error } = await supabase
-      .from('meal_logs')
-      .select('*')
-      .eq('id', entry.id)
-      .single();
-
-    if (error) {
-      console.error('Error fetching meal log:', error);
-      toast({
-        title: '❌ Erro',
-        description: 'Não foi possível atualizar os dados',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (data) {
-      // Update the timeline with fresh data from database
-      setTimeline(prev => prev.map(e => 
-        e.id === entry.id 
-          ? {
-              ...e,
-              food_name: data.food_name || '',
-              calories: data.calories || 0,
-              ai_analysis: data.ai_analysis,
-              status: data.status || 'manual',
-              is_emotional: data.is_emotional || false,
-            }
-          : e
-      ));
-
-      toast({
-        title: '✅ Atualizado!',
-        description: 'Dados carregados com sucesso',
-      });
-    }
-  };
-
   const handleMealEditSubmit = async (data: {
     food_name: string;
     calories: number;
@@ -672,7 +625,6 @@ export default function Diary() {
                   <TimelineEntryCard 
                     entry={entry} 
                     onEdit={entry.type === 'meal' ? () => handleEditMeal(entry) : undefined}
-                    onRefresh={entry.type === 'meal' && entry.entry_method === 'ai' ? () => handleRefreshMeal(entry) : undefined}
                   />
                 </SwipeableRow>
               </motion.div>
