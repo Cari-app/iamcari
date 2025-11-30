@@ -445,28 +445,48 @@ export default function Diary() {
   };
 
   const handleRefreshMeal = async (entry: TimelineEntry) => {
-    if (!user || entry.type !== 'meal' || !entry.image_url) return;
+    if (!user || entry.type !== 'meal') return;
 
     toast({
-      title: '🔄 Reprocessando...',
-      description: 'A Dona está analisando a foto novamente',
+      title: '🔄 Atualizando...',
+      description: 'Carregando dados mais recentes',
     });
 
-    // Update status to pending
-    const { error } = await supabase
+    // Just refetch the data from database
+    const { data, error } = await supabase
       .from('meal_logs')
-      .update({
-        status: 'pending',
-        ai_analysis: null,
-      })
-      .eq('id', entry.id);
+      .select('*')
+      .eq('id', entry.id)
+      .single();
 
     if (error) {
-      console.error('Error updating meal log:', error);
+      console.error('Error fetching meal log:', error);
       toast({
         title: '❌ Erro',
-        description: 'Não foi possível reprocessar a análise',
+        description: 'Não foi possível atualizar os dados',
         variant: 'destructive',
+      });
+      return;
+    }
+
+    if (data) {
+      // Update the timeline with fresh data from database
+      setTimeline(prev => prev.map(e => 
+        e.id === entry.id 
+          ? {
+              ...e,
+              food_name: data.food_name || '',
+              calories: data.calories || 0,
+              ai_analysis: data.ai_analysis,
+              status: data.status || 'manual',
+              is_emotional: data.is_emotional || false,
+            }
+          : e
+      ));
+
+      toast({
+        title: '✅ Atualizado!',
+        description: 'Dados carregados com sucesso',
       });
     }
   };
