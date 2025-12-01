@@ -4,9 +4,14 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 
 export function Navbar() {
   const { theme, toggleTheme } = useTheme();
+  const location = useLocation();
+  
+  // Hide gamification widget on profile page
+  const hideGamification = location.pathname === '/profile';
 
   return (
     <motion.header 
@@ -20,7 +25,7 @@ export function Navbar() {
           <Logo size="xs" />
           
           <div className="flex items-center gap-2">
-            <GamificationWidget />
+            {!hideGamification && <GamificationWidget />}
             
             <Button
               variant="ghost"
