@@ -16,201 +16,308 @@ export type Database = {
     Tables: {
       achievements: {
         Row: {
-          achievement_key: string
+          code: string
           description: string | null
           icon: string | null
-          id: string
-          title: string
-          unlocked_at: string | null
-          user_id: string
+          id: number
+          name: string
+          xp_reward: number | null
         }
         Insert: {
-          achievement_key: string
+          code: string
           description?: string | null
           icon?: string | null
-          id?: string
-          title: string
-          unlocked_at?: string | null
-          user_id: string
+          id?: number
+          name: string
+          xp_reward?: number | null
         }
         Update: {
-          achievement_key?: string
+          code?: string
           description?: string | null
           icon?: string | null
-          id?: string
-          title?: string
-          unlocked_at?: string | null
-          user_id?: string
+          id?: number
+          name?: string
+          xp_reward?: number | null
         }
         Relationships: []
       }
       assessments: {
         Row: {
-          activity_level: string
-          age: number
+          activity_level: string | null
+          age: number | null
           bmr: number | null
-          created_at: string | null
-          gender: string
+          created_at: string
+          daily_calories_target: number | null
+          gender: string | null
           goal_speed: string | null
-          goal_type: string
-          height: number
+          goal_type: string | null
+          height_cm: number | null
           id: string
-          target_calories: number | null
-          target_weight: number | null
+          protein_target_g: number | null
           target_weight_kg: number | null
           tdee: number | null
           user_id: string
-          weight: number
+          weight_kg: number | null
         }
         Insert: {
-          activity_level: string
-          age: number
+          activity_level?: string | null
+          age?: number | null
           bmr?: number | null
-          created_at?: string | null
-          gender: string
+          created_at?: string
+          daily_calories_target?: number | null
+          gender?: string | null
           goal_speed?: string | null
-          goal_type: string
-          height: number
+          goal_type?: string | null
+          height_cm?: number | null
           id?: string
-          target_calories?: number | null
-          target_weight?: number | null
+          protein_target_g?: number | null
           target_weight_kg?: number | null
           tdee?: number | null
           user_id: string
-          weight: number
+          weight_kg?: number | null
         }
         Update: {
-          activity_level?: string
-          age?: number
+          activity_level?: string | null
+          age?: number | null
           bmr?: number | null
-          created_at?: string | null
-          gender?: string
+          created_at?: string
+          daily_calories_target?: number | null
+          gender?: string | null
           goal_speed?: string | null
-          goal_type?: string
-          height?: number
+          goal_type?: string | null
+          height_cm?: number | null
           id?: string
-          target_calories?: number | null
-          target_weight?: number | null
+          protein_target_g?: number | null
           target_weight_kg?: number | null
           tdee?: number | null
           user_id?: string
-          weight?: number
+          weight_kg?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "assessments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       diet_types: {
         Row: {
-          color_theme: string
-          created_at: string | null
-          full_description: string
-          icon: string
+          color_theme: string | null
+          full_description: string | null
+          icon: string | null
           id: string
+          ideal_for: string | null
           name: string
+          short_description: string | null
         }
         Insert: {
-          color_theme: string
-          created_at?: string | null
-          full_description: string
-          icon: string
+          color_theme?: string | null
+          full_description?: string | null
+          icon?: string | null
           id: string
+          ideal_for?: string | null
           name: string
+          short_description?: string | null
         }
         Update: {
-          color_theme?: string
-          created_at?: string | null
-          full_description?: string
-          icon?: string
+          color_theme?: string | null
+          full_description?: string | null
+          icon?: string | null
           id?: string
+          ideal_for?: string | null
           name?: string
+          short_description?: string | null
         }
         Relationships: []
       }
       fasting_sessions: {
         Row: {
-          created_at: string | null
+          created_at: string
           end_time: string | null
           id: string
+          potential_xp: number | null
           protocol_type: string | null
           start_time: string
-          target_hours: number
+          status: string | null
+          target_hours: number | null
           user_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           end_time?: string | null
           id?: string
+          potential_xp?: number | null
           protocol_type?: string | null
           start_time: string
-          target_hours: number
+          status?: string | null
+          target_hours?: number | null
           user_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           end_time?: string | null
           id?: string
+          potential_xp?: number | null
           protocol_type?: string | null
           start_time?: string
-          target_hours?: number
+          status?: string | null
+          target_hours?: number | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fasting_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_posts: {
+        Row: {
+          caption: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          likes_count: number | null
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          likes_count?: number | null
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          likes_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       meal_logs: {
         Row: {
-          ai_analysis: string | null
+          ai_analysis: Json | null
           calories: number | null
-          created_at: string | null
+          created_at: string
           description: string | null
           entry_type: string | null
           food_name: string | null
-          hunger_level: string | null
+          hunger_level: number | null
           id: string
           image_url: string | null
           is_emotional: boolean | null
+          macros: Json | null
           metric_value: number | null
           mood_tag: string | null
-          status: string | null
+          status: Database["public"]["Enums"]["meal_status"]
           user_id: string
         }
         Insert: {
-          ai_analysis?: string | null
+          ai_analysis?: Json | null
           calories?: number | null
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           entry_type?: string | null
           food_name?: string | null
-          hunger_level?: string | null
+          hunger_level?: number | null
           id?: string
           image_url?: string | null
           is_emotional?: boolean | null
+          macros?: Json | null
           metric_value?: number | null
           mood_tag?: string | null
-          status?: string | null
+          status?: Database["public"]["Enums"]["meal_status"]
           user_id: string
         }
         Update: {
-          ai_analysis?: string | null
+          ai_analysis?: Json | null
           calories?: number | null
-          created_at?: string | null
+          created_at?: string
           description?: string | null
           entry_type?: string | null
           food_name?: string | null
-          hunger_level?: string | null
+          hunger_level?: number | null
           id?: string
           image_url?: string | null
           is_emotional?: boolean | null
+          macros?: Json | null
           metric_value?: number | null
           mood_tag?: string | null
-          status?: string | null
+          status?: Database["public"]["Enums"]["meal_status"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "meal_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nutrition_assessments: {
         Row: {
           carb_preference: string | null
           cooking_time: string | null
-          created_at: string | null
+          created_at: string
           dietary_restrictions: string | null
           discipline_level: string | null
           eating_habit: string | null
@@ -221,13 +328,15 @@ export type Database = {
           meals_per_day: string | null
           meat_consumption: string | null
           night_hunger: string | null
+          scores: Json | null
           structure_preference: string | null
+          suggested_diet: string | null
           user_id: string
         }
         Insert: {
           carb_preference?: string | null
           cooking_time?: string | null
-          created_at?: string | null
+          created_at?: string
           dietary_restrictions?: string | null
           discipline_level?: string | null
           eating_habit?: string | null
@@ -238,13 +347,15 @@ export type Database = {
           meals_per_day?: string | null
           meat_consumption?: string | null
           night_hunger?: string | null
+          scores?: Json | null
           structure_preference?: string | null
+          suggested_diet?: string | null
           user_id: string
         }
         Update: {
           carb_preference?: string | null
           cooking_time?: string | null
-          created_at?: string | null
+          created_at?: string
           dietary_restrictions?: string | null
           discipline_level?: string | null
           eating_habit?: string | null
@@ -255,19 +366,29 @@ export type Database = {
           meals_per_day?: string | null
           meat_consumption?: string | null
           night_hunger?: string | null
+          scores?: Json | null
           structure_preference?: string | null
+          suggested_diet?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "nutrition_assessments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
-          active_diet: string | null
           activity_level: string | null
           age: number | null
           avatar_url: string | null
-          created_at: string | null
+          created_at: string
           daily_calories_target: number | null
+          email: string | null
           fasting_protocol: string | null
           full_name: string | null
           gender: string | null
@@ -277,17 +398,16 @@ export type Database = {
           onboarding_completed: boolean | null
           tier: string | null
           token_balance: number | null
-          updated_at: string | null
           weight: number | null
           whatsapp_number: string | null
         }
         Insert: {
-          active_diet?: string | null
           activity_level?: string | null
           age?: number | null
           avatar_url?: string | null
-          created_at?: string | null
+          created_at?: string
           daily_calories_target?: number | null
+          email?: string | null
           fasting_protocol?: string | null
           full_name?: string | null
           gender?: string | null
@@ -297,17 +417,16 @@ export type Database = {
           onboarding_completed?: boolean | null
           tier?: string | null
           token_balance?: number | null
-          updated_at?: string | null
           weight?: number | null
           whatsapp_number?: string | null
         }
         Update: {
-          active_diet?: string | null
           activity_level?: string | null
           age?: number | null
           avatar_url?: string | null
-          created_at?: string | null
+          created_at?: string
           daily_calories_target?: number | null
+          email?: string | null
           fasting_protocol?: string | null
           full_name?: string | null
           gender?: string | null
@@ -317,78 +436,132 @@ export type Database = {
           onboarding_completed?: boolean | null
           tier?: string | null
           token_balance?: number | null
-          updated_at?: string | null
           weight?: number | null
           whatsapp_number?: string | null
         }
         Relationships: []
       }
+      token_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "token_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_achievements: {
         Row: {
-          achievement_code: string
+          achievement_code: string | null
           id: string
           unlocked_at: string | null
           user_id: string
         }
         Insert: {
-          achievement_code: string
+          achievement_code?: string | null
           id?: string
           unlocked_at?: string | null
           user_id: string
         }
         Update: {
-          achievement_code?: string
+          achievement_code?: string | null
           id?: string
           unlocked_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_code_fkey"
+            columns: ["achievement_code"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "user_achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_stats: {
         Row: {
-          created_at: string | null
           current_cycle_xp: number | null
           current_level: number | null
           current_streak: number | null
           game_coins: number | null
-          id: string
+          longest_streak: number | null
           total_xp: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
-          created_at?: string | null
           current_cycle_xp?: number | null
           current_level?: number | null
           current_streak?: number | null
           game_coins?: number | null
-          id?: string
+          longest_streak?: number | null
           total_xp?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
-          created_at?: string | null
           current_cycle_xp?: number | null
           current_level?: number | null
           current_streak?: number | null
           game_coins?: number | null
-          id?: string
+          longest_streak?: number | null
           total_xp?: number | null
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_stats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      renew_subscription_balance: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      meal_status: "manual" | "pending" | "analyzed" | "error"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -515,6 +688,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      meal_status: ["manual", "pending", "analyzed", "error"],
+    },
   },
 } as const
