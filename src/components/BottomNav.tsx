@@ -17,7 +17,7 @@ export function BottomNav() {
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 safe-area-inset-bottom"
+      className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 safe-area-inset-bottom md:hidden"
     >
       <div className="mx-auto max-w-lg">
         <div className="rounded-3xl shadow-lg backdrop-blur-2xl bg-white/80 dark:bg-black/50 border border-white/30 dark:border-white/10">
