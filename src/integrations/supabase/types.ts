@@ -14,7 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          active_diet: string | null
+          created_at: string | null
+          daily_calories_target: number | null
+          full_name: string | null
+          id: string
+          nickname: string | null
+          onboarding_completed: boolean | null
+          tier: string | null
+          token_balance: number | null
+          updated_at: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          active_diet?: string | null
+          created_at?: string | null
+          daily_calories_target?: number | null
+          full_name?: string | null
+          id: string
+          nickname?: string | null
+          onboarding_completed?: boolean | null
+          tier?: string | null
+          token_balance?: number | null
+          updated_at?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          active_diet?: string | null
+          created_at?: string | null
+          daily_calories_target?: number | null
+          full_name?: string | null
+          id?: string
+          nickname?: string | null
+          onboarding_completed?: boolean | null
+          tier?: string | null
+          token_balance?: number | null
+          updated_at?: string | null
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
