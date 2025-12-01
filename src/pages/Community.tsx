@@ -179,15 +179,12 @@ export default function Community() {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-6"
+          className="flex items-center justify-end mb-6"
         >
-          <h1 className="text-2xl font-bold gradient-text">
-            Comunidade LeveStay
-          </h1>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
             size="sm"
-            className="gap-2"
+            className="gap-2 rounded-full"
           >
             <Plus className="h-4 w-4" />
             Novo Post
@@ -196,19 +193,19 @@ export default function Community() {
 
         {/* Feed */}
         {loading ? (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="glass rounded-3xl p-4 animate-pulse">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-12 w-12 rounded-full bg-muted" />
+              <div key={i} className="glass rounded-2xl p-4 animate-pulse">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-full bg-muted/50" />
                   <div className="flex-1">
-                    <div className="h-4 bg-muted rounded w-32 mb-2" />
-                    <div className="h-3 bg-muted rounded w-20" />
+                    <div className="h-3 bg-muted/50 rounded w-24 mb-1.5" />
+                    <div className="h-2 bg-muted/50 rounded w-16" />
                   </div>
                 </div>
-                <div className="aspect-square bg-muted rounded-2xl mb-4" />
-                <div className="h-4 bg-muted rounded w-full mb-2" />
-                <div className="h-4 bg-muted rounded w-3/4" />
+                <div className="aspect-square bg-muted/50 rounded-xl mb-3" />
+                <div className="h-3 bg-muted/50 rounded w-full mb-2" />
+                <div className="h-3 bg-muted/50 rounded w-2/3" />
               </div>
             ))}
           </div>
@@ -216,26 +213,32 @@ export default function Community() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass rounded-3xl p-12 text-center"
+            className="flex flex-col items-center justify-center py-20 px-6"
           >
-            <Users className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum post ainda</h3>
-            <p className="text-muted-foreground mb-6">
+            <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
+              <Users className="h-8 w-8 text-muted-foreground/50" />
+            </div>
+            <h3 className="text-base font-medium mb-1.5 text-foreground/80">Nenhum post ainda</h3>
+            <p className="text-sm text-muted-foreground mb-6 text-center">
               Seja o primeiro a compartilhar sua jornada!
             </p>
-            <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Button 
+              onClick={() => setIsCreateModalOpen(true)}
+              size="sm"
+              className="rounded-full"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Criar Primeiro Post
             </Button>
           </motion.div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {posts.map((post, index) => (
               <motion.div
                 key={post.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: index * 0.05 }}
               >
                 <PostCard
                   post={post}

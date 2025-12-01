@@ -31,33 +31,33 @@ export function PostCard({ post, currentUserId, onLike }: PostCardProps) {
   });
 
   return (
-    <div className="glass rounded-3xl overflow-hidden">
+    <div className="glass rounded-2xl overflow-hidden">
       {/* Header */}
-      <div className="p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-12 w-12 border-2 border-primary/20">
+      <div className="p-3 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <Avatar className="h-10 w-10 border border-border/50">
             <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user_id}`} />
-            <AvatarFallback className="bg-primary/10 text-primary">
+            <AvatarFallback className="bg-muted text-foreground text-sm">
               {username[0]}
             </AvatarFallback>
           </Avatar>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-foreground">{username}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-medium text-sm text-foreground">{username}</span>
               <Badge 
                 variant="secondary" 
-                className="text-xs px-2 py-0.5 bg-gradient-primary text-white border-0"
+                className="text-[10px] px-1.5 py-0 h-4 bg-gradient-primary text-white border-0"
               >
-                Nível {userLevel}
+                Nv. {userLevel}
               </Badge>
             </div>
-            <span className="text-sm text-muted-foreground">{timeAgo}</span>
+            <span className="text-xs text-muted-foreground">{timeAgo}</span>
           </div>
         </div>
       </div>
 
       {/* Image */}
-      <div className="relative aspect-square bg-muted">
+      <div className="relative aspect-square bg-muted/30">
         <img
           src={post.image_url}
           alt="Post"
@@ -66,30 +66,30 @@ export function PostCard({ post, currentUserId, onLike }: PostCardProps) {
       </div>
 
       {/* Actions & Caption */}
-      <div className="p-4 space-y-3">
+      <div className="p-3 space-y-2">
         {/* Like Button */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => onLike(post.id)}
-            className="press-effect transition-transform"
+            className="press-effect transition-transform -ml-1"
           >
             <Heart
               className={cn(
-                'h-7 w-7 transition-colors',
+                'h-6 w-6 transition-colors',
                 hasLiked ? 'fill-rose text-rose' : 'text-foreground'
               )}
             />
           </button>
-          <span className="text-sm font-semibold text-foreground">
+          <span className="text-xs font-medium text-foreground">
             {likeCount} {likeCount === 1 ? 'curtida' : 'curtidas'}
           </span>
         </div>
 
         {/* Caption */}
         {post.caption && (
-          <div className="text-sm">
-            <span className="font-semibold text-foreground mr-2">{username}</span>
-            <span className="text-foreground">{post.caption}</span>
+          <div className="text-sm leading-relaxed">
+            <span className="font-medium text-foreground mr-1.5">{username}</span>
+            <span className="text-foreground/90">{post.caption}</span>
           </div>
         )}
       </div>
