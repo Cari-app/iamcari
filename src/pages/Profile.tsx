@@ -38,6 +38,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { FitCoinIcon } from '@/components/FitCoinIcon';
 
 const menuItems = [
   { icon: Bell, label: 'Notificações', action: 'toggle' },
@@ -378,8 +379,14 @@ export default function Profile() {
                   <p className="font-semibold text-foreground">
                     {profile?.tier === 'free' ? 'Plano Gratuito' : profile?.tier === 'premium' ? 'Plano Premium' : 'Plano Pro'}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    {profile?.token_balance || 0} tokens restantes
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <FitCoinIcon size={14} />
+                    <p className="text-sm text-muted-foreground">
+                      {profile?.token_balance || 0} FitCoins
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground/70 mt-0.5 italic">
+                    Use FitCoins para análises de IA avançadas
                   </p>
                 </div>
               </div>
@@ -686,7 +693,7 @@ export default function Profile() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-rose-500 mt-0.5">•</span>
-                  <span>Tokens e configurações não poderão ser recuperados</span>
+                  <span>FitCoins e configurações não poderão ser recuperados</span>
                 </li>
               </ul>
             </div>

@@ -338,7 +338,7 @@ export function MealInputDialog({
               <div className="flex items-center gap-2 p-3 rounded-xl bg-violet-500/10 border border-violet-500/20">
                 <Sparkles className="h-4 w-4 text-violet-400 flex-shrink-0" />
                 <p className="text-xs text-violet-300">
-                  Esta funcionalidade consome tokens de IA
+                  Esta funcionalidade consome FitCoins de IA
                 </p>
               </div>
 

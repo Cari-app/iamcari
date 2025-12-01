@@ -4,6 +4,7 @@ import { X, Camera, Pencil, Heart, Wind } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import { FitCoinIcon } from '@/components/FitCoinIcon';
 
 interface MealLogModalProps {
   isOpen: boolean;
@@ -229,7 +230,7 @@ export function MealLogModal({ isOpen, onClose }: MealLogModalProps) {
                         <div className="text-left">
                           <p className="font-medium text-foreground">Foto com IA</p>
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
-                            <span className="text-primary">💎</span> 1 Token
+                            <FitCoinIcon size={14} /> 1 FitCoin
                           </p>
                         </div>
                       </Button>
