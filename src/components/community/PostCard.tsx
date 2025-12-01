@@ -18,7 +18,7 @@ export function PostCard({ post, currentUserId, onLike }: PostCardProps) {
     : false;
   
   const likeCount = post._count?.likes || 0;
-  const userLevel = post.user_stats[0]?.level || 1;
+  const userLevel = post.profiles?.user_stats?.[0]?.current_level || 1;
   
   // Get username from whatsapp_number or use fallback
   const username = post.profiles?.whatsapp_number 
