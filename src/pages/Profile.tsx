@@ -90,6 +90,15 @@ export default function Profile() {
   
   // Stats
   const [totalFastingHours, setTotalFastingHours] = useState(0);
+  
+  // Active Diet
+  const [activeDiet, setActiveDiet] = useState<{
+    id: string;
+    name: string;
+    icon: string;
+    short_description: string;
+    color_theme: string;
+  } | null>(null);
 
   // Body Stats Dialog
   const [isBodyStatsOpen, setIsBodyStatsOpen] = useState(false);
@@ -114,7 +123,7 @@ export default function Profile() {
       // Fetch profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('full_name, nickname, avatar_url, weight, height')
+        .select('full_name, nickname, avatar_url, weight, height, active_diet')
         .eq('id', user.id)
         .single();
 
@@ -124,6 +133,19 @@ export default function Profile() {
         setAvatarUrl(profileData.avatar_url);
         setBodyWeight(profileData.weight || 0);
         setBodyHeight(profileData.height || 0);
+        
+        // Fetch active diet details if exists
+        if (profileData.active_diet) {
+          const { data: dietData } = await supabase
+            .from('diet_types')
+            .select('id, name, icon, short_description, color_theme')
+            .eq('id', profileData.active_diet)
+            .single();
+          
+          if (dietData) {
+            setActiveDiet(dietData);
+          }
+        }
       }
 
       // Fetch total fasting hours
@@ -521,6 +543,68 @@ export default function Profile() {
               </CardContent>
             </Card>
           </motion.div>
+
+          {/* Active Diet Card */}
+          {activeDiet && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+            >
+              <Card className="glass border-teal-500/30 overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+                      Sua Dieta Ativa
+                    </h2>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate('/diet-result')}
+                      className="h-7 text-xs"
+                    >
+                      Ver detalhes
+                      <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    {/* Diet Icon */}
+                    <div className={cn(
+                      "w-16 h-16 rounded-2xl flex items-center justify-center text-3xl",
+                      "border-2",
+                      activeDiet.color_theme === 'violet' && "bg-violet-500/10 border-violet-500/50",
+                      activeDiet.color_theme === 'teal' && "bg-teal-500/10 border-teal-500/50",
+                      activeDiet.color_theme === 'blue' && "bg-blue-500/10 border-blue-500/50",
+                      activeDiet.color_theme === 'red' && "bg-red-500/10 border-red-500/50",
+                      activeDiet.color_theme === 'orange' && "bg-orange-500/10 border-orange-500/50",
+                      activeDiet.color_theme === 'green' && "bg-green-500/10 border-green-500/50",
+                    )}>
+                      {activeDiet.icon}
+                    </div>
+
+                    {/* Diet Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className={cn(
+                        "text-lg font-bold mb-1",
+                        activeDiet.color_theme === 'violet' && "text-violet-400",
+                        activeDiet.color_theme === 'teal' && "text-teal-400",
+                        activeDiet.color_theme === 'blue' && "text-blue-400",
+                        activeDiet.color_theme === 'red' && "text-red-400",
+                        activeDiet.color_theme === 'orange' && "text-orange-400",
+                        activeDiet.color_theme === 'green' && "text-green-400",
+                      )}>
+                        {activeDiet.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {activeDiet.short_description}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           {/* Section B: Recent Achievements (Horizontal Carousel) */}
           <motion.div
