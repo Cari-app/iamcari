@@ -8,11 +8,16 @@ import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
+interface QuestionOption {
+  label: string;
+  value: string;
+}
+
 interface Question {
   id: number;
   question: string;
   dbColumn: string;
-  options: string[];
+  options: QuestionOption[];
   icon: LucideIcon;
   color: string;
 }
@@ -22,7 +27,12 @@ const questions: Question[] = [
     id: 1,
     question: "Como você come?",
     dbColumn: "eating_habit",
-    options: ["Rápido/Impulso", "Por Ansiedade", "Só com Fome", "Disciplinado", "Esqueço de comer"],
+    options: [
+      { label: "Como rápido/impuso", value: "Rápido/Impulso" },
+      { label: "Como por ansiedade", value: "Como por ansiedade" },
+      { label: "Tenho disciplina", value: "Tenho disciplina" },
+      { label: "Esqueço de comer", value: "Esquece de comer" }
+    ],
     icon: Zap,
     color: "text-violet-500"
   },
@@ -30,7 +40,10 @@ const questions: Question[] = [
     id: 2,
     question: "Sente fome à noite?",
     dbColumn: "night_hunger",
-    options: ["Sempre", "Às vezes", "Quase nunca"],
+    options: [
+      { label: "Sim, sempre", value: "Sim, sempre" },
+      { label: "Quase nunca", value: "Quase nunca" }
+    ],
     icon: Moon,
     color: "text-indigo-500"
   },
@@ -38,7 +51,10 @@ const questions: Question[] = [
     id: 3,
     question: "Nível de disciplina?",
     dbColumn: "discipline_level",
-    options: ["Baixo", "Médio", "Alto"],
+    options: [
+      { label: "Baixo", value: "Baixo" },
+      { label: "Alto", value: "Alto" }
+    ],
     icon: Target,
     color: "text-teal-500"
   },
@@ -46,7 +62,11 @@ const questions: Question[] = [
     id: 4,
     question: "Tempo para cozinhar?",
     dbColumn: "cooking_time",
-    options: ["Zero", "Pouco", "Médio", "Bastante"],
+    options: [
+      { label: "Zero", value: "Zero" },
+      { label: "Pouco", value: "Pouco" },
+      { label: "Bastante", value: "Bastante" }
+    ],
     icon: ChefHat,
     color: "text-amber-500"
   },
@@ -54,7 +74,10 @@ const questions: Question[] = [
     id: 5,
     question: "Gosta de carboidratos?",
     dbColumn: "carb_preference",
-    options: ["Amo", "Gosto", "Tanto faz", "Evito"],
+    options: [
+      { label: "Amo 🍝", value: "Amo" },
+      { label: "Não faço questão", value: "Não faço questão" }
+    ],
     icon: Wheat,
     color: "text-yellow-500"
   },
@@ -62,7 +85,10 @@ const questions: Question[] = [
     id: 6,
     question: "Consumo de carne?",
     dbColumn: "meat_consumption",
-    options: ["Muito", "Normal", "Pouco", "Não como"],
+    options: [
+      { label: "Muito 🥩", value: "Muito" },
+      { label: "Não como (Veg)", value: "Não como" }
+    ],
     icon: Beef,
     color: "text-rose-500"
   },
@@ -70,7 +96,10 @@ const questions: Question[] = [
     id: 7,
     question: "Experiência com jejum?",
     dbColumn: "fasting_history",
-    options: ["Horrível", "Difícil", "Fácil", "Nunca tentei"],
+    options: [
+      { label: "Horrível", value: "Horrível" },
+      { label: "Fácil", value: "Fácil" }
+    ],
     icon: Clock,
     color: "text-violet-500"
   },
@@ -78,7 +107,10 @@ const questions: Question[] = [
     id: 8,
     question: "Come mais por...",
     dbColumn: "eating_trigger",
-    options: ["Fome", "Ansiedade", "Rotina", "Tédio"],
+    options: [
+      { label: "Tédio", value: "Tédio" },
+      { label: "Fome", value: "Fome" }
+    ],
     icon: Heart,
     color: "text-pink-500"
   },
@@ -86,7 +118,11 @@ const questions: Question[] = [
     id: 9,
     question: "Objetivo principal?",
     dbColumn: "main_goal",
-    options: ["Emagrecer Rápido", "Saúde", "Energia"],
+    options: [
+      { label: "Emagrecer rápido", value: "Emagrecer rápido" },
+      { label: "Saúde", value: "Saúde" },
+      { label: "Energia", value: "Energia" }
+    ],
     icon: TrendingUp,
     color: "text-teal-500"
   },
@@ -94,7 +130,10 @@ const questions: Question[] = [
     id: 10,
     question: "Preferência de rotina?",
     dbColumn: "structure_preference",
-    options: ["Regras Simples", "Liberdade", "Rotina Fixa"],
+    options: [
+      { label: "Liberdade", value: "Liberdade" },
+      { label: "Regras simples", value: "Regras simples" }
+    ],
     icon: Calendar,
     color: "text-blue-500"
   },
@@ -102,7 +141,10 @@ const questions: Question[] = [
     id: 11,
     question: "Quantas refeições por dia?",
     dbColumn: "meals_per_day",
-    options: ["1-2", "3-4", "5+"],
+    options: [
+      { label: "1 a 2", value: "1 a 2" },
+      { label: "5 ou mais", value: "5 ou mais" }
+    ],
     icon: UtensilsCrossed,
     color: "text-orange-500"
   },
@@ -110,7 +152,10 @@ const questions: Question[] = [
     id: 12,
     question: "Alguma restrição alimentar?",
     dbColumn: "dietary_restrictions",
-    options: ["Sem Lactose", "Sem Glúten", "Vegetariano", "Nenhuma"],
+    options: [
+      { label: "Vegetariano", value: "Vegetariano" },
+      { label: "Nenhuma", value: "Nenhuma" }
+    ],
     icon: ShieldAlert,
     color: "text-emerald-500"
   }
@@ -126,10 +171,10 @@ export default function NutritionQuiz() {
   const currentQuestion = questions[currentStep - 1];
   const progressPercentage = (currentStep / questions.length) * 100;
 
-  const handleOptionSelect = (option: string) => {
+  const handleOptionSelect = (optionValue: string) => {
     const newAnswers = {
       ...answers,
-      [currentQuestion.dbColumn]: option
+      [currentQuestion.dbColumn]: optionValue
     };
     setAnswers(newAnswers);
 
@@ -176,10 +221,10 @@ export default function NutritionQuiz() {
         description: 'A IA está analisando seu perfil...',
       });
 
-      // Wait 2 seconds for DB trigger to process
+      // Wait 1 second for DB trigger to process
       setTimeout(() => {
         navigate('/diet-result');
-      }, 2000);
+      }, 1000);
     } catch (error) {
       console.error('Error submitting nutrition assessment:', error);
       toast({
@@ -254,11 +299,11 @@ export default function NutritionQuiz() {
                 {/* Options */}
                 <div className="space-y-2.5">
                   {currentQuestion.options.map((option) => {
-                    const isSelected = answers[currentQuestion.dbColumn] === option;
+                    const isSelected = answers[currentQuestion.dbColumn] === option.value;
                     return (
                       <motion.button
-                        key={option}
-                        onClick={() => handleOptionSelect(option)}
+                        key={option.value}
+                        onClick={() => handleOptionSelect(option.value)}
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}
                         className={`w-full p-4 rounded-2xl border transition-all text-left press-effect ${
@@ -270,7 +315,7 @@ export default function NutritionQuiz() {
                         <span className={`text-base font-medium ${
                           isSelected ? 'text-primary' : 'text-foreground'
                         }`}>
-                          {option}
+                          {option.label}
                         </span>
                       </motion.button>
                     );
@@ -304,10 +349,10 @@ export default function NutritionQuiz() {
                   <Loader2 className="h-10 w-10 text-primary animate-spin" />
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">
-                  Analisando seu perfil...
+                  A I.A. está cruzando seus dados...
                 </h2>
                 <p className="text-muted-foreground">
-                  A IA está processando suas respostas
+                  Definindo a melhor estratégia para você
                 </p>
               </motion.div>
             )}
