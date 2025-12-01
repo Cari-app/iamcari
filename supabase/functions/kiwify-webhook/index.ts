@@ -75,7 +75,7 @@ serve(async (req) => {
 
     // CASO A: Assinatura Premium
     // Substitua 'SEU_PRODUCT_ID_PREMIUM' pelo ID real do produto na Kiwify
-    if (productId === 'SEU_PRODUCT_ID_PREMIUM') { 
+    if (productId === 'd426cbe0-ce60-11f0-9119-9fe5587bc657') {
       console.log('💎 Ativando assinatura premium...')
       
       // Calcula expiração (30 dias)
@@ -103,7 +103,7 @@ serve(async (req) => {
 
     // CASO B: Pacote de Tokens (Compra Avulsa)
     // Substitua 'SEU_PRODUCT_ID_TOKENS' pelo ID real do produto na Kiwify
-    if (productId === 'SEU_PRODUCT_ID_TOKENS') { 
+    if (productId === 'd426cbe0-ce60-11f0-9119-9fe5587bc657') {
       console.log('🪙 Adicionando tokens...')
       
       const tokensToAdd = 20 // Quantidade de tokens a adicionar
