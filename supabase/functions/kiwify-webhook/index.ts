@@ -106,7 +106,7 @@ serve(async (req) => {
     if (productId === 'd426cbe0-ce60-11f0-9119-9fe5587bc657') {
       console.log('🪙 Adicionando tokens...')
       
-      const tokensToAdd = 20 // Quantidade de tokens a adicionar
+      const tokensToAdd = 80 // Quantidade de tokens a adicionar
       const newBalance = (profile.token_balance || 0) + tokensToAdd
       
       // Atualiza saldo
