@@ -11,7 +11,7 @@ import { BentoStats } from '@/components/dashboard/BentoStats';
 import { useFastingTimer } from '@/hooks/useFastingTimer';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Play, Pause, RotateCcw, Flame, Zap, Sparkles, Target } from 'lucide-react';
+import { Play, Pause, RotateCcw, Flame, Zap, Sparkles, Target, MapPin, UtensilsCrossed, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -451,6 +451,50 @@ export default function Dashboard() {
                 </div>
               </>
             )}
+          </motion.div>
+
+          {/* Feature Navigation Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="grid grid-cols-3 gap-3"
+          >
+            <button
+              onClick={() => toast({ title: 'Em breve', description: 'Mapeamento Alimentar estará disponível em breve!' })}
+              className="p-4 rounded-2xl bg-card border border-border hover:bg-accent/50 transition-colors press-effect text-center"
+            >
+              <div className="flex justify-center mb-2">
+                <MapPin className="h-6 w-6 text-violet-500" />
+              </div>
+              <p className="text-xs text-foreground font-medium leading-tight">
+                Mapeamento<br/>Alimentar
+              </p>
+            </button>
+
+            <button
+              onClick={() => toast({ title: 'Em breve', description: 'Explorar Dietas estará disponível em breve!' })}
+              className="p-4 rounded-2xl bg-card border border-border hover:bg-accent/50 transition-colors press-effect text-center"
+            >
+              <div className="flex justify-center mb-2">
+                <UtensilsCrossed className="h-6 w-6 text-teal-500" />
+              </div>
+              <p className="text-xs text-foreground font-medium leading-tight">
+                Explorar<br/>Dietas
+              </p>
+            </button>
+
+            <button
+              onClick={() => toast({ title: 'Em breve', description: 'Jejum Prime estará disponível em breve!' })}
+              className="p-4 rounded-2xl bg-card border border-border hover:bg-accent/50 transition-colors press-effect text-center"
+            >
+              <div className="flex justify-center mb-2">
+                <Clock className="h-6 w-6 text-violet-500" />
+              </div>
+              <p className="text-xs text-foreground font-medium leading-tight">
+                Jejum<br/>Prime
+              </p>
+            </button>
           </motion.div>
         </div>
       </main>
