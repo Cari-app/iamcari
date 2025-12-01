@@ -7,7 +7,9 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from '@/components/ui/drawer';
+import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import { useState, useEffect } from 'react';
 
 interface Protocol {
   hours: number;
@@ -24,7 +26,7 @@ const PROTOCOLS: Protocol[] = [
 
 interface ProtocolSelectorProps {
   selectedHours: number;
-  onSelect: (hours: number) => void;
+  onSelect: (hours: number, isCustom?: boolean) => void;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   disabled?: boolean;
@@ -37,6 +39,29 @@ export function ProtocolSelector({
   onOpenChange,
   disabled,
 }: ProtocolSelectorProps) {
+  const [customHours, setCustomHours] = useState(selectedHours);
+  const [isCustomMode, setIsCustomMode] = useState(false);
+  
+  // Check if selected hours matches a preset
+  const isPresetHours = PROTOCOLS.some(p => p.hours === selectedHours);
+  
+  useEffect(() => {
+    if (!isPresetHours && selectedHours >= 10 && selectedHours <= 48) {
+      setIsCustomMode(true);
+      setCustomHours(selectedHours);
+    }
+  }, [selectedHours, isPresetHours]);
+
+  const handleSliderChange = (value: number[]) => {
+    setCustomHours(value[0]);
+    setIsCustomMode(true);
+  };
+
+  const handleCustomConfirm = () => {
+    onSelect(customHours, true);
+    onOpenChange(false);
+  };
+  
   return (
     <>
       <Badge
@@ -66,13 +91,14 @@ export function ProtocolSelector({
               <button
                 key={protocol.hours}
                 onClick={() => {
-                  onSelect(protocol.hours);
+                  setIsCustomMode(false);
+                  onSelect(protocol.hours, false);
                   onOpenChange(false);
                 }}
                 className={cn(
                   "w-full p-4 rounded-2xl flex items-center justify-between transition-all",
                   "border bg-card hover:bg-accent/50",
-                  selectedHours === protocol.hours
+                  selectedHours === protocol.hours && !isCustomMode
                     ? "border-primary bg-primary/10"
                     : "border-border"
                 )}
@@ -80,7 +106,7 @@ export function ProtocolSelector({
                 <div className="flex items-center gap-4">
                   <div className={cn(
                     "w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg",
-                    selectedHours === protocol.hours
+                    selectedHours === protocol.hours && !isCustomMode
                       ? "gradient-primary text-white"
                       : "bg-muted text-muted-foreground"
                   )}>
@@ -94,13 +120,71 @@ export function ProtocolSelector({
                   </div>
                 </div>
                 
-                {selectedHours === protocol.hours && (
+                {selectedHours === protocol.hours && !isCustomMode && (
                   <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center">
                     <Check className="h-4 w-4 text-white" />
                   </div>
                 )}
               </button>
             ))}
+
+            {/* Custom Duration Section */}
+            <div
+              className={cn(
+                "w-full p-6 rounded-2xl border transition-all",
+                isCustomMode
+                  ? "border-primary bg-primary/10"
+                  : "border-border bg-card"
+              )}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="font-semibold text-foreground">Personalizado</p>
+                  <p className="text-sm text-muted-foreground">
+                    Defina sua própria meta
+                  </p>
+                </div>
+                {isCustomMode && (
+                  <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center">
+                    <Check className="h-4 w-4 text-white" />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div className="text-center">
+                  <p className="text-3xl font-bold gradient-text tabular-nums">
+                    ⏱️ {customHours}h
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Meta de jejum
+                  </p>
+                </div>
+
+                <Slider
+                  value={[customHours]}
+                  onValueChange={handleSliderChange}
+                  min={10}
+                  max={48}
+                  step={0.5}
+                  className="w-full"
+                />
+
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>10h</span>
+                  <span>48h</span>
+                </div>
+
+                {isCustomMode && (
+                  <button
+                    onClick={handleCustomConfirm}
+                    className="w-full py-2 rounded-xl gradient-primary text-white font-medium text-sm press-effect"
+                  >
+                    Confirmar {customHours}h
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </DrawerContent>
       </Drawer>
