@@ -57,6 +57,7 @@ export type Database = {
           id: string
           target_calories: number | null
           target_weight: number | null
+          target_weight_kg: number | null
           tdee: number | null
           user_id: string
           weight: number
@@ -73,6 +74,7 @@ export type Database = {
           id?: string
           target_calories?: number | null
           target_weight?: number | null
+          target_weight_kg?: number | null
           tdee?: number | null
           user_id: string
           weight: number
@@ -89,6 +91,7 @@ export type Database = {
           id?: string
           target_calories?: number | null
           target_weight?: number | null
+          target_weight_kg?: number | null
           tdee?: number | null
           user_id?: string
           weight?: number
@@ -154,32 +157,50 @@ export type Database = {
       }
       meal_logs: {
         Row: {
+          ai_analysis: string | null
           calories: number | null
           created_at: string | null
           description: string | null
+          entry_type: string | null
+          food_name: string | null
+          hunger_level: string | null
           id: string
           image_url: string | null
           is_emotional: boolean | null
+          metric_value: number | null
+          mood_tag: string | null
           status: string | null
           user_id: string
         }
         Insert: {
+          ai_analysis?: string | null
           calories?: number | null
           created_at?: string | null
           description?: string | null
+          entry_type?: string | null
+          food_name?: string | null
+          hunger_level?: string | null
           id?: string
           image_url?: string | null
           is_emotional?: boolean | null
+          metric_value?: number | null
+          mood_tag?: string | null
           status?: string | null
           user_id: string
         }
         Update: {
+          ai_analysis?: string | null
           calories?: number | null
           created_at?: string | null
           description?: string | null
+          entry_type?: string | null
+          food_name?: string | null
+          hunger_level?: string | null
           id?: string
           image_url?: string | null
           is_emotional?: boolean | null
+          metric_value?: number | null
+          mood_tag?: string | null
           status?: string | null
           user_id?: string
         }
@@ -299,6 +320,27 @@ export type Database = {
           updated_at?: string | null
           weight?: number | null
           whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_code: string
+          id: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_code: string
+          id?: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_code?: string
+          id?: string
+          unlocked_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
