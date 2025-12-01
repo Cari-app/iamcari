@@ -176,6 +176,14 @@
     background: var(--gradient-warm);
   }
 
+  /* Gradient Text */
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
   /* Tabular Numbers for Timers */
   .tabular-nums {
     font-variant-numeric: tabular-nums;

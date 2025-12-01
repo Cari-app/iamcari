@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProtocolOpen, setIsProtocolOpen] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState(16);
+  const [isCustomProtocol, setIsCustomProtocol] = useState(false);
   
   // Sync selected protocol with profile on mount
   useEffect(() => {
@@ -139,8 +140,9 @@ export default function Dashboard() {
     fetchDashboardData();
   }, [user]);
 
-  const handleProtocolSelect = async (hours: number) => {
+  const handleProtocolSelect = async (hours: number, isCustom: boolean = false) => {
     setSelectedProtocol(hours);
+    setIsCustomProtocol(isCustom);
     
     if (!user) return;
     
@@ -337,7 +339,7 @@ export default function Dashboard() {
           >
             {!isActive ? (
               <Button
-                onClick={() => startFasting(selectedProtocol)}
+                onClick={() => startFasting(selectedProtocol, isCustomProtocol ? 'custom' : 'standard')}
                 className="flex-1 h-14 rounded-2xl gradient-primary text-white font-semibold text-base press-effect shadow-violet"
               >
                 <Play className="mr-2 h-5 w-5" />
@@ -356,7 +358,7 @@ export default function Dashboard() {
                 <Button
                   onClick={() => {
                     stopFasting();
-                    setTimeout(() => startFasting(selectedProtocol), 100);
+                    setTimeout(() => startFasting(selectedProtocol, isCustomProtocol ? 'custom' : 'standard'), 100);
                   }}
                   variant="outline"
                   className="h-14 w-14 rounded-2xl press-effect"

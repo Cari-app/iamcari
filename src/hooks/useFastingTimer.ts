@@ -131,7 +131,7 @@ export function useFastingTimer() {
   }, [session, calculateState]);
 
 
-  const startFasting = useCallback(async (targetHours: number = 16) => {
+  const startFasting = useCallback(async (targetHours: number = 16, protocolType: string = 'standard') => {
     if (!user) return;
 
     const { data, error } = await supabase
@@ -140,6 +140,7 @@ export function useFastingTimer() {
         user_id: user.id,
         start_time: new Date().toISOString(),
         target_hours: targetHours,
+        protocol_type: protocolType,
       })
       .select()
       .single();
