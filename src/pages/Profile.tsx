@@ -334,11 +334,11 @@ export default function Profile() {
   const currentXP = stats?.current_cycle_xp || 0;
   const xpProgress = (currentXP / 1000) * 100;
 
-  // Get recent/next achievements for carousel (unlocked or next 3 locked)
+  // Get recent/next achievements (prioritize unlocked, then locked)
   const recentAchievements = [
-    ...achievements.filter(a => isAchievementUnlocked(a.code)).slice(-3),
-    ...achievements.filter(a => !isAchievementUnlocked(a.code)).slice(0, 3),
-  ].slice(0, 6);
+    ...achievements.filter(a => isAchievementUnlocked(a.code)),
+    ...achievements.filter(a => !isAchievementUnlocked(a.code)),
+  ].slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background pb-24 pt-20">
@@ -473,8 +473,8 @@ export default function Profile() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {recentAchievements.slice(0, 4).map((achievement) => {
+            <div className="grid grid-cols-4 gap-2">
+              {recentAchievements.map((achievement) => {
                 const unlocked = isAchievementUnlocked(achievement.code);
                 
                 return (
@@ -482,8 +482,8 @@ export default function Profile() {
                     key={achievement.id}
                     onClick={() => handleAchievementClick(achievement)}
                     className={cn(
-                      "relative h-28 p-3 rounded-xl border transition-all",
-                      "flex flex-col items-center justify-center gap-2",
+                      "relative h-28 p-2 rounded-xl border transition-all",
+                      "flex flex-col items-center justify-center gap-1",
                       unlocked
                         ? "bg-gradient-to-br from-teal-500/20 to-violet-500/20 border-primary/50 shadow-lg shadow-primary/10 hover:shadow-primary/20"
                         : "bg-white/5 border-white/10 hover:border-white/20"
@@ -498,7 +498,7 @@ export default function Profile() {
 
                     {/* Icon */}
                     <div className={cn(
-                      "text-3xl transition-all",
+                      "text-2xl transition-all",
                       !unlocked && "grayscale opacity-50"
                     )}>
                       {achievement.icon || '🏆'}
@@ -506,7 +506,7 @@ export default function Profile() {
 
                     {/* Name */}
                     <p className={cn(
-                      "text-xs font-medium text-center line-clamp-2 leading-tight w-full px-1",
+                      "text-[10px] font-medium text-center line-clamp-2 leading-tight w-full",
                       unlocked ? "text-foreground" : "text-muted-foreground"
                     )}>
                       {achievement.name}
