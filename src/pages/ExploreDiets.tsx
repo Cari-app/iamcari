@@ -81,7 +81,7 @@ export default function ExploreDiets() {
   };
 
   const handleDietClick = (dietId: string) => {
-    navigate(`/diet-result?diet=${dietId}`);
+    navigate(`/diet-detail?diet=${dietId}`);
   };
 
   return (
