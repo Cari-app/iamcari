@@ -1,12 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { Home, BookOpen, User, BarChart3, Users } from 'lucide-react';
+import { Home, BookOpen, User, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 const navItems = [
   { icon: Home, label: 'Início', path: '/dashboard' },
   { icon: BookOpen, label: 'Diário', path: '/diary' },
-  { icon: Users, label: 'Comunidade', path: '/community' },
   { icon: BarChart3, label: 'Progresso', path: '/progress' },
   { icon: User, label: 'Perfil', path: '/profile' },
 ];
