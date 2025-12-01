@@ -19,6 +19,13 @@ import {
   LogOut,
   Moon,
   Sun,
+  Scale,
+  Crown,
+  Bell,
+  HelpCircle,
+  Shield,
+  ChevronRight,
+  Gem,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -35,6 +42,17 @@ import {
 } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
 import { FitCoinIcon } from '@/components/FitCoinIcon';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Achievement {
   id: number;
@@ -71,6 +89,12 @@ export default function Profile() {
   // Stats
   const [totalFastingHours, setTotalFastingHours] = useState(0);
 
+  // Body Stats Dialog
+  const [isBodyStatsOpen, setIsBodyStatsOpen] = useState(false);
+  const [bodyWeight, setBodyWeight] = useState<number>(0);
+  const [bodyHeight, setBodyHeight] = useState<number>(0);
+  const [savingBodyStats, setSavingBodyStats] = useState(false);
+
   // Fetch profile data
   useEffect(() => {
     if (!user) {
@@ -82,13 +106,15 @@ export default function Profile() {
       // Fetch profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('full_name, avatar_url')
+        .select('full_name, avatar_url, weight, height')
         .eq('id', user.id)
         .single();
 
       if (profileData) {
         setFullName(profileData.full_name || user.email?.split('@')[0] || 'Jogador');
         setAvatarUrl(profileData.avatar_url);
+        setBodyWeight(profileData.weight || 0);
+        setBodyHeight(profileData.height || 0);
       }
 
       // Fetch total fasting hours
@@ -232,6 +258,70 @@ export default function Profile() {
     return 'Iniciante';
   };
 
+  const handleEditBodyStats = () => {
+    setIsBodyStatsOpen(true);
+  };
+
+  const handleSaveBodyStats = async () => {
+    if (!user) return;
+
+    setSavingBodyStats(true);
+
+    try {
+      // Update profile basic info
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          weight: bodyWeight,
+          height: bodyHeight,
+        })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      // Create new assessment to recalculate BMR/TDEE via DB trigger
+      const { data: latestAssessment } = await supabase
+        .from('assessments')
+        .select('gender, age, activity_level, goal_type, goal_speed, target_weight_kg')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const { error: assessmentError } = await supabase
+        .from('assessments')
+        .insert({
+          user_id: user.id,
+          gender: latestAssessment?.gender || 'male',
+          age: latestAssessment?.age || 30,
+          height_cm: bodyHeight,
+          weight_kg: bodyWeight,
+          activity_level: latestAssessment?.activity_level || 'moderate',
+          goal_type: latestAssessment?.goal_type || 'maintain',
+          goal_speed: latestAssessment?.goal_speed || null,
+          target_weight_kg: latestAssessment?.target_weight_kg || null,
+        });
+
+      if (assessmentError) throw assessmentError;
+
+      setIsBodyStatsOpen(false);
+
+      toast({
+        title: '✅ Dados atualizados',
+        description: 'Nova avaliação metabólica calculada',
+      });
+    } catch (error) {
+      console.error('Error updating body stats:', error);
+      toast({
+        title: '❌ Erro ao salvar',
+        description: 'Não foi possível atualizar seus dados',
+        variant: 'destructive',
+      });
+    } finally {
+      setSavingBodyStats(false);
+    }
+  };
+
   if (loading || statsLoading) {
     return (
       <div className="min-h-screen bg-background pb-24 pt-20 flex items-center justify-center">
@@ -244,217 +334,291 @@ export default function Profile() {
   const currentXP = stats?.current_cycle_xp || 0;
   const xpProgress = (currentXP / 1000) * 100;
 
+  // Get recent/next achievements for carousel (unlocked or next 3 locked)
+  const recentAchievements = [
+    ...achievements.filter(a => isAchievementUnlocked(a.code)).slice(-3),
+    ...achievements.filter(a => !isAchievementUnlocked(a.code)).slice(0, 3),
+  ].slice(0, 6);
+
   return (
     <div className="min-h-screen bg-background pb-24 pt-20">
       <Navbar />
       
       <main className="px-4 py-6">
-        <div className="mx-auto max-w-2xl space-y-8">
-          {/* Hero Section - The Player */}
+        <div className="mx-auto max-w-lg space-y-6">
+          {/* Section A: The Player Card (Compact - Max 35% height) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center space-y-4"
           >
-            {/* Avatar with Level Badge */}
-            <div className="relative inline-block">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarUpload}
-                className="hidden"
-              />
-              
-              <div className="relative w-32 h-32 mx-auto group">
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt="Avatar"
-                    className="w-32 h-32 rounded-full object-cover border-4 border-primary shadow-violet"
-                  />
-                ) : (
-                  <div className="w-32 h-32 rounded-full gradient-primary flex items-center justify-center border-4 border-primary shadow-violet">
-                    <User className="h-16 w-16 text-white" />
+            <Card className="glass border-primary/30 overflow-hidden">
+              <CardContent className="p-5 space-y-4">
+                {/* Top Row: Avatar + Info */}
+                <div className="flex items-start gap-4">
+                  {/* Avatar with Level Badge */}
+                  <div className="relative flex-shrink-0">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                    
+                    <div className="relative w-20 h-20 group">
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt="Avatar"
+                          className="w-20 h-20 rounded-2xl object-cover border-2 border-primary/50"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-2xl gradient-primary flex items-center justify-center border-2 border-primary/50">
+                          <User className="h-10 w-10 text-white" />
+                        </div>
+                      )}
+                      
+                      <button
+                        onClick={handleAvatarClick}
+                        disabled={uploadingAvatar}
+                        className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                      >
+                        {uploadingAvatar ? (
+                          <Loader2 className="h-6 w-6 text-white animate-spin" />
+                        ) : (
+                          <Camera className="h-6 w-6 text-white" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Level Badge (Corner) */}
+                    <div className="absolute -bottom-1 -right-1">
+                      <Badge className="px-2 py-0.5 gradient-primary text-white font-bold text-xs">
+                        Lvl {currentLevel}
+                      </Badge>
+                    </div>
                   </div>
-                )}
-                
-                <button
-                  onClick={handleAvatarClick}
-                  disabled={uploadingAvatar}
-                  className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-                >
-                  {uploadingAvatar ? (
-                    <Loader2 className="h-8 w-8 text-white animate-spin" />
-                  ) : (
-                    <Camera className="h-8 w-8 text-white" />
-                  )}
-                </button>
-              </div>
 
-              {/* Level Badge */}
-              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-                <Badge className="px-4 py-1.5 gradient-primary text-white font-bold text-lg shadow-violet border-2 border-background">
-                  Nível {currentLevel}
-                </Badge>
-              </div>
-            </div>
+                  {/* Name, Title & XP */}
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div>
+                      <h1 className="text-xl font-bold text-foreground truncate">
+                        {fullName}
+                      </h1>
+                      <p className="text-sm text-muted-foreground">
+                        {getPlayerTitle()}
+                      </p>
+                    </div>
+                    
+                    {/* XP Progress */}
+                    <div className="space-y-1">
+                      <Progress value={xpProgress} className="h-2" />
+                      <p className="text-xs text-muted-foreground">
+                        {currentXP} / 1000 XP
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Name & Title */}
-            <div className="space-y-1 mt-6">
-              <h1 className="text-3xl font-bold text-foreground">
-                {fullName}
-              </h1>
-              <p className="text-lg text-muted-foreground font-medium">
-                {getPlayerTitle()}
-              </p>
-            </div>
+                {/* Stats Row */}
+                <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border/50">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center mb-1">
+                      <Flame className="h-5 w-5 text-rose" />
+                    </div>
+                    <p className="text-lg font-bold text-foreground">{stats?.current_streak || 0}</p>
+                    <p className="text-xs text-muted-foreground">Dias</p>
+                  </div>
 
-            {/* XP Bar */}
-            <div className="max-w-md mx-auto space-y-2 px-4">
-              <Progress value={xpProgress} className="h-4 shadow-md" />
-              <p className="text-sm font-medium text-muted-foreground">
-                {currentXP} / 1000 XP para o próximo nível
-              </p>
-            </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center mb-1">
+                      <FitCoinIcon size={20} />
+                    </div>
+                    <p className="text-lg font-bold text-foreground">{stats?.game_coins || 0}</p>
+                    <p className="text-xs text-muted-foreground">Moedas</p>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="flex items-center justify-center mb-1">
+                      <Clock className="h-5 w-5 text-teal" />
+                    </div>
+                    <p className="text-lg font-bold text-foreground">{totalFastingHours}</p>
+                    <p className="text-xs text-muted-foreground">Horas</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
 
-          {/* Stats Grid - The HUD */}
+          {/* Section B: Recent Achievements (Horizontal Carousel) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-3 gap-4"
+            className="space-y-3"
           >
-            {/* Streak */}
-            <Card className="glass border-primary/30">
-              <CardContent className="p-4 text-center space-y-2">
-                <Flame className="h-8 w-8 mx-auto text-rose" />
-                <p className="text-2xl font-bold text-foreground">{stats?.current_streak || 0}</p>
-                <p className="text-xs text-muted-foreground font-medium">Sequência (dias)</p>
-              </CardContent>
-            </Card>
-
-            {/* Coins */}
-            <Card className="glass border-primary/30">
-              <CardContent className="p-4 text-center space-y-2">
-                <FitCoinIcon size={32} className="mx-auto" />
-                <p className="text-2xl font-bold text-foreground">{stats?.game_coins || 0}</p>
-                <p className="text-xs text-muted-foreground font-medium">Moedas</p>
-              </CardContent>
-            </Card>
-
-            {/* Total Fasting Hours */}
-            <Card className="glass border-primary/30">
-              <CardContent className="p-4 text-center space-y-2">
-                <Clock className="h-8 w-8 mx-auto text-teal" />
-                <p className="text-2xl font-bold text-foreground">{totalFastingHours}</p>
-                <p className="text-xs text-muted-foreground font-medium">Horas de Jejum</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Achievements Section - The Trophy Room */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-4"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                <Trophy className="h-6 w-6 text-primary" />
-                Suas Conquistas
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-primary" />
+                Conquistas Recentes
               </h2>
               <Badge variant="secondary" className="text-xs">
                 {userAchievements.length}/{achievements.length}
               </Badge>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              {achievements.map((achievement) => {
-                const unlocked = isAchievementUnlocked(achievement.code);
-                
-                return (
-                  <motion.button
-                    key={achievement.id}
-                    onClick={() => handleAchievementClick(achievement)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={cn(
-                      "relative p-4 rounded-2xl border-2 transition-all",
-                      unlocked
-                        ? "bg-card border-primary shadow-violet"
-                        : "bg-card/50 border-border grayscale opacity-60"
-                    )}
-                  >
-                    {/* Lock overlay for locked achievements */}
-                    {!unlocked && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Lock className="h-6 w-6 text-muted-foreground" />
+            <ScrollArea className="w-full">
+              <div className="flex gap-3 pb-2">
+                {recentAchievements.map((achievement) => {
+                  const unlocked = isAchievementUnlocked(achievement.code);
+                  
+                  return (
+                    <button
+                      key={achievement.id}
+                      onClick={() => handleAchievementClick(achievement)}
+                      className={cn(
+                        "relative flex-shrink-0 w-20 p-3 rounded-xl border-2 transition-all",
+                        unlocked
+                          ? "bg-card border-primary/50 shadow-sm"
+                          : "bg-card/50 border-border grayscale opacity-50"
+                      )}
+                    >
+                      {!unlocked && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Lock className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+
+                      <div className={cn("text-3xl mb-1", !unlocked && "opacity-0")}>
+                        {achievement.icon || '🏆'}
                       </div>
-                    )}
 
-                    {/* Icon or Trophy */}
-                    <div className={cn("text-4xl mb-2", !unlocked && "opacity-0")}>
-                      {achievement.icon || '🏆'}
-                    </div>
+                      <p className={cn(
+                        "text-[10px] font-medium line-clamp-2 leading-tight",
+                        unlocked ? "text-foreground" : "text-muted-foreground"
+                      )}>
+                        {achievement.name}
+                      </p>
 
-                    {/* Name */}
-                    <p className={cn(
-                      "text-xs font-semibold line-clamp-2",
-                      unlocked ? "text-foreground" : "text-muted-foreground"
-                    )}>
-                      {achievement.name}
-                    </p>
-
-                    {/* Unlocked badge */}
-                    {unlocked && (
-                      <Badge 
-                        variant="outline" 
-                        className="absolute -top-2 -right-2 text-xs bg-primary text-primary-foreground border-primary"
-                      >
-                        ✓
-                      </Badge>
-                    )}
-                  </motion.button>
-                );
-              })}
-            </div>
+                      {unlocked && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                          <span className="text-[10px] text-white">✓</span>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </ScrollArea>
           </motion.div>
 
-          {/* Settings Section */}
+          {/* Section C: The Control Menu */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="space-y-3"
+            transition={{ delay: 0.2 }}
+            className="space-y-6"
           >
-            <h3 className="text-lg font-bold text-muted-foreground uppercase tracking-wider px-2">
-              Configurações
-            </h3>
+            {/* Group 1: Biometria */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+                Biometria
+              </p>
+              <Card>
+                <CardContent className="p-0">
+                  <button
+                    onClick={handleEditBodyStats}
+                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Scale className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium text-foreground">Meus Dados Corporais</span>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </button>
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* Theme Toggle */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {theme === 'dark' ? (
-                      <Moon className="h-5 w-5 text-primary" />
-                    ) : (
-                      <Sun className="h-5 w-5 text-yellow-500" />
-                    )}
-                    <span className="font-medium text-foreground">Modo Escuro</span>
+            {/* Group 2: App Settings */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+                Configurações
+              </p>
+              <Card>
+                <CardContent className="p-0">
+                  <button
+                    onClick={() => navigate('/plans')}
+                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Crown className="h-5 w-5 text-primary" />
+                      <span className="font-medium text-foreground">Planos & FitCoins</span>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </button>
+
+                  <button
+                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Bell className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium text-foreground">Notificações</span>
+                    </div>
+                    <Switch defaultChecked />
+                  </button>
+
+                  <div className="flex items-center justify-between p-4">
+                    <div className="flex items-center gap-3">
+                      {theme === 'dark' ? (
+                        <Moon className="h-5 w-5 text-primary" />
+                      ) : (
+                        <Sun className="h-5 w-5 text-yellow-500" />
+                      )}
+                      <span className="font-medium text-foreground">Modo Escuro</span>
+                    </div>
+                    <Switch
+                      checked={theme === 'dark'}
+                      onCheckedChange={toggleTheme}
+                    />
                   </div>
-                  <Switch
-                    checked={theme === 'dark'}
-                    onCheckedChange={toggleTheme}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* Logout Button */}
+            {/* Group 3: Suporte */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+                Suporte
+              </p>
+              <Card>
+                <CardContent className="p-0">
+                  <button
+                    onClick={() => navigate('/help')}
+                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <HelpCircle className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium text-foreground">Ajuda & Suporte</span>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/privacy')}
+                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Shield className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium text-foreground">Termos & Privacidade</span>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Footer: Logout */}
             <Button
               onClick={handleSignOut}
               variant="outline"
@@ -468,6 +632,59 @@ export default function Profile() {
       </main>
 
       <BottomNav />
+
+      {/* Body Stats Dialog */}
+      <Dialog open={isBodyStatsOpen} onOpenChange={setIsBodyStatsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Atualizar Dados Corporais</DialogTitle>
+            <DialogDescription>
+              Mantenha seus dados atualizados para cálculos mais precisos
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="weight">Peso (kg)</Label>
+              <Input
+                id="weight"
+                type="number"
+                value={bodyWeight || ''}
+                onChange={(e) => setBodyWeight(parseFloat(e.target.value) || 0)}
+                placeholder="Ex: 70"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="height">Altura (cm)</Label>
+              <Input
+                id="height"
+                type="number"
+                value={bodyHeight || ''}
+                onChange={(e) => setBodyHeight(parseFloat(e.target.value) || 0)}
+                placeholder="Ex: 170"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsBodyStatsOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSaveBodyStats}
+              disabled={savingBodyStats || !bodyWeight || !bodyHeight}
+              className="gradient-primary text-white"
+            >
+              {savingBodyStats && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Achievement Details Drawer */}
       <Drawer open={achievementDrawerOpen} onOpenChange={setAchievementDrawerOpen}>
