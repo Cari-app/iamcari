@@ -10,15 +10,8 @@ interface Profile {
   tier: string;
   onboarding_completed: boolean;
   created_at: string;
-  email: string | null;
-  age: number | null;
-  weight: number | null;
-  height: number | null;
-  gender: string | null;
-  activity_level: string | null;
+  updated_at: string;
   daily_calories_target: number | null;
-  fasting_protocol: string | null;
-  avatar_url: string | null;
   full_name: string | null;
   nickname: string | null;
   active_diet: string | null;
@@ -57,13 +50,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(data);
     } else {
       // Profile doesn't exist, create it
-      const { data: authUser } = await supabase.auth.getUser();
       const { data: newProfile, error: insertError } = await supabase
         .from('profiles')
         .insert([{ 
-          id: userId, 
-          email: authUser.user?.email || null,
-          token_balance: 0,
+          id: userId,
+          token_balance: 30,
           onboarding_completed: false
         }])
         .select()

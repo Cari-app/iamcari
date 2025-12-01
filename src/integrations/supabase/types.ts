@@ -14,6 +14,174 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessments: {
+        Row: {
+          activity_level: string
+          age: number
+          bmr: number | null
+          created_at: string | null
+          gender: string
+          goal_speed: string | null
+          goal_type: string
+          height: number
+          id: string
+          target_calories: number | null
+          target_weight: number | null
+          tdee: number | null
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          activity_level: string
+          age: number
+          bmr?: number | null
+          created_at?: string | null
+          gender: string
+          goal_speed?: string | null
+          goal_type: string
+          height: number
+          id?: string
+          target_calories?: number | null
+          target_weight?: number | null
+          tdee?: number | null
+          user_id: string
+          weight: number
+        }
+        Update: {
+          activity_level?: string
+          age?: number
+          bmr?: number | null
+          created_at?: string | null
+          gender?: string
+          goal_speed?: string | null
+          goal_type?: string
+          height?: number
+          id?: string
+          target_calories?: number | null
+          target_weight?: number | null
+          tdee?: number | null
+          user_id?: string
+          weight?: number
+        }
+        Relationships: []
+      }
+      fasting_sessions: {
+        Row: {
+          created_at: string | null
+          end_time: string | null
+          id: string
+          protocol_type: string | null
+          start_time: string
+          target_hours: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          protocol_type?: string | null
+          start_time: string
+          target_hours: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          protocol_type?: string | null
+          start_time?: string
+          target_hours?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      meal_logs: {
+        Row: {
+          calories: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          is_emotional: boolean | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          calories?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_emotional?: boolean | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          calories?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_emotional?: boolean | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      nutrition_assessments: {
+        Row: {
+          carb_preference: string | null
+          cooking_time: string | null
+          created_at: string | null
+          dietary_restrictions: string | null
+          discipline_level: string | null
+          eating_habit: string | null
+          eating_trigger: string | null
+          fasting_history: string | null
+          id: string
+          main_goal: string | null
+          meals_per_day: string | null
+          meat_consumption: string | null
+          night_hunger: string | null
+          structure_preference: string | null
+          user_id: string
+        }
+        Insert: {
+          carb_preference?: string | null
+          cooking_time?: string | null
+          created_at?: string | null
+          dietary_restrictions?: string | null
+          discipline_level?: string | null
+          eating_habit?: string | null
+          eating_trigger?: string | null
+          fasting_history?: string | null
+          id?: string
+          main_goal?: string | null
+          meals_per_day?: string | null
+          meat_consumption?: string | null
+          night_hunger?: string | null
+          structure_preference?: string | null
+          user_id: string
+        }
+        Update: {
+          carb_preference?: string | null
+          cooking_time?: string | null
+          created_at?: string | null
+          dietary_restrictions?: string | null
+          discipline_level?: string | null
+          eating_habit?: string | null
+          eating_trigger?: string | null
+          fasting_history?: string | null
+          id?: string
+          main_goal?: string | null
+          meals_per_day?: string | null
+          meat_consumption?: string | null
+          night_hunger?: string | null
+          structure_preference?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           active_diet: string | null
@@ -53,6 +221,42 @@ export type Database = {
           token_balance?: number | null
           updated_at?: string | null
           whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          created_at: string | null
+          current_cycle_xp: number | null
+          current_level: number | null
+          current_streak: number | null
+          game_coins: number | null
+          id: string
+          total_xp: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_cycle_xp?: number | null
+          current_level?: number | null
+          current_streak?: number | null
+          game_coins?: number | null
+          id?: string
+          total_xp?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_cycle_xp?: number | null
+          current_level?: number | null
+          current_streak?: number | null
+          game_coins?: number | null
+          id?: string
+          total_xp?: number | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
