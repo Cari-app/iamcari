@@ -14,6 +14,7 @@ import { Play, Pause, RotateCcw, Flame, Zap, Sparkles, Target } from 'lucide-rea
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { FitCoinIcon } from '@/components/FitCoinIcon';
 
 export default function Dashboard() {
   const { user, profile, refreshProfile } = useAuth();
@@ -395,11 +396,14 @@ export default function Dashboard() {
             </div>
             
             <div className="p-4 rounded-2xl bg-card border border-border text-center">
-              <p className="text-2xl font-bold text-foreground tabular-nums">
-                {profile?.token_balance || 0}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Tokens 💎
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <FitCoinIcon size={20} />
+                <p className="text-2xl font-bold text-foreground tabular-nums">
+                  {profile?.token_balance || 0}
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                FitCoins
               </p>
             </div>
           </motion.div>
