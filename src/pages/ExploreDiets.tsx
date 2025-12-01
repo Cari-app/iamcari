@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Sparkles } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 interface Diet {
@@ -20,12 +21,17 @@ interface Diet {
 
 export default function ExploreDiets() {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [diets, setDiets] = useState<Diet[]>([]);
+  const [activeDiet, setActiveDiet] = useState<Diet | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchDiets();
-  }, []);
+    if (profile?.active_diet) {
+      fetchActiveDiet();
+    }
+  }, [profile]);
 
   const fetchDiets = async () => {
     try {
@@ -40,6 +46,23 @@ export default function ExploreDiets() {
       console.error('Error fetching diets:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchActiveDiet = async () => {
+    if (!profile?.active_diet) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('diet_types')
+        .select('id, name, icon, short_description, full_description, color_theme')
+        .eq('id', profile.active_diet)
+        .single();
+
+      if (error) throw error;
+      if (data) setActiveDiet(data);
+    } catch (error) {
+      console.error('Error fetching active diet:', error);
     }
   };
 
@@ -90,6 +113,48 @@ export default function ExploreDiets() {
               Descubra qual dieta se encaixa perfeitamente no seu estilo de vida
             </p>
           </motion.div>
+
+          {/* Active Diet Banner */}
+          {activeDiet && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className={cn(
+                "p-4 rounded-2xl border-2 bg-gradient-to-br",
+                activeDiet.color_theme === 'violet' && "from-violet-500/10 to-violet-500/5 border-violet-500/30",
+                activeDiet.color_theme === 'teal' && "from-teal-500/10 to-teal-500/5 border-teal-500/30",
+                activeDiet.color_theme === 'blue' && "from-blue-500/10 to-blue-500/5 border-blue-500/30",
+                activeDiet.color_theme === 'red' && "from-red-500/10 to-red-500/5 border-red-500/30",
+                activeDiet.color_theme === 'orange' && "from-orange-500/10 to-orange-500/5 border-orange-500/30",
+                activeDiet.color_theme === 'green' && "from-green-500/10 to-green-500/5 border-green-500/30",
+                activeDiet.color_theme === 'emerald' && "from-emerald-500/10 to-emerald-500/5 border-emerald-500/30",
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "text-3xl",
+                  getColorClasses(activeDiet.color_theme)
+                )}>
+                  {activeDiet.icon}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Sparkles className={cn("h-4 w-4", getColorClasses(activeDiet.color_theme))} />
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Sua dieta ativa
+                    </p>
+                  </div>
+                  <h3 className={cn(
+                    "text-lg font-bold",
+                    getColorClasses(activeDiet.color_theme)
+                  )}>
+                    {activeDiet.name}
+                  </h3>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Diets Grid - Mobile First */}
           {loading ? (
