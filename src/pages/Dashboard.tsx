@@ -461,7 +461,7 @@ export default function Dashboard() {
             className="grid grid-cols-3 gap-3"
           >
             <button
-              onClick={() => toast({ title: 'Em breve', description: 'Mapeamento Alimentar estará disponível em breve!' })}
+              onClick={() => navigate('/nutrition-quiz')}
               className="p-4 rounded-2xl bg-card border border-border hover:bg-accent/50 transition-colors press-effect text-center"
             >
               <div className="flex justify-center mb-2">
