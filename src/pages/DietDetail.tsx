@@ -158,7 +158,7 @@ export default function DietDetail() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <main className="pt-20 pb-24 px-4 max-w-lg mx-auto">
+      <main className="pt-28 pb-24 px-4 max-w-lg mx-auto">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
