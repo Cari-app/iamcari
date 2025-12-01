@@ -5,102 +5,133 @@ import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGamification } from '@/hooks/useGamification';
 import { supabase } from '@/integrations/supabase';
 import { toast } from '@/hooks/use-toast';
 import { 
   User, 
-  Bell, 
-  Activity, 
-  HelpCircle, 
-  LogOut, 
-  ChevronRight,
+  Camera,
+  Loader2,
+  Flame,
+  Trophy,
+  Clock,
+  Lock,
+  LogOut,
   Moon,
   Sun,
-  Gem,
-  Crown,
-  Camera,
-  Pencil,
-  Loader2,
-  FileText,
-  Trash,
-  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerClose,
+} from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
 import { FitCoinIcon } from '@/components/FitCoinIcon';
 
-const menuItems = [
-  { icon: Bell, label: 'Notificações', action: 'toggle' },
-  { icon: Activity, label: 'Meus Dados Corporais', action: 'edit-body-stats' },
-  { icon: HelpCircle, label: 'Ajuda & Suporte', action: 'navigate' },
-];
+interface Achievement {
+  id: number;
+  code: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  xp_reward: number | null;
+}
+
+interface UserAchievement {
+  achievement_code: string;
+  unlocked_at: string;
+}
 
 export default function Profile() {
   const { theme, toggleTheme } = useTheme();
-  const { user, profile, signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const { stats, loading: statsLoading } = useGamification();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [fullName, setFullName] = useState<string>('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [isEditNameOpen, setIsEditNameOpen] = useState(false);
-  const [editNameValue, setEditNameValue] = useState('');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [savingName, setSavingName] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isBodyStatsOpen, setIsBodyStatsOpen] = useState(false);
-  const [bodyWeight, setBodyWeight] = useState<number>(0);
-  const [bodyHeight, setBodyHeight] = useState<number>(0);
-  const [savingBodyStats, setSavingBodyStats] = useState(false);
+  
+  // Achievements data
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [userAchievements, setUserAchievements] = useState<UserAchievement[]>([]);
+  const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+  const [achievementDrawerOpen, setAchievementDrawerOpen] = useState(false);
+  
+  // Stats
+  const [totalFastingHours, setTotalFastingHours] = useState(0);
 
-  // Fetch profile data on mount
+  // Fetch profile data
   useEffect(() => {
     if (!user) {
       setLoading(false);
       return;
     }
 
-    const fetchProfile = async () => {
-      const { data, error } = await supabase
+    const fetchData = async () => {
+      // Fetch profile
+      const { data: profileData } = await supabase
         .from('profiles')
-        .select('email, full_name, avatar_url, whatsapp_number, token_balance, tier, weight, height, daily_calories_target')
+        .select('full_name, avatar_url')
         .eq('id', user.id)
         .single();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-        toast({
-          title: '❌ Erro ao carregar perfil',
-          description: 'Não foi possível carregar seus dados',
-          variant: 'destructive',
-        });
-        setLoading(false);
-        return;
+      if (profileData) {
+        setFullName(profileData.full_name || user.email?.split('@')[0] || 'Jogador');
+        setAvatarUrl(profileData.avatar_url);
       }
 
-      if (data) {
-        setFullName(data.full_name || user.email?.split('@')[0] || 'Usuário');
-        setAvatarUrl(data.avatar_url);
-        setBodyWeight(data.weight || 0);
-        setBodyHeight(data.height || 0);
+      // Fetch total fasting hours
+      const { data: fastingData } = await supabase
+        .from('fasting_sessions')
+        .select('start_time, end_time')
+        .eq('user_id', user.id)
+        .not('end_time', 'is', null);
+
+      if (fastingData) {
+        const totalHours = fastingData.reduce((acc, session) => {
+          const start = new Date(session.start_time);
+          const end = new Date(session.end_time!);
+          const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+          return acc + hours;
+        }, 0);
+        setTotalFastingHours(Math.floor(totalHours));
+      }
+
+      // Fetch all achievements
+      const { data: achievementsData } = await supabase
+        .from('achievements')
+        .select('*')
+        .order('id', { ascending: true });
+
+      if (achievementsData) {
+        setAchievements(achievementsData);
+      }
+
+      // Fetch user's unlocked achievements
+      const { data: userAchievementsData } = await supabase
+        .from('user_achievements')
+        .select('achievement_code, unlocked_at')
+        .eq('user_id', user.id);
+
+      if (userAchievementsData) {
+        setUserAchievements(userAchievementsData);
       }
 
       setLoading(false);
     };
 
-    fetchProfile();
+    fetchData();
   }, [user]);
 
   const handleAvatarClick = () => {
@@ -111,7 +142,6 @@ export default function Profile() {
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast({
         title: '❌ Arquivo inválido',
@@ -121,7 +151,6 @@ export default function Profile() {
       return;
     }
 
-    // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       toast({
         title: '❌ Arquivo muito grande',
@@ -134,7 +163,6 @@ export default function Profile() {
     setUploadingAvatar(true);
 
     try {
-      // Upload to avatars bucket
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
@@ -144,14 +172,12 @@ export default function Profile() {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: urlData } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
 
       const publicUrl = urlData.publicUrl;
 
-      // Update profiles table with new avatar URL
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
@@ -177,144 +203,61 @@ export default function Profile() {
     }
   };
 
-  const handleEditName = () => {
-    setEditNameValue(fullName);
-    setIsEditNameOpen(true);
-  };
-
-  const handleSaveName = async () => {
-    if (!user || !editNameValue.trim()) return;
-
-    setSavingName(true);
-
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ full_name: editNameValue.trim() })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      setFullName(editNameValue.trim());
-      setIsEditNameOpen(false);
-
-      toast({
-        title: '✅ Nome atualizado',
-        description: 'Suas informações foram salvas',
-      });
-    } catch (error) {
-      console.error('Error updating name:', error);
-      toast({
-        title: '❌ Erro ao salvar',
-        description: 'Não foi possível atualizar seu nome',
-        variant: 'destructive',
-      });
-    } finally {
-      setSavingName(false);
-    }
-  };
-
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
   };
 
-  const handleDeleteAccount = () => {
-    setIsDeleteDialogOpen(true);
+  const isAchievementUnlocked = (code: string) => {
+    return userAchievements.some(ua => ua.achievement_code === code);
   };
 
-  const confirmDeleteAccount = async () => {
-    // TODO: Implement account deletion logic
-    toast({
-      title: '⚠️ Função em desenvolvimento',
-      description: 'A exclusão de conta estará disponível em breve.',
-    });
-    setIsDeleteDialogOpen(false);
+  const getUnlockedDate = (code: string) => {
+    const achievement = userAchievements.find(ua => ua.achievement_code === code);
+    if (!achievement) return null;
+    return new Date(achievement.unlocked_at).toLocaleDateString('pt-BR');
   };
 
-  const handleEditBodyStats = () => {
-    setIsBodyStatsOpen(true);
+  const handleAchievementClick = (achievement: Achievement) => {
+    setSelectedAchievement(achievement);
+    setAchievementDrawerOpen(true);
   };
 
-  const handleSaveBodyStats = async () => {
-    if (!user) return;
-
-    setSavingBodyStats(true);
-
-    try {
-      // Update profile basic info
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ 
-          weight: bodyWeight,
-          height: bodyHeight,
-        })
-        .eq('id', user.id);
-
-      if (profileError) throw profileError;
-
-      // Create new assessment to recalculate BMR/TDEE via DB trigger
-      const { data: latestAssessment } = await supabase
-        .from('assessments')
-        .select('gender, age, activity_level, goal_type, goal_speed, target_weight_kg')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      const { error: assessmentError } = await supabase
-        .from('assessments')
-        .insert({
-          user_id: user.id,
-          gender: latestAssessment?.gender || profile?.gender || 'male',
-          age: latestAssessment?.age || profile?.age || 30,
-          height_cm: bodyHeight,
-          weight_kg: bodyWeight,
-          activity_level: latestAssessment?.activity_level || profile?.activity_level || 'moderate',
-          goal_type: latestAssessment?.goal_type || 'maintain',
-          goal_speed: latestAssessment?.goal_speed || null,
-          target_weight_kg: latestAssessment?.target_weight_kg || null,
-        });
-
-      if (assessmentError) throw assessmentError;
-
-      setIsBodyStatsOpen(false);
-
-      toast({
-        title: '✅ Dados atualizados',
-        description: 'Nova avaliação metabólica calculada',
-      });
-    } catch (error) {
-      console.error('Error updating body stats:', error);
-      toast({
-        title: '❌ Erro ao salvar',
-        description: 'Não foi possível atualizar seus dados',
-        variant: 'destructive',
-      });
-    } finally {
-      setSavingBodyStats(false);
-    }
+  const getPlayerTitle = () => {
+    const level = stats?.current_level || 1;
+    if (level >= 20) return 'Mestre do Jejum';
+    if (level >= 15) return 'Guerreiro Épico';
+    if (level >= 10) return 'Veterano';
+    if (level >= 5) return 'Explorador';
+    return 'Iniciante';
   };
 
-  const handleMenuItemClick = (action: string) => {
-    if (action === 'edit-body-stats') {
-      handleEditBodyStats();
-    }
-  };
+  if (loading || statsLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-24 pt-20 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const currentLevel = stats?.current_level || 1;
+  const currentXP = stats?.current_cycle_xp || 0;
+  const xpProgress = (currentXP / 1000) * 100;
 
   return (
     <div className="min-h-screen bg-background pb-24 pt-20">
       <Navbar />
       
       <main className="px-4 py-6">
-        <div className="mx-auto max-w-lg space-y-6">
-          {/* Profile Header */}
+        <div className="mx-auto max-w-2xl space-y-8">
+          {/* Hero Section - The Player */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center pt-4"
+            className="text-center space-y-4"
           >
-            <div className="relative w-20 h-20 mx-auto mb-4 group">
+            {/* Avatar with Level Badge */}
+            <div className="relative inline-block">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -323,413 +266,254 @@ export default function Profile() {
                 className="hidden"
               />
               
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Avatar"
-                  className="w-20 h-20 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center">
-                  <User className="h-10 w-10 text-white" />
-                </div>
-              )}
-              
-              <button
-                onClick={handleAvatarClick}
-                disabled={uploadingAvatar}
-                className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-              >
-                {uploadingAvatar ? (
-                  <Loader2 className="h-6 w-6 text-white animate-spin" />
+              <div className="relative w-32 h-32 mx-auto group">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="Avatar"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-primary shadow-violet"
+                  />
                 ) : (
-                  <Camera className="h-6 w-6 text-white" />
+                  <div className="w-32 h-32 rounded-full gradient-primary flex items-center justify-center border-4 border-primary shadow-violet">
+                    <User className="h-16 w-16 text-white" />
+                  </div>
                 )}
-              </button>
+                
+                <button
+                  onClick={handleAvatarClick}
+                  disabled={uploadingAvatar}
+                  className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                >
+                  {uploadingAvatar ? (
+                    <Loader2 className="h-8 w-8 text-white animate-spin" />
+                  ) : (
+                    <Camera className="h-8 w-8 text-white" />
+                  )}
+                </button>
+              </div>
+
+              {/* Level Badge */}
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+                <Badge className="px-4 py-1.5 gradient-primary text-white font-bold text-lg shadow-violet border-2 border-background">
+                  Nível {currentLevel}
+                </Badge>
+              </div>
             </div>
-            
-            <div className="flex items-center justify-center gap-2">
-              <h1 className="text-2xl font-bold text-foreground">
-                {fullName || 'Defina seu nome'}
+
+            {/* Name & Title */}
+            <div className="space-y-1 mt-6">
+              <h1 className="text-3xl font-bold text-foreground">
+                {fullName}
               </h1>
-              <button
-                onClick={handleEditName}
-                className="p-1.5 rounded-lg hover:bg-muted transition-colors press-effect"
-              >
-                <Pencil className="h-4 w-4 text-muted-foreground" />
-              </button>
+              <p className="text-lg text-muted-foreground font-medium">
+                {getPlayerTitle()}
+              </p>
             </div>
-            
-            <p className="text-muted-foreground">{user?.email || 'usuario@email.com'}</p>
+
+            {/* XP Bar */}
+            <div className="max-w-md mx-auto space-y-2 px-4">
+              <Progress value={xpProgress} className="h-4 shadow-md" />
+              <p className="text-sm font-medium text-muted-foreground">
+                {currentXP} / 1000 XP para o próximo nível
+              </p>
+            </div>
           </motion.div>
 
-          {/* Plan Card */}
+          {/* Stats Grid - The HUD */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="p-4 rounded-2xl border border-primary/30 bg-primary/5"
+            className="grid grid-cols-3 gap-4"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-                  <Gem className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">
-                    {profile?.tier === 'free' ? 'Plano Gratuito' : profile?.tier === 'premium' ? 'Plano Premium' : 'Plano Pro'}
-                  </p>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <FitCoinIcon size={14} />
-                    <p className="text-sm text-muted-foreground">
-                      {profile?.token_balance || 0} FitCoins
-                    </p>
-                  </div>
-                  <p className="text-xs text-muted-foreground/70 mt-0.5 italic">
-                    Use FitCoins para análises de IA avançadas
-                  </p>
-                </div>
-              </div>
-              <Button 
-                size="sm" 
-                className="rounded-xl gradient-primary text-white press-effect"
-              >
-                <Crown className="h-4 w-4 mr-1" />
-                Upgrade
-              </Button>
-            </div>
+            {/* Streak */}
+            <Card className="glass border-primary/30">
+              <CardContent className="p-4 text-center space-y-2">
+                <Flame className="h-8 w-8 mx-auto text-rose" />
+                <p className="text-2xl font-bold text-foreground">{stats?.current_streak || 0}</p>
+                <p className="text-xs text-muted-foreground font-medium">Sequência (dias)</p>
+              </CardContent>
+            </Card>
+
+            {/* Coins */}
+            <Card className="glass border-primary/30">
+              <CardContent className="p-4 text-center space-y-2">
+                <FitCoinIcon size={32} className="mx-auto" />
+                <p className="text-2xl font-bold text-foreground">{stats?.game_coins || 0}</p>
+                <p className="text-xs text-muted-foreground font-medium">Moedas</p>
+              </CardContent>
+            </Card>
+
+            {/* Total Fasting Hours */}
+            <Card className="glass border-primary/30">
+              <CardContent className="p-4 text-center space-y-2">
+                <Clock className="h-8 w-8 mx-auto text-teal" />
+                <p className="text-2xl font-bold text-foreground">{totalFastingHours}</p>
+                <p className="text-xs text-muted-foreground font-medium">Horas de Jejum</p>
+              </CardContent>
+            </Card>
           </motion.div>
 
-          {/* Theme Toggle */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="p-4 rounded-2xl bg-card border border-border"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {theme === 'dark' ? (
-                  <Moon className="h-5 w-5 text-primary" />
-                ) : (
-                  <Sun className="h-5 w-5 text-yellow-500" />
-                )}
-                <span className="font-medium text-foreground">Modo Escuro</span>
-              </div>
-              <Switch
-                checked={theme === 'dark'}
-                onCheckedChange={toggleTheme}
-              />
-            </div>
-          </motion.div>
-
-          {/* Menu Items */}
+          {/* Achievements Section - The Trophy Room */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="rounded-2xl bg-card border border-border overflow-hidden"
+            className="space-y-4"
           >
-            {menuItems.map((item, index) => (
-              <button
-                key={item.label}
-                onClick={() => handleMenuItemClick(item.action)}
-                className={cn(
-                  "w-full flex items-center justify-between p-4 press-effect",
-                  "hover:bg-muted/50 transition-colors",
-                  index !== menuItems.length - 1 && "border-b border-border"
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <item.icon className="h-5 w-5 text-muted-foreground" />
-                  <span className="font-medium text-foreground">{item.label}</span>
-                </div>
-                {item.action === 'navigate' && (
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                )}
-                {item.action === 'toggle' && (
-                  <Switch defaultChecked />
-                )}
-                {item.action === 'edit-body-stats' && (
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                )}
-              </button>
-            ))}
-          </motion.div>
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                <Trophy className="h-6 w-6 text-primary" />
+                Suas Conquistas
+              </h2>
+              <Badge variant="secondary" className="text-xs">
+                {userAchievements.length}/{achievements.length}
+              </Badge>
+            </div>
 
-          {/* Sobre Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.22 }}
-            className="space-y-2"
-          >
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
-              Sobre
-            </p>
-            <div className="rounded-2xl bg-card border border-border overflow-hidden">
-              <button
-                onClick={() => navigate('/terms')}
-                className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
-              >
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
-                  <span className="font-medium text-foreground">Termos de Uso</span>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </button>
+            <div className="grid grid-cols-3 gap-3">
+              {achievements.map((achievement) => {
+                const unlocked = isAchievementUnlocked(achievement.code);
+                
+                return (
+                  <motion.button
+                    key={achievement.id}
+                    onClick={() => handleAchievementClick(achievement)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={cn(
+                      "relative p-4 rounded-2xl border-2 transition-all",
+                      unlocked
+                        ? "bg-card border-primary shadow-violet"
+                        : "bg-card/50 border-border grayscale opacity-60"
+                    )}
+                  >
+                    {/* Lock overlay for locked achievements */}
+                    {!unlocked && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Lock className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                    )}
 
-              <button
-                onClick={() => navigate('/privacy')}
-                className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
-              >
-                <div className="flex items-center gap-3">
-                  <Shield className="h-5 w-5 text-muted-foreground" />
-                  <span className="font-medium text-foreground">Política de Privacidade</span>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </button>
+                    {/* Icon or Trophy */}
+                    <div className={cn("text-4xl mb-2", !unlocked && "opacity-0")}>
+                      {achievement.icon || '🏆'}
+                    </div>
 
-              <button
-                onClick={handleDeleteAccount}
-                className="w-full flex items-center justify-between p-4 press-effect hover:bg-destructive/10 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Trash className="h-5 w-5 text-rose-500" />
-                  <span className="font-medium text-rose-500">Deletar minha conta</span>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </button>
+                    {/* Name */}
+                    <p className={cn(
+                      "text-xs font-semibold line-clamp-2",
+                      unlocked ? "text-foreground" : "text-muted-foreground"
+                    )}>
+                      {achievement.name}
+                    </p>
+
+                    {/* Unlocked badge */}
+                    {unlocked && (
+                      <Badge 
+                        variant="outline" 
+                        className="absolute -top-2 -right-2 text-xs bg-primary text-primary-foreground border-primary"
+                      >
+                        ✓
+                      </Badge>
+                    )}
+                  </motion.button>
+                );
+              })}
             </div>
           </motion.div>
 
-          {/* Logout */}
+          {/* Settings Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-3"
           >
+            <h3 className="text-lg font-bold text-muted-foreground uppercase tracking-wider px-2">
+              Configurações
+            </h3>
+
+            {/* Theme Toggle */}
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {theme === 'dark' ? (
+                      <Moon className="h-5 w-5 text-primary" />
+                    ) : (
+                      <Sun className="h-5 w-5 text-yellow-500" />
+                    )}
+                    <span className="font-medium text-foreground">Modo Escuro</span>
+                  </div>
+                  <Switch
+                    checked={theme === 'dark'}
+                    onCheckedChange={toggleTheme}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Logout Button */}
             <Button
-              variant="ghost"
-              className="w-full h-14 rounded-2xl text-destructive hover:text-destructive hover:bg-destructive/10 press-effect"
               onClick={handleSignOut}
+              variant="outline"
+              className="w-full justify-start gap-3 h-auto py-4 border-destructive/30 hover:bg-destructive/10 text-destructive"
             >
-              <LogOut className="h-5 w-5 mr-2" />
-              Sair da conta
+              <LogOut className="h-5 w-5" />
+              <span className="font-medium">Sair da Conta</span>
             </Button>
           </motion.div>
-
-          {/* Version */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-center text-sm text-muted-foreground"
-          >
-            LeveStay v1.0.0
-          </motion.p>
         </div>
       </main>
 
-      {/* Edit Name Dialog */}
-      <Dialog open={isEditNameOpen} onOpenChange={setIsEditNameOpen}>
-        <DialogContent className="bg-card border-border sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-foreground">Editar Nome</DialogTitle>
-            <DialogDescription>
-              Digite seu nome completo
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-4">
-            <Label htmlFor="name" className="text-foreground">
-              Nome
-            </Label>
-            <Input
-              id="name"
-              value={editNameValue}
-              onChange={(e) => setEditNameValue(e.target.value)}
-              placeholder="Seu nome completo"
-              className="mt-2 bg-background"
-              maxLength={100}
-            />
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => setIsEditNameOpen(false)}
-              disabled={savingName}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSaveName}
-              disabled={!editNameValue.trim() || savingName}
-              className="gradient-primary text-white"
-            >
-              {savingName ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                'Salvar'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Body Stats Dialog */}
-      <Dialog open={isBodyStatsOpen} onOpenChange={setIsBodyStatsOpen}>
-        <DialogContent className="bg-card border-border sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-foreground flex items-center gap-2">
-              <Activity className="h-5 w-5 text-primary" />
-              Meus Dados Corporais
-            </DialogTitle>
-            <DialogDescription>
-              Atualize suas informações biométricas
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-4 space-y-4">
-            <div>
-              <Label htmlFor="weight" className="text-foreground">
-                Peso Atual (kg)
-              </Label>
-              <Input
-                id="weight"
-                type="number"
-                value={bodyWeight || ''}
-                onChange={(e) => setBodyWeight(Number(e.target.value))}
-                placeholder="Ex: 70"
-                className="mt-2 bg-background"
-                min={0}
-                step={0.1}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="height" className="text-foreground">
-                Altura (cm)
-              </Label>
-              <Input
-                id="height"
-                type="number"
-                value={bodyHeight || ''}
-                onChange={(e) => setBodyHeight(Number(e.target.value))}
-                placeholder="Ex: 170"
-                className="mt-2 bg-background"
-                min={0}
-                step={1}
-              />
-            </div>
-
-            <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
-              <p className="text-sm text-muted-foreground">
-                💡 <strong className="text-foreground">Suas metas calóricas</strong> serão recalculadas automaticamente com base nos novos dados.
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => setIsBodyStatsOpen(false)}
-              disabled={savingBodyStats}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSaveBodyStats}
-              disabled={savingBodyStats}
-              className="gradient-primary text-white"
-            >
-              {savingBodyStats ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                'Salvar'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Account Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="bg-card border-border sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-rose-500 flex items-center gap-2">
-              <Trash className="h-5 w-5" />
-              Deletar Conta Permanentemente
-            </DialogTitle>
-            <DialogDescription className="text-foreground font-semibold">
-              ⚠️ Esta ação é IRREVERSÍVEL
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-4 space-y-4">
-            <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20">
-              <p className="text-sm text-foreground font-medium mb-2">
-                Ao deletar sua conta:
-              </p>
-              <ul className="space-y-1.5 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-rose-500 mt-0.5">•</span>
-                  <span>Sua assinatura será <strong className="text-foreground">cancelada imediatamente</strong></span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-rose-500 mt-0.5">•</span>
-                  <span>Todos os dados serão <strong className="text-foreground">excluídos permanentemente</strong></span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-rose-500 mt-0.5">•</span>
-                  <span>Histórico de jejum, refeições e progresso serão perdidos</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-rose-500 mt-0.5">•</span>
-                  <span>FitCoins e configurações não poderão ser recuperados</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-              <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Para voltar a usar o app</strong>, você precisará criar uma nova conta e fazer uma <strong className="text-foreground">nova assinatura</strong>.
-              </p>
-            </div>
-
-            <p className="text-xs text-center text-muted-foreground">
-              Não há como desfazer esta ação. Tenha certeza absoluta antes de continuar.
-            </p>
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-              className="flex-1"
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDeleteAccount}
-              className="flex-1 bg-rose-500 hover:bg-rose-600"
-            >
-              <Trash className="h-4 w-4 mr-2" />
-              Sim, Deletar Tudo
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       <BottomNav />
+
+      {/* Achievement Details Drawer */}
+      <Drawer open={achievementDrawerOpen} onOpenChange={setAchievementDrawerOpen}>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle className="flex items-center gap-3 text-2xl">
+              <span className="text-4xl">{selectedAchievement?.icon || '🏆'}</span>
+              {selectedAchievement?.name}
+            </DrawerTitle>
+            <DrawerDescription className="mt-4 space-y-4">
+              <div>
+                <p className="text-base text-foreground">
+                  {selectedAchievement?.description}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Badge className="gradient-primary text-white">
+                  +{selectedAchievement?.xp_reward || 0} XP
+                </Badge>
+                
+                {selectedAchievement && isAchievementUnlocked(selectedAchievement.code) && (
+                  <Badge variant="secondary">
+                    Desbloqueado em {getUnlockedDate(selectedAchievement.code)}
+                  </Badge>
+                )}
+              </div>
+
+              {selectedAchievement && !isAchievementUnlocked(selectedAchievement.code) && (
+                <div className="p-4 rounded-lg bg-muted/50 border border-border">
+                  <p className="text-sm text-muted-foreground">
+                    <strong>Como desbloquear:</strong> {selectedAchievement.description}
+                  </p>
+                </div>
+              )}
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="p-4">
+            <DrawerClose asChild>
+              <Button variant="outline" className="w-full">
+                Fechar
+              </Button>
+            </DrawerClose>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
