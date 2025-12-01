@@ -84,18 +84,18 @@ export default function Diary() {
 
           // Map based on entry_type
           if (log.entry_type === 'meal') {
-            return {
-              ...baseEntry,
-              type: 'meal' as const,
-              entry_method: log.image_url ? 'ai' as const : 'manual' as const,
-              food_name: log.food_name || '',
-              calories: log.calories || 0,
-              image_url: log.image_url,
-              is_emotional: log.is_emotional || false,
-              hunger_level: log.hunger_level,
-              ai_analysis: log.ai_analysis,
-              status: log.status || 'manual',
-            };
+              return {
+                ...baseEntry,
+                type: 'meal' as const,
+                entry_method: log.image_url ? 'ai' as const : 'manual' as const,
+                food_name: log.food_name || '',
+                calories: log.calories || 0,
+                image_url: log.image_url,
+                is_emotional: log.is_emotional || false,
+                hunger_level: log.hunger_level,
+                ai_analysis: typeof log.ai_analysis === 'string' ? log.ai_analysis : log.ai_analysis as any,
+                status: log.status || 'manual',
+              };
           } else if (log.entry_type === 'water') {
             return {
               ...baseEntry,
@@ -164,7 +164,7 @@ export default function Diary() {
                   image_url: updatedLog.image_url,
                   is_emotional: updatedLog.is_emotional || false,
                   hunger_level: updatedLog.hunger_level,
-                  ai_analysis: updatedLog.ai_analysis,
+                  ai_analysis: typeof updatedLog.ai_analysis === 'string' ? updatedLog.ai_analysis : updatedLog.ai_analysis as any,
                   status: updatedLog.status || 'manual',
                 };
                 
