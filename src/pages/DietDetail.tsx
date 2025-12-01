@@ -55,7 +55,7 @@ export default function DietDetail() {
         .from('diet_types')
         .select('*')
         .eq('id', dietId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       if (data) {
@@ -78,7 +78,8 @@ export default function DietDetail() {
 
     lines.forEach((line) => {
       // Detect section headers (## emoji number. Title)
-      const headerMatch = line.match(/^##\s+(.*?)\s+(\d+)\.\s+(.+)$/);
+      // Matches: ## 🌿 1. Cabeçalho
+      const headerMatch = line.match(/^##\s+(.+?)\s+(\d+)\.\s+(.+)$/);
       
       if (headerMatch) {
         // Save previous section
@@ -88,8 +89,8 @@ export default function DietDetail() {
         }
         
         // Start new section
-        const emoji = headerMatch[1];
-        const title = headerMatch[3];
+        const emoji = headerMatch[1].trim();
+        const title = headerMatch[3].trim();
         currentSection = {
           id: `section-${parsed.length}`,
           emoji,

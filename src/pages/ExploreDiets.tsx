@@ -57,7 +57,7 @@ export default function ExploreDiets() {
         .from('diet_types')
         .select('id, name, icon, short_description, full_description, color_theme')
         .eq('id', profile.active_diet)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       if (data) setActiveDiet(data);
