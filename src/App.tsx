@@ -12,6 +12,7 @@ import Progress from "./pages/Progress";
 import Profile from "./pages/Profile";
 import Onboarding from "./pages/Onboarding";
 import Assessment from "./pages/Assessment";
+import NutritionQuiz from "./pages/NutritionQuiz";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Plans from "./pages/Plans";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             <Route path="/assessment" element={<ProtectedRoute><Assessment /></ProtectedRoute>} />
+            <Route path="/nutrition-quiz" element={<ProtectedRoute><NutritionQuiz /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/diary" element={<ProtectedRoute><Diary /></ProtectedRoute>} />
             <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
