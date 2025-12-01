@@ -27,7 +27,7 @@ export const useGamification = () => {
           .from('user_stats')
           .select('*')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
 
