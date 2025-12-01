@@ -190,7 +190,7 @@ export default function Dashboard() {
   const PhaseIcon = phaseIcons[currentPhase];
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-24 pt-20 overflow-x-clip overflow-y-visible">
+    <div className="min-h-[100dvh] bg-background pb-24 pt-[130px] overflow-x-clip overflow-y-visible">
       <Navbar />
       
       <main className="px-4 py-6 overflow-visible">
