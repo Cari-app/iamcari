@@ -20,6 +20,7 @@ interface Profile {
   fasting_protocol: string | null;
   avatar_url: string | null;
   full_name: string | null;
+  nickname: string | null;
 }
 
 interface AuthContextType {
