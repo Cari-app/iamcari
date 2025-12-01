@@ -233,6 +233,47 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          kiwify_order_id: string | null
+          plan_id: string
+          status: Database["public"]["Enums"]["subscription_status"] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          kiwify_order_id?: string | null
+          plan_id: string
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          kiwify_order_id?: string | null
+          plan_id?: string
+          status?: Database["public"]["Enums"]["subscription_status"] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       token_transactions: {
         Row: {
           amount: number
@@ -274,6 +315,7 @@ export type Database = {
     }
     Enums: {
       meal_status: "manual" | "pending" | "analyzed" | "error"
+      subscription_status: "active" | "past_due" | "canceled" | "unpaid"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -402,6 +444,7 @@ export const Constants = {
   public: {
     Enums: {
       meal_status: ["manual", "pending", "analyzed", "error"],
+      subscription_status: ["active", "past_due", "canceled", "unpaid"],
     },
   },
 } as const
