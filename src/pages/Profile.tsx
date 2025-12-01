@@ -462,13 +462,19 @@ export default function Profile() {
                 <Trophy className="h-4 w-4 text-primary" />
                 Conquistas Recentes
               </h2>
-              <Badge variant="secondary" className="text-xs">
-                {userAchievements.length}/{achievements.length}
-              </Badge>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="h-7 text-xs text-primary hover:text-primary/80"
+                onClick={() => {/* TODO: Navigate to all achievements page */}}
+              >
+                Ver todas
+                <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
             </div>
 
-            <ScrollArea className="w-full">
-              <div className="flex gap-3 pb-2">
+            <div className="relative -mx-4 px-4">
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory">
                 {recentAchievements.map((achievement) => {
                   const unlocked = isAchievementUnlocked(achievement.code);
                   
@@ -477,39 +483,40 @@ export default function Profile() {
                       key={achievement.id}
                       onClick={() => handleAchievementClick(achievement)}
                       className={cn(
-                        "relative flex-shrink-0 w-20 p-3 rounded-xl border-2 transition-all",
+                        "relative flex-shrink-0 w-[100px] h-[120px] p-3 rounded-xl border transition-all snap-center",
+                        "flex flex-col items-center justify-between",
                         unlocked
-                          ? "bg-card border-primary/50 shadow-sm"
-                          : "bg-card/50 border-border grayscale opacity-50"
+                          ? "bg-white/5 border-primary/50 shadow-lg shadow-primary/10 hover:shadow-primary/20"
+                          : "bg-white/5 border-white/10 hover:border-white/20"
                       )}
                     >
+                      {/* Lock icon overlay for locked achievements */}
                       {!unlocked && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Lock className="h-5 w-5 text-muted-foreground" />
+                        <div className="absolute top-2 right-2">
+                          <Lock className="h-3.5 w-3.5 text-muted-foreground/50" />
                         </div>
                       )}
 
-                      <div className={cn("text-3xl mb-1", !unlocked && "opacity-0")}>
+                      {/* Icon */}
+                      <div className={cn(
+                        "text-4xl mt-2 transition-all",
+                        !unlocked && "grayscale opacity-50"
+                      )}>
                         {achievement.icon || '🏆'}
                       </div>
 
+                      {/* Name */}
                       <p className={cn(
-                        "text-[10px] font-medium line-clamp-2 leading-tight",
+                        "text-xs font-medium text-center line-clamp-2 leading-tight w-full px-1",
                         unlocked ? "text-foreground" : "text-muted-foreground"
                       )}>
                         {achievement.name}
                       </p>
-
-                      {unlocked && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-                          <span className="text-[10px] text-white">✓</span>
-                        </div>
-                      )}
                     </button>
                   );
                 })}
               </div>
-            </ScrollArea>
+            </div>
           </motion.div>
 
           {/* Section C: The Control Menu */}
