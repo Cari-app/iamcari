@@ -10,11 +10,11 @@ interface Profile {
   tier: string;
   onboarding_completed: boolean;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
   daily_calories_target: number | null;
   full_name: string | null;
   nickname: string | null;
-  active_diet: string | null;
+  active_diet?: string | null;
   avatar_url: string | null;
   fasting_protocol: string | null;
   weight: number | null;
@@ -22,6 +22,7 @@ interface Profile {
   age: number | null;
   gender: string | null;
   activity_level: string | null;
+  email?: string | null;
 }
 
 interface AuthContextType {
@@ -54,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (data) {
-      setProfile(data);
+      setProfile(data as Profile);
     } else {
       // Profile doesn't exist, create it
       const { data: newProfile, error: insertError } = await supabase
@@ -73,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (newProfile) {
-        setProfile(newProfile);
+        setProfile(newProfile as Profile);
       }
     }
   };
