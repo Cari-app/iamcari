@@ -237,7 +237,7 @@ const Plans = () => {
       }} className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2.5 text-sm text-muted-foreground">
             <Shield className="h-4 w-4" />
-            <span>Pagamento seguro via Stripe• Cancele a qualquer momento</span>
+            <span>Pagamento seguro via Stripe • Cancele a qualquer momento</span>
           </div>
           
           <button onClick={handleRestorePurchases} className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors underline-offset-4 hover:underline flex items-center gap-1.5 mx-auto">
