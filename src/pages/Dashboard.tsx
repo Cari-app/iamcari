@@ -50,6 +50,7 @@ export default function Dashboard() {
   const [caloriesConsumed, setCaloriesConsumed] = useState(0);
   const [lastCheckIn, setLastCheckIn] = useState<{ isEmotional: boolean; time: string } | null>(null);
   const [weeklyFasts, setWeeklyFasts] = useState(0);
+  const [gameCoins, setGameCoins] = useState(0);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [loading, setLoading] = useState(true);
   
@@ -121,45 +122,20 @@ export default function Dashboard() {
       
       setWeeklyFasts(weeklyData?.length || 0);
       
-      // Calculate streak (consecutive days with at least one completed fast)
-      const { data: allSessions, error: sessionsError } = await supabase
-        .from('fasting_sessions')
-        .select('start_time, end_time')
+      // Fetch user stats (streak and coins from database)
+      const { data: statsData, error: statsError } = await supabase
+        .from('user_stats')
+        .select('current_streak, game_coins')
         .eq('user_id', user.id)
-        .not('end_time', 'is', null)
-        .order('start_time', { ascending: false });
+        .maybeSingle();
       
-      if (sessionsError) {
-        console.error('Error fetching sessions:', sessionsError);
+      if (statsError) {
+        console.error('Error fetching user stats:', statsError);
       }
       
-      if (allSessions && allSessions.length > 0) {
-        let streak = 0;
-        let currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0);
-        
-        const sessionsByDay = new Map<string, boolean>();
-        allSessions.forEach(session => {
-          const dayKey = new Date(session.start_time).toISOString().split('T')[0];
-          sessionsByDay.set(dayKey, true);
-        });
-        
-        while (true) {
-          const dayKey = currentDate.toISOString().split('T')[0];
-          if (sessionsByDay.has(dayKey)) {
-            streak++;
-            currentDate.setDate(currentDate.getDate() - 1);
-          } else if (streak > 0) {
-            break;
-          } else {
-            currentDate.setDate(currentDate.getDate() - 1);
-            if (currentDate < new Date(allSessions[allSessions.length - 1].start_time)) {
-              break;
-            }
-          }
-        }
-        
-        setCurrentStreak(streak);
+      if (statsData) {
+        setCurrentStreak(statsData.current_streak || 0);
+        setGameCoins(statsData.game_coins || 0);
       }
       } catch (error) {
         console.error('Unexpected error fetching dashboard data:', error);
@@ -442,7 +418,7 @@ export default function Dashboard() {
                   <div className="flex items-center justify-center gap-1.5 mb-1">
                     <FitCoinIcon size={20} />
                     <p className="text-2xl font-bold text-foreground tabular-nums">
-                      {profile?.token_balance || 0}
+                      {gameCoins}
                     </p>
                   </div>
                   <p className="text-xs text-muted-foreground">
