@@ -16,18 +16,28 @@ interface DietType {
 }
 
 export default function DietResult() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [diet, setDiet] = useState<DietType | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || !profile) return;
+    if (!user) return;
 
     const fetchDietResult = async () => {
       try {
-        // Check if user has an active diet
-        if (!profile.active_diet) {
+        // Fetch the most recent nutrition assessment
+        const { data: assessment, error: assessmentError } = await supabase
+          .from('nutrition_assessments')
+          .select('suggested_diet')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (assessmentError) throw assessmentError;
+
+        if (!assessment || !assessment.suggested_diet) {
           toast({
             title: "Quiz não completado",
             description: "Complete o mapeamento primeiro",
@@ -37,18 +47,19 @@ export default function DietResult() {
           return;
         }
 
-        // Fetch diet details
-        const { data: dietData, error } = await supabase
+        // Fetch diet details using the suggested_diet
+        const { data: dietData, error: dietError } = await supabase
           .from('diet_types')
           .select('*')
-          .eq('id', profile.active_diet)
+          .eq('id', assessment.suggested_diet)
           .maybeSingle();
 
-        if (error) {
-          console.error('Error fetching diet:', error);
+        if (dietError) throw dietError;
+
+        if (!dietData) {
           toast({
             title: "Erro ao carregar resultado",
-            description: "Tente novamente",
+            description: "Dieta não encontrada",
             variant: "destructive",
           });
           navigate('/dashboard');
@@ -57,7 +68,12 @@ export default function DietResult() {
 
         setDiet(dietData);
       } catch (error) {
-        console.error('Unexpected error:', error);
+        console.error('Error fetching diet result:', error);
+        toast({
+          title: "Erro ao carregar resultado",
+          description: "Tente novamente",
+          variant: "destructive",
+        });
         navigate('/dashboard');
       } finally {
         setLoading(false);
@@ -65,7 +81,7 @@ export default function DietResult() {
     };
 
     fetchDietResult();
-  }, [user, profile, navigate]);
+  }, [user, navigate]);
 
   const getColorClasses = (theme: string) => {
     const colorMap: Record<string, { glow: string; border: string; text: string }> = {
