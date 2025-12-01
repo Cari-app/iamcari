@@ -7,14 +7,21 @@ import { Slider } from '@/components/ui/slider';
 import { Card } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, ArrowRight, User, Activity, Target } from 'lucide-react';
+import { ArrowLeft, ArrowRight, User, Activity, Target, Sparkles, TrendingUp, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Assessment = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { refreshProfile } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [calculatedData, setCalculatedData] = useState<{
+    bmr: number;
+    tdee: number;
+    target: number;
+  } | null>(null);
 
   // Step 1: Dados Básicos
   const [gender, setGender] = useState<string>('');
@@ -71,6 +78,7 @@ const Assessment = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
+      // Insert assessment data
       const { error } = await supabase.from('assessments').insert({
         user_id: user.id,
         gender,
@@ -85,12 +93,53 @@ const Assessment = () => {
 
       if (error) throw error;
 
-      toast({
-        title: 'Plano calculado com sucesso!',
-        description: 'Sua avaliação metabólica foi salva.',
-      });
+      // Wait minimum 1.5s for loading UX
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      navigate('/dashboard');
+      // Retry logic: Poll for updated profile data
+      let retries = 0;
+      const maxRetries = 5;
+      let profileData = null;
+
+      while (retries < maxRetries) {
+        await refreshProfile();
+        
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('daily_calories_target')
+          .eq('id', user.id)
+          .single();
+
+        if (profile?.daily_calories_target && profile.daily_calories_target > 0) {
+          profileData = profile;
+          break;
+        }
+
+        retries++;
+        if (retries < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 800));
+        }
+      }
+
+      // Fetch calculated BMR and TDEE from assessments
+      const { data: assessmentData } = await supabase
+        .from('assessments')
+        .select('bmr, tdee')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (profileData && assessmentData) {
+        setCalculatedData({
+          bmr: Math.round(assessmentData.bmr || 0),
+          tdee: Math.round(assessmentData.tdee || 0),
+          target: Math.round(profileData.daily_calories_target || 0),
+        });
+        setStep(4); // Move to result step
+      } else {
+        throw new Error('Não foi possível calcular o plano');
+      }
     } catch (error: any) {
       toast({
         title: 'Erro ao salvar avaliação',
@@ -137,6 +186,86 @@ const Assessment = () => {
       {/* Content */}
       <div className="flex-1 max-w-2xl mx-auto w-full px-4 py-6 pb-24">
         <AnimatePresence mode="wait">
+          {/* RESULT STEP (Step 4) */}
+          {step === 4 && calculatedData && (
+            <motion.div
+              key="step4"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="space-y-6 py-8"
+            >
+              {/* Success Icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="flex justify-center"
+              >
+                <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="h-12 w-12 text-primary" />
+                </div>
+              </motion.div>
+
+              {/* Header */}
+              <div className="text-center space-y-2">
+                <h2 className="text-3xl font-bold">Plano Calculado! 🎉</h2>
+                <p className="text-muted-foreground">
+                  A I.A. analisou seu perfil metabólico
+                </p>
+              </div>
+
+              {/* Results Cards */}
+              <div className="space-y-3 pt-4">
+                <Card className="p-6 border-2">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+                      <Activity className="h-6 w-6 text-secondary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">Metabolismo Basal (BMR)</p>
+                      <p className="text-2xl font-bold">{calculatedData.bmr} kcal</p>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6 border-2">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                      <TrendingUp className="h-6 w-6 text-accent" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">Gasto Total Diário (TDEE)</p>
+                      <p className="text-2xl font-bold">{calculatedData.tdee} kcal</p>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6 border-2 border-primary bg-primary/5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+                      <Flame className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground font-medium">🎯 Sua Meta Diária</p>
+                      <p className="text-3xl font-bold text-primary">{calculatedData.target} kcal</p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Action Button */}
+              <Button
+                size="lg"
+                onClick={() => navigate('/dashboard')}
+                className="w-full h-14 text-base font-semibold mt-8"
+              >
+                Começar Jornada
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </motion.div>
+          )}
+
           {step === 1 && (
             <motion.div
               key="step1"
@@ -400,9 +529,10 @@ const Assessment = () => {
       </div>
 
       {/* Footer Actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border">
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          {step < 3 ? (
+      {step < 4 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border">
+          <div className="max-w-2xl mx-auto px-4 py-4">
+            {step < 3 ? (
             <Button
               size="lg"
               onClick={handleNext}
@@ -416,17 +546,25 @@ const Assessment = () => {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           ) : (
-            <Button
-              size="lg"
-              onClick={handleComplete}
-              disabled={!canProceedStep3 || loading}
-              className="w-full h-14 text-base font-semibold"
-            >
-              {loading ? 'Calculando...' : 'Finalizar Avaliação'}
-            </Button>
-          )}
+              <Button
+                size="lg"
+                onClick={handleComplete}
+                disabled={!canProceedStep3 || loading}
+                className="w-full h-14 text-base font-semibold"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                    A I.A. está calculando...
+                  </span>
+                ) : (
+                  'Calcular Plano'
+                )}
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
