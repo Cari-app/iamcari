@@ -171,69 +171,60 @@ export default function Community() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-24 pt-20">
+    <div className="min-h-[100dvh] bg-background pb-24 pt-16">
       <Navbar />
       
-      {/* Floating Action Button */}
-      <motion.div
+      {/* Floating Action Button - Bottom Right */}
+      <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 260, damping: 20 }}
-        className="fixed top-[86px] right-4 z-40"
+        transition={{ delay: 0.3, type: 'spring', stiffness: 260, damping: 20 }}
+        onClick={() => setIsCreateModalOpen(true)}
+        className="fixed bottom-24 right-4 z-50 w-14 h-14 rounded-full bg-gradient-primary shadow-lg hover:shadow-xl flex items-center justify-center press-effect"
+        style={{ boxShadow: '0 8px 24px -4px rgba(139, 92, 246, 0.4)' }}
       >
-        <Button
-          onClick={() => setIsCreateModalOpen(true)}
-          size="lg"
-          className="rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-shadow p-0"
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
-      </motion.div>
+        <Plus className="h-6 w-6 text-white" />
+      </motion.button>
       
-      <main className="px-4 py-6">
+      <main className="pb-6">
 
         {/* Feed */}
         {loading ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="glass rounded-2xl p-4 animate-pulse">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-10 w-10 rounded-full bg-muted/50" />
+              <div key={i} className="animate-pulse">
+                <div className="flex items-center gap-2.5 px-4 mb-3">
+                  <div className="h-9 w-9 rounded-full bg-muted/50" />
                   <div className="flex-1">
                     <div className="h-3 bg-muted/50 rounded w-24 mb-1.5" />
                     <div className="h-2 bg-muted/50 rounded w-16" />
                   </div>
                 </div>
-                <div className="aspect-square bg-muted/50 rounded-xl mb-3" />
-                <div className="h-3 bg-muted/50 rounded w-full mb-2" />
-                <div className="h-3 bg-muted/50 rounded w-2/3" />
+                <div className="w-full aspect-[4/5] bg-muted/50 mb-3" />
+                <div className="px-4">
+                  <div className="h-8 bg-muted/50 rounded w-32 mb-2" />
+                  <div className="h-3 bg-muted/50 rounded w-full mb-1.5" />
+                  <div className="h-3 bg-muted/50 rounded w-3/4" />
+                </div>
               </div>
             ))}
           </div>
         ) : posts.length === 0 ? (
           <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center justify-center py-20 px-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center px-6 py-32 text-center"
           >
-            <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
-              <Users className="h-8 w-8 text-muted-foreground/50" />
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500/20 to-teal-500/20 flex items-center justify-center mb-6">
+              <Users className="h-10 w-10 text-violet-500" />
             </div>
-            <h3 className="text-base font-medium mb-1.5 text-foreground/80">Nenhum post ainda</h3>
-            <p className="text-sm text-muted-foreground mb-6 text-center">
-              Seja o primeiro a compartilhar sua jornada!
+            <h3 className="text-lg font-bold mb-2">A arena está vazia</h3>
+            <p className="text-sm text-muted-foreground max-w-xs">
+              Seja o primeiro a inspirar a comunidade!
             </p>
-            <Button 
-              onClick={() => setIsCreateModalOpen(true)}
-              size="sm"
-              className="rounded-full"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Criar Primeiro Post
-            </Button>
           </motion.div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {posts.map((post, index) => (
               <motion.div
                 key={post.id}

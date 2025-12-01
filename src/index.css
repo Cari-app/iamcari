@@ -171,6 +171,10 @@
   .gradient-primary {
     background: var(--gradient-primary);
   }
+  
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
 
   .gradient-warm {
     background: var(--gradient-warm);
