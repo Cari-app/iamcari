@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          achievement_key: string
+          description: string | null
+          icon: string | null
+          id: string
+          title: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_key: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          title: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_key?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          title?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       assessments: {
         Row: {
           activity_level: string
@@ -62,6 +92,33 @@ export type Database = {
           tdee?: number | null
           user_id?: string
           weight?: number
+        }
+        Relationships: []
+      }
+      diet_types: {
+        Row: {
+          color_theme: string
+          created_at: string | null
+          full_description: string
+          icon: string
+          id: string
+          name: string
+        }
+        Insert: {
+          color_theme: string
+          created_at?: string | null
+          full_description: string
+          icon: string
+          id: string
+          name: string
+        }
+        Update: {
+          color_theme?: string
+          created_at?: string | null
+          full_description?: string
+          icon?: string
+          id?: string
+          name?: string
         }
         Relationships: []
       }
@@ -185,41 +242,62 @@ export type Database = {
       profiles: {
         Row: {
           active_diet: string | null
+          activity_level: string | null
+          age: number | null
+          avatar_url: string | null
           created_at: string | null
           daily_calories_target: number | null
+          fasting_protocol: string | null
           full_name: string | null
+          gender: string | null
+          height: number | null
           id: string
           nickname: string | null
           onboarding_completed: boolean | null
           tier: string | null
           token_balance: number | null
           updated_at: string | null
+          weight: number | null
           whatsapp_number: string | null
         }
         Insert: {
           active_diet?: string | null
+          activity_level?: string | null
+          age?: number | null
+          avatar_url?: string | null
           created_at?: string | null
           daily_calories_target?: number | null
+          fasting_protocol?: string | null
           full_name?: string | null
+          gender?: string | null
+          height?: number | null
           id: string
           nickname?: string | null
           onboarding_completed?: boolean | null
           tier?: string | null
           token_balance?: number | null
           updated_at?: string | null
+          weight?: number | null
           whatsapp_number?: string | null
         }
         Update: {
           active_diet?: string | null
+          activity_level?: string | null
+          age?: number | null
+          avatar_url?: string | null
           created_at?: string | null
           daily_calories_target?: number | null
+          fasting_protocol?: string | null
           full_name?: string | null
+          gender?: string | null
+          height?: number | null
           id?: string
           nickname?: string | null
           onboarding_completed?: boolean | null
           tier?: string | null
           token_balance?: number | null
           updated_at?: string | null
+          weight?: number | null
           whatsapp_number?: string | null
         }
         Relationships: []

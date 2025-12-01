@@ -15,6 +15,13 @@ interface Profile {
   full_name: string | null;
   nickname: string | null;
   active_diet: string | null;
+  avatar_url: string | null;
+  fasting_protocol: string | null;
+  weight: number | null;
+  height: number | null;
+  age: number | null;
+  gender: string | null;
+  activity_level: string | null;
 }
 
 interface AuthContextType {
