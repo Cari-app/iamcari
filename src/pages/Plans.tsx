@@ -8,102 +8,73 @@ import { BottomNav } from "@/components/BottomNav";
 import { motion } from "framer-motion";
 import { FitCoinIcon } from "@/components/FitCoinIcon";
 import { cn } from "@/lib/utils";
-
 const Plans = () => {
-  const { user } = useAuth();
-
-  const plans = [
-    {
-      id: "trial",
-      name: "Trial",
-      badge: "Iniciante",
-      subtitle: "O Começo",
-      price: "27,00",
-      fitcoins: 30,
-      features: [
-        "Diário Inteligente",
-        "Acesso Básico à Dona",
-        "Análise de Jejum",
-        "Suporte via Email",
-      ],
-      checkoutUrl: "",
-      highlighted: false,
-      tier: "trial",
-    },
-    {
-      id: "vip",
-      name: "VIP",
-      badge: "Mais Popular",
-      subtitle: "O Destaque",
-      price: "67,00",
-      fitcoins: 80,
-      features: [
-        "Diário Inteligente",
-        "Acesso à Dona (WhatsApp)",
-        "Análise de Jejum Avançada",
-        "Suporte Prioritário",
-        "Acesso Antecipado a Features",
-      ],
-      checkoutUrl: "",
-      highlighted: true,
-      tier: "vip",
-    },
-    {
-      id: "premium",
-      name: "Premium",
-      badge: "Power User",
-      subtitle: "O Poderoso",
-      price: "97,00",
-      fitcoins: 190,
-      features: [
-        "Diário Inteligente",
-        "Acesso à Dona (WhatsApp)",
-        "Análise de Jejum Avançada",
-        "Suporte Prioritário",
-        "Acesso Ilimitado a Novas Features",
-        "Consultoria Mensal",
-      ],
-      checkoutUrl: "",
-      highlighted: false,
-      tier: "premium",
-    },
-  ];
-
+  const {
+    user
+  } = useAuth();
+  const plans = [{
+    id: "trial",
+    name: "Trial",
+    badge: "Iniciante",
+    subtitle: "O Começo",
+    price: "27,00",
+    fitcoins: 30,
+    features: ["Diário Inteligente", "Acesso Básico à Dona", "Análise de Jejum", "Suporte via Email"],
+    checkoutUrl: "",
+    highlighted: false,
+    tier: "trial"
+  }, {
+    id: "vip",
+    name: "VIP",
+    badge: "Mais Popular",
+    subtitle: "O Destaque",
+    price: "67,00",
+    fitcoins: 80,
+    features: ["Diário Inteligente", "Acesso à Dona (WhatsApp)", "Análise de Jejum Avançada", "Suporte Prioritário", "Acesso Antecipado a Features"],
+    checkoutUrl: "",
+    highlighted: true,
+    tier: "vip"
+  }, {
+    id: "premium",
+    name: "Premium",
+    badge: "Power User",
+    subtitle: "O Poderoso",
+    price: "97,00",
+    fitcoins: 190,
+    features: ["Diário Inteligente", "Acesso à Dona (WhatsApp)", "Análise de Jejum Avançada", "Suporte Prioritário", "Acesso Ilimitado a Novas Features", "Consultoria Mensal"],
+    checkoutUrl: "",
+    highlighted: false,
+    tier: "premium"
+  }];
   const handleSelectPlan = (plan: typeof plans[0]) => {
     if (!plan.checkoutUrl) {
       console.log("Checkout URL will be configured later");
       return;
     }
-    
     const checkoutUrl = new URL(plan.checkoutUrl);
     if (user?.email) {
       checkoutUrl.searchParams.set("email", user.email);
     }
     window.open(checkoutUrl.toString(), "_blank");
   };
-
   const handleRestorePurchases = () => {
     console.log("Restore purchases functionality");
   };
 
   // Reorder for mobile: VIP first
-  const mobilePlans = [
-    plans.find(p => p.id === "vip")!,
-    plans.find(p => p.id === "trial")!,
-    plans.find(p => p.id === "premium")!,
-  ];
-
-  return (
-    <div className="min-h-screen bg-background">
+  const mobilePlans = [plans.find(p => p.id === "vip")!, plans.find(p => p.id === "trial")!, plans.find(p => p.id === "premium")!];
+  return <div className="min-h-screen bg-background">
       <Navbar />
       
       <main className="container max-w-6xl mx-auto px-4 pt-[180px] pb-32 md:pb-20">
         {/* Hero Section - Minimalista */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-20 space-y-4"
-        >
+        <motion.div initial={{
+        opacity: 0,
+        y: 20
+      }} animate={{
+        opacity: 1,
+        y: 0
+      }} className="text-center mb-20 space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground">
             Potencialize sua Jornada
           </h1>
@@ -115,33 +86,22 @@ const Plans = () => {
 
         {/* Desktop: 3 Column Grid */}
         <div className="hidden md:grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
-          {plans.map((plan, index) => (
-            <motion.div
-              key={plan.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card
-                className={cn(
-                  "relative h-full bg-card border transition-all duration-200 hover:border-primary/30",
-                  plan.highlighted && "border-primary/40 shadow-sm"
-                )}
-              >
+          {plans.map((plan, index) => <motion.div key={plan.id} initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          delay: index * 0.1
+        }}>
+              <Card className={cn("relative h-full bg-card border transition-all duration-200 hover:border-primary/30", plan.highlighted && "border-primary/40 shadow-sm")}>
                 {/* Badge Simples */}
-                {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                    <Badge 
-                      variant={plan.highlighted ? "default" : "secondary"}
-                      className={cn(
-                        "px-3 py-0.5 text-xs",
-                        plan.highlighted && "bg-primary text-primary-foreground"
-                      )}
-                    >
+                {plan.badge && <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                    <Badge variant={plan.highlighted ? "default" : "secondary"} className={cn("px-3 py-0.5 text-xs", plan.highlighted && "bg-primary text-primary-foreground")}>
                       {plan.badge}
                     </Badge>
-                  </div>
-                )}
+                  </div>}
 
                 <CardHeader className="text-center pb-6 pt-8">
                   <h3 className="text-xl font-semibold text-foreground mb-1">
@@ -177,63 +137,42 @@ const Plans = () => {
                 </CardHeader>
 
                 <CardContent className="space-y-3 px-6 pb-6">
-                  {plan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start gap-2.5">
+                  {plan.features.map((feature, idx) => <div key={idx} className="flex items-start gap-2.5">
                       <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                       <span className="text-sm text-foreground/80">
                         {feature}
                       </span>
-                    </div>
-                  ))}
+                    </div>)}
                 </CardContent>
 
                 <CardFooter className="px-6 pb-6">
-                  <Button
-                    onClick={() => handleSelectPlan(plan)}
-                    className={cn(
-                      "w-full h-11 font-medium transition-all",
-                      plan.highlighted && "bg-primary text-primary-foreground hover:bg-primary/90"
-                    )}
-                    variant={plan.highlighted ? "default" : "outline"}
-                  >
+                  <Button onClick={() => handleSelectPlan(plan)} className={cn("w-full h-11 font-medium transition-all", plan.highlighted && "bg-primary text-primary-foreground hover:bg-primary/90")} variant={plan.highlighted ? "default" : "outline"}>
                     {plan.tier === "trial" && "Experimentar"}
                     {plan.tier === "vip" && "Escolher VIP"}
                     {plan.tier === "premium" && "Escolher Premium"}
                   </Button>
                 </CardFooter>
               </Card>
-            </motion.div>
-          ))}
+            </motion.div>)}
         </div>
 
         {/* Mobile: Vertical Stack */}
         <div className="md:hidden space-y-6 mb-16">
-          {mobilePlans.map((plan, index) => (
-            <motion.div
-              key={plan.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card
-                className={cn(
-                  "relative bg-card border transition-all",
-                  plan.highlighted && "border-primary/40 shadow-sm"
-                )}
-              >
-                {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                    <Badge 
-                      variant={plan.highlighted ? "default" : "secondary"}
-                      className={cn(
-                        "px-3 py-0.5 text-xs",
-                        plan.highlighted && "bg-primary text-primary-foreground"
-                      )}
-                    >
+          {mobilePlans.map((plan, index) => <motion.div key={plan.id} initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          delay: index * 0.1
+        }}>
+              <Card className={cn("relative bg-card border transition-all", plan.highlighted && "border-primary/40 shadow-sm")}>
+                {plan.badge && <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                    <Badge variant={plan.highlighted ? "default" : "secondary"} className={cn("px-3 py-0.5 text-xs", plan.highlighted && "bg-primary text-primary-foreground")}>
                       {plan.badge}
                     </Badge>
-                  </div>
-                )}
+                  </div>}
 
                 <CardHeader className="text-center pb-6 pt-8">
                   <h3 className="text-xl font-semibold text-foreground mb-1">
@@ -267,51 +206,41 @@ const Plans = () => {
                 </CardHeader>
 
                 <CardContent className="space-y-3 px-6 pb-6">
-                  {plan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-start gap-2.5">
+                  {plan.features.map((feature, idx) => <div key={idx} className="flex items-start gap-2.5">
                       <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                       <span className="text-sm text-foreground/80">
                         {feature}
                       </span>
-                    </div>
-                  ))}
+                    </div>)}
                 </CardContent>
 
                 <CardFooter className="px-6 pb-6">
-                  <Button
-                    onClick={() => handleSelectPlan(plan)}
-                    className={cn(
-                      "w-full h-11 font-medium transition-all",
-                      plan.highlighted && "bg-primary text-primary-foreground hover:bg-primary/90"
-                    )}
-                    variant={plan.highlighted ? "default" : "outline"}
-                  >
+                  <Button onClick={() => handleSelectPlan(plan)} className={cn("w-full h-11 font-medium transition-all", plan.highlighted && "bg-primary text-primary-foreground hover:bg-primary/90")} variant={plan.highlighted ? "default" : "outline"}>
                     {plan.tier === "trial" && "Experimentar"}
                     {plan.tier === "vip" && "Escolher VIP"}
                     {plan.tier === "premium" && "Escolher Premium"}
                   </Button>
                 </CardFooter>
               </Card>
-            </motion.div>
-          ))}
+            </motion.div>)}
         </div>
 
         {/* Trust Footer - Minimalista */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="text-center space-y-3"
-        >
+        <motion.div initial={{
+        opacity: 0,
+        y: 20
+      }} animate={{
+        opacity: 1,
+        y: 0
+      }} transition={{
+        delay: 0.3
+      }} className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2.5 text-sm text-muted-foreground">
             <Shield className="h-4 w-4" />
-            <span>Pagamento seguro via Kiwify • Cancele a qualquer momento</span>
+            <span>Pagamento seguro via Stripe• Cancele a qualquer momento</span>
           </div>
           
-          <button
-            onClick={handleRestorePurchases}
-            className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors underline-offset-4 hover:underline flex items-center gap-1.5 mx-auto"
-          >
+          <button onClick={handleRestorePurchases} className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors underline-offset-4 hover:underline flex items-center gap-1.5 mx-auto">
             <RefreshCw className="h-3 w-3" />
             Restaurar Compras
           </button>
@@ -319,8 +248,6 @@ const Plans = () => {
       </main>
 
       <BottomNav />
-    </div>
-  );
+    </div>;
 };
-
 export default Plans;
