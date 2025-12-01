@@ -27,6 +27,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [nickname, setNickname] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -77,6 +78,26 @@ export default function Login() {
       toast({
         title: "Nome obrigatório",
         description: "Por favor, informe seu nome completo.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Validate nickname
+    if (!nickname.trim()) {
+      toast({
+        title: "Apelido obrigatório",
+        description: "Por favor, escolha um apelido (nick).",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Validate nickname format (no spaces, alphanumeric + underscore)
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(nickname.trim())) {
+      toast({
+        title: "Apelido inválido",
+        description: "Use apenas letras, números e underscore. Entre 3-20 caracteres.",
         variant: "destructive",
       });
       return false;
@@ -211,7 +232,7 @@ export default function Login() {
         return;
       }
 
-      // Step 2: Immediately update profile with full_name and whatsapp_number
+      // Step 2: Immediately update profile with full_name, nickname, and whatsapp_number
       if (authData?.user) {
         const formattedPhone = formatWhatsAppNumber(whatsapp);
         
@@ -219,6 +240,7 @@ export default function Login() {
           .from('profiles')
           .update({
             full_name: fullName,
+            nickname: nickname.trim(),
             whatsapp_number: formattedPhone,
           })
           .eq('id', authData.user.id);
@@ -402,6 +424,22 @@ export default function Login() {
                           className="h-12 pl-12 pr-4 rounded-2xl text-base bg-card border-border focus:border-primary"
                           required
                         />
+                      </div>
+
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input
+                          type="text"
+                          placeholder="Apelido (Nick)"
+                          value={nickname}
+                          onChange={(e) => setNickname(e.target.value.toLowerCase())}
+                          className="h-12 pl-12 pr-4 rounded-2xl text-base bg-card border-border focus:border-primary"
+                          maxLength={20}
+                          required
+                        />
+                        <p className="text-xs text-muted-foreground mt-1 ml-1">
+                          Usado em posts e comunidade
+                        </p>
                       </div>
 
                       <div className="relative">

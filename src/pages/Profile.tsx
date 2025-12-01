@@ -76,6 +76,7 @@ export default function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [fullName, setFullName] = useState<string>('');
+  const [nickname, setNickname] = useState<string>('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -95,6 +96,12 @@ export default function Profile() {
   const [bodyHeight, setBodyHeight] = useState<number>(0);
   const [savingBodyStats, setSavingBodyStats] = useState(false);
 
+  // Personal Data Dialog
+  const [isPersonalDataOpen, setIsPersonalDataOpen] = useState(false);
+  const [editFullName, setEditFullName] = useState('');
+  const [editNickname, setEditNickname] = useState('');
+  const [savingPersonalData, setSavingPersonalData] = useState(false);
+
   // Fetch profile data
   useEffect(() => {
     if (!user) {
@@ -106,12 +113,13 @@ export default function Profile() {
       // Fetch profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('full_name, avatar_url, weight, height')
+        .select('full_name, nickname, avatar_url, weight, height')
         .eq('id', user.id)
         .single();
 
       if (profileData) {
         setFullName(profileData.full_name || user.email?.split('@')[0] || 'Jogador');
+        setNickname(profileData.nickname || '');
         setAvatarUrl(profileData.avatar_url);
         setBodyWeight(profileData.weight || 0);
         setBodyHeight(profileData.height || 0);
@@ -260,6 +268,69 @@ export default function Profile() {
 
   const handleEditBodyStats = () => {
     setIsBodyStatsOpen(true);
+  };
+
+  const handleEditPersonalData = () => {
+    setEditFullName(fullName);
+    setEditNickname(nickname);
+    setIsPersonalDataOpen(true);
+  };
+
+  const handleSavePersonalData = async () => {
+    if (!user) return;
+
+    // Validate nickname format
+    if (editNickname.trim() && !/^[a-zA-Z0-9_]{3,20}$/.test(editNickname.trim())) {
+      toast({
+        title: '❌ Apelido inválido',
+        description: 'Use apenas letras, números e underscore. Entre 3-20 caracteres.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSavingPersonalData(true);
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          full_name: editFullName.trim(),
+          nickname: editNickname.trim() || null,
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        // Check if it's a unique constraint error
+        if (error.code === '23505') {
+          toast({
+            title: '❌ Apelido já existe',
+            description: 'Esse apelido já está sendo usado. Escolha outro.',
+            variant: 'destructive',
+          });
+          return;
+        }
+        throw error;
+      }
+
+      setFullName(editFullName.trim());
+      setNickname(editNickname.trim());
+      setIsPersonalDataOpen(false);
+
+      toast({
+        title: '✅ Dados atualizados',
+        description: 'Suas informações foram salvas',
+      });
+    } catch (error) {
+      console.error('Error updating personal data:', error);
+      toast({
+        title: '❌ Erro ao salvar',
+        description: 'Não foi possível atualizar seus dados',
+        variant: 'destructive',
+      });
+    } finally {
+      setSavingPersonalData(false);
+    }
   };
 
   const handleSaveBodyStats = async () => {
@@ -532,12 +603,23 @@ export default function Profile() {
               <Card>
                 <CardContent className="p-0">
                   <button
+                    onClick={handleEditPersonalData}
+                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <User className="h-5 w-5 text-muted-foreground" />
+                      <span className="font-medium text-foreground">Meus Dados</span>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </button>
+
+                  <button
                     onClick={handleEditBodyStats}
                     className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <Scale className="h-5 w-5 text-muted-foreground" />
-                      <span className="font-medium text-foreground">Meus Dados Corporais</span>
+                      <span className="font-medium text-foreground">Dados Corporais</span>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </button>
@@ -685,6 +767,63 @@ export default function Profile() {
               className="gradient-primary text-white"
             >
               {savingBodyStats && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Personal Data Dialog */}
+      <Dialog open={isPersonalDataOpen} onOpenChange={setIsPersonalDataOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Atualizar Meus Dados</DialogTitle>
+            <DialogDescription>
+              Edite seu nome e apelido (nick) usado na comunidade
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-fullname">Nome Completo</Label>
+              <Input
+                id="edit-fullname"
+                type="text"
+                value={editFullName}
+                onChange={(e) => setEditFullName(e.target.value)}
+                placeholder="Seu nome completo"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-nickname">Apelido (Nick)</Label>
+              <Input
+                id="edit-nickname"
+                type="text"
+                value={editNickname}
+                onChange={(e) => setEditNickname(e.target.value.toLowerCase())}
+                placeholder="seu_nick"
+                maxLength={20}
+              />
+              <p className="text-xs text-muted-foreground">
+                Usado em posts e comunidade. Use apenas letras, números e underscore (3-20 caracteres).
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsPersonalDataOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSavePersonalData}
+              disabled={savingPersonalData || !editFullName.trim()}
+              className="gradient-primary text-white"
+            >
+              {savingPersonalData && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Salvar
             </Button>
           </DialogFooter>
