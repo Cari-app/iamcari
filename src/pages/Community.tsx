@@ -174,22 +174,23 @@ export default function Community() {
     <div className="min-h-[100dvh] bg-background pb-24 pt-20">
       <Navbar />
       
-      <main className="px-4 py-6 max-w-2xl mx-auto">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-end mb-6"
+      {/* Floating Action Button */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.2, type: 'spring', stiffness: 260, damping: 20 }}
+        className="fixed top-[86px] right-4 z-40"
+      >
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          size="lg"
+          className="rounded-full w-14 h-14 shadow-lg hover:shadow-xl transition-shadow p-0"
         >
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            size="sm"
-            className="gap-2 rounded-full"
-          >
-            <Plus className="h-4 w-4" />
-            Novo Post
-          </Button>
-        </motion.div>
+          <Plus className="h-6 w-6" />
+        </Button>
+      </motion.div>
+      
+      <main className="px-4 py-6">
 
         {/* Feed */}
         {loading ? (
