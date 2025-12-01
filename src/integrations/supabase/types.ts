@@ -276,7 +276,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      renew_subscription_balance: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       meal_status: "manual" | "pending" | "analyzed" | "error"
