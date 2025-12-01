@@ -11,6 +11,7 @@ interface DietType {
   id: string;
   name: string;
   icon: string;
+  short_description: string;
   full_description: string;
   color_theme: string;
 }
@@ -163,10 +164,19 @@ export default function DietResult() {
             {diet.name}
           </h3>
 
-          {/* Description */}
-          <p className="text-muted-foreground text-center leading-relaxed">
-            {diet.full_description}
+          {/* Short Description */}
+          <p className="text-muted-foreground text-center leading-relaxed mb-4">
+            {diet.full_description?.split('\n')[0] || 'Sua dieta personalizada'}
           </p>
+
+          <Button
+            onClick={() => navigate(`/diet-detail?diet=${diet.id}`)}
+            variant="outline"
+            size="sm"
+            className="w-full"
+          >
+            Ver Guia Completo
+          </Button>
         </motion.div>
 
         {/* Why This Diet */}
@@ -196,15 +206,15 @@ export default function DietResult() {
             className="w-full h-12"
             size="lg"
           >
-            Ver Plano no Diário
+            Ir para o Dashboard
           </Button>
           <Button
-            onClick={() => navigate('/explore-diets')}
+            onClick={() => navigate('/diets')}
             variant="outline"
             className="w-full h-12"
             size="lg"
           >
-            Explorar Outras Opções
+            Explorar Outras Dietas
           </Button>
         </motion.div>
       </main>
