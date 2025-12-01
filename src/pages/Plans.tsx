@@ -97,7 +97,7 @@ const Plans = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container max-w-6xl mx-auto px-4 pt-[130px] pb-32 md:pb-20">
+      <main className="container max-w-6xl mx-auto px-4 pt-[180px] pb-32 md:pb-20">
         {/* Hero Section - Minimalista */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
