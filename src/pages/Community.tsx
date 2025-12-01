@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Users } from 'lucide-react';
 import { PostCard } from '@/components/community/PostCard';
 import { CreatePostModal } from '@/components/community/CreatePostModal';
+import { RightSidebar } from '@/components/community/RightSidebar';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -171,7 +172,7 @@ export default function Community() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-24 pt-16">
+    <div className="min-h-[100dvh] bg-background pb-24 pt-16 md:pb-0 md:pt-0">
       <Navbar />
       
       {/* Floating Action Button - Bottom Right */}
@@ -180,13 +181,16 @@ export default function Community() {
         animate={{ scale: 1 }}
         transition={{ delay: 0.3, type: 'spring', stiffness: 260, damping: 20 }}
         onClick={() => setIsCreateModalOpen(true)}
-        className="fixed bottom-24 right-4 z-50 w-14 h-14 rounded-full bg-gradient-primary shadow-lg hover:shadow-xl flex items-center justify-center press-effect"
+        className="fixed bottom-24 right-4 z-50 w-14 h-14 rounded-full bg-gradient-primary shadow-lg hover:shadow-xl flex items-center justify-center press-effect md:bottom-8"
         style={{ boxShadow: '0 8px 24px -4px rgba(139, 92, 246, 0.4)' }}
       >
         <Plus className="h-6 w-6 text-white" />
       </motion.button>
       
-      <main className="pb-6">
+      <div className="md:max-w-screen-xl md:mx-auto md:py-8">
+        <div className="md:flex md:gap-8">
+          {/* Main Feed */}
+          <main className="pb-6 md:flex-1 md:max-w-2xl md:mx-auto">
 
         {/* Feed */}
         {loading ? (
@@ -243,13 +247,20 @@ export default function Community() {
         )}
       </main>
 
-      <BottomNav />
-      
-      <CreatePostModal
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-        onPostCreated={fetchPosts}
-      />
+      {/* Right Sidebar - Desktop Only */}
+      <div className="hidden lg:block">
+        <RightSidebar />
+      </div>
     </div>
-  );
+  </div>
+
+  <BottomNav />
+  
+  <CreatePostModal
+    open={isCreateModalOpen}
+    onOpenChange={setIsCreateModalOpen}
+    onPostCreated={fetchPosts}
+  />
+</div>
+);
 }
