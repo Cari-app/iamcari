@@ -26,6 +26,7 @@ import {
   Shield,
   ChevronRight,
   Gem,
+  Swords,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -641,6 +642,17 @@ export default function Profile() {
                     <div className="flex items-center gap-3">
                       <Crown className="h-5 w-5 text-primary" />
                       <span className="font-medium text-foreground">Planos & FitCoins</span>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/arena')}
+                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Swords className="h-5 w-5 text-violet-500" />
+                      <span className="font-medium text-foreground">Arena</span>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </button>
