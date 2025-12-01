@@ -31,29 +31,32 @@ export function GamificationWidget() {
   return (
     <motion.button
       onClick={() => navigate('/profile')}
-      className="flex items-center justify-end gap-2 press-effect rounded-xl hover:bg-accent/5 p-1.5 transition-colors"
+      className="flex items-center justify-end gap-3 press-effect rounded-xl hover:bg-accent/5 p-1.5 transition-colors"
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
-      <div className="hidden sm:flex items-center gap-1.5">
+      <div className="hidden sm:flex flex-col items-start gap-1">
+        <span className="text-xs font-semibold text-foreground">
+          Nível {level}
+        </span>
         <Progress 
           value={xpPercentage} 
-          className="h-2 w-20 bg-secondary"
+          className="h-2 w-24 bg-secondary"
         />
-        <span className="text-[10px] text-muted-foreground tabular-nums whitespace-nowrap">
+        <span className="text-[10px] text-muted-foreground tabular-nums">
           {xp}/1000 XP
         </span>
       </div>
 
       <div className="relative">
-        <Avatar className="h-9 w-9 ring-2 ring-primary/20">
+        <Avatar className="h-10 w-10 ring-2 ring-primary/20">
           <AvatarImage src={profile?.avatar_url || ''} alt="Avatar" />
           <AvatarFallback className="bg-primary/10">
             <User className="h-5 w-5 text-primary" />
           </AvatarFallback>
         </Avatar>
-        <div className="absolute -top-1 -right-1 bg-gradient-to-r from-violet-600 to-violet-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-lg border border-violet-400/30">
-          Lvl {level}
+        <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-violet-600 to-violet-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-lg border border-violet-400/30">
+          {level}
         </div>
       </div>
     </motion.button>
