@@ -222,13 +222,32 @@ export default function DietDetail() {
                   <AccordionContent className="px-5 pb-4 pt-2">
                     <div className="prose prose-sm prose-invert max-w-none">
                       <div
-                        className="text-muted-foreground leading-relaxed whitespace-pre-wrap text-sm"
+                        className="text-muted-foreground leading-relaxed text-sm"
                         dangerouslySetInnerHTML={{
                           __html: section.content
+                            // Remove markdown italics
+                            .replace(/\*([^\*\n]+)\*/g, '$1')
+                            // Bold text
                             .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>')
-                            .replace(/✔️/g, '<span class="text-teal-400">✔️</span>')
+                            // Replace literal \n with actual breaks
+                            .replace(/\\n/g, '\n')
+                            // Remove --- separators
+                            .replace(/^---+$/gm, '')
+                            // Remove blockquote markers
+                            .replace(/^>\s*/gm, '')
+                            // Process bullet points starting with *
+                            .replace(/^\* (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-teal-400 shrink-0">•</span><span>$1</span></div>')
+                            // Process bullet points starting with -
                             .replace(/^- (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-teal-400 shrink-0">•</span><span>$1</span></div>')
+                            // Process numbered lists
                             .replace(/^(\d+)\. (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-violet-400 font-semibold shrink-0">$1.</span><span>$2</span></div>')
+                            // Checkmarks
+                            .replace(/✔️/g, '<span class="text-teal-400">✔️</span>')
+                            // Convert newlines to <br> for remaining text
+                            .split('\n')
+                            .map(line => line.trim())
+                            .filter(line => line.length > 0)
+                            .join('<br/><br/>')
                         }}
                       />
                     </div>
