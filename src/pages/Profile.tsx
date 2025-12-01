@@ -534,15 +534,6 @@ export default function Profile() {
                 <Trophy className="h-4 w-4 text-primary" />
                 Conquistas Recentes
               </h2>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="h-7 text-xs text-primary hover:text-primary/80"
-                onClick={() => {/* TODO: Navigate to all achievements page */}}
-              >
-                Ver todas
-                <ChevronRight className="h-3 w-3 ml-1" />
-              </Button>
             </div>
 
             <div className="grid grid-cols-4 gap-2">
