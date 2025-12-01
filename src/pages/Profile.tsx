@@ -473,49 +473,47 @@ export default function Profile() {
               </Button>
             </div>
 
-            <div className="relative -mx-4 px-4">
-              <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory">
-                {recentAchievements.map((achievement) => {
-                  const unlocked = isAchievementUnlocked(achievement.code);
-                  
-                  return (
-                    <button
-                      key={achievement.id}
-                      onClick={() => handleAchievementClick(achievement)}
-                      className={cn(
-                        "relative flex-shrink-0 w-[100px] h-[120px] p-3 rounded-xl border transition-all snap-center",
-                        "flex flex-col items-center justify-between",
-                        unlocked
-                          ? "bg-white/5 border-primary/50 shadow-lg shadow-primary/10 hover:shadow-primary/20"
-                          : "bg-white/5 border-white/10 hover:border-white/20"
-                      )}
-                    >
-                      {/* Lock icon overlay for locked achievements */}
-                      {!unlocked && (
-                        <div className="absolute top-2 right-2">
-                          <Lock className="h-3.5 w-3.5 text-muted-foreground/50" />
-                        </div>
-                      )}
-
-                      {/* Icon */}
-                      <div className={cn(
-                        "text-4xl mt-2 transition-all",
-                        !unlocked && "grayscale opacity-50"
-                      )}>
-                        {achievement.icon || '🏆'}
+            <div className="grid grid-cols-2 gap-3">
+              {recentAchievements.slice(0, 4).map((achievement) => {
+                const unlocked = isAchievementUnlocked(achievement.code);
+                
+                return (
+                  <button
+                    key={achievement.id}
+                    onClick={() => handleAchievementClick(achievement)}
+                    className={cn(
+                      "relative h-28 p-3 rounded-xl border transition-all",
+                      "flex flex-col items-center justify-center gap-2",
+                      unlocked
+                        ? "bg-gradient-to-br from-teal-500/20 to-violet-500/20 border-primary/50 shadow-lg shadow-primary/10 hover:shadow-primary/20"
+                        : "bg-white/5 border-white/10 hover:border-white/20"
+                    )}
+                  >
+                    {/* Lock icon overlay for locked achievements */}
+                    {!unlocked && (
+                      <div className="absolute top-2 right-2">
+                        <Lock className="h-3.5 w-3.5 text-muted-foreground/50" />
                       </div>
+                    )}
 
-                      {/* Name */}
-                      <p className={cn(
-                        "text-xs font-medium text-center line-clamp-2 leading-tight w-full px-1",
-                        unlocked ? "text-foreground" : "text-muted-foreground"
-                      )}>
-                        {achievement.name}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
+                    {/* Icon */}
+                    <div className={cn(
+                      "text-3xl transition-all",
+                      !unlocked && "grayscale opacity-50"
+                    )}>
+                      {achievement.icon || '🏆'}
+                    </div>
+
+                    {/* Name */}
+                    <p className={cn(
+                      "text-xs font-medium text-center line-clamp-2 leading-tight w-full px-1",
+                      unlocked ? "text-foreground" : "text-muted-foreground"
+                    )}>
+                      {achievement.name}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
           </motion.div>
 
