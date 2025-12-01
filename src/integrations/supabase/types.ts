@@ -383,6 +383,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_diet: string | null
           activity_level: string | null
           age: number | null
           avatar_url: string | null
@@ -402,6 +403,7 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
+          active_diet?: string | null
           activity_level?: string | null
           age?: number | null
           avatar_url?: string | null
@@ -421,6 +423,7 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
+          active_diet?: string | null
           activity_level?: string | null
           age?: number | null
           avatar_url?: string | null
