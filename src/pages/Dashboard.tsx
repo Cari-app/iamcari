@@ -10,11 +10,13 @@ import { ProtocolSelector } from '@/components/dashboard/ProtocolSelector';
 import { BentoStats } from '@/components/dashboard/BentoStats';
 import { useFastingTimer } from '@/hooks/useFastingTimer';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Play, Pause, RotateCcw, Flame, Zap, Sparkles, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { FitCoinIcon } from '@/components/FitCoinIcon';
+import { toast } from '@/hooks/use-toast';
 
 export default function Dashboard() {
   const { user, profile, refreshProfile } = useAuth();
@@ -49,21 +51,36 @@ export default function Dashboard() {
   const [lastCheckIn, setLastCheckIn] = useState<{ isEmotional: boolean; time: string } | null>(null);
   const [weeklyFasts, setWeeklyFasts] = useState(0);
   const [currentStreak, setCurrentStreak] = useState(0);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     
     const fetchDashboardData = async () => {
-      const today = new Date().toISOString().split('T')[0];
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      
-      // Fetch today's meals
-      const { data: mealsData } = await supabase
+      try {
+        setLoading(true);
+        const today = new Date().toISOString().split('T')[0];
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        
+        // Fetch today's meals
+        const { data: mealsData, error: mealsError } = await supabase
         .from('meal_logs')
         .select('calories, is_emotional, created_at')
         .eq('user_id', user.id)
         .gte('created_at', `${today}T00:00:00`)
         .order('created_at', { ascending: false });
+      
+      if (mealsError) {
+        console.error('Error fetching meals:', mealsError);
+        toast({
+          title: '❌ Erro ao carregar dados',
+          description: 'Não foi possível carregar as refeições. Tente novamente.',
+          variant: 'destructive',
+        });
+      }
       
       if (mealsData) {
         const totalCalories = mealsData.reduce((sum, log) => sum + (log.calories || 0), 0);
@@ -91,22 +108,30 @@ export default function Dashboard() {
       }
       
       // Fetch weekly fasting sessions (last 7 days, completed only)
-      const { data: weeklyData } = await supabase
+      const { data: weeklyData, error: weeklyError } = await supabase
         .from('fasting_sessions')
         .select('id')
         .eq('user_id', user.id)
         .not('end_time', 'is', null)
         .gte('start_time', sevenDaysAgo);
       
+      if (weeklyError) {
+        console.error('Error fetching weekly data:', weeklyError);
+      }
+      
       setWeeklyFasts(weeklyData?.length || 0);
       
       // Calculate streak (consecutive days with at least one completed fast)
-      const { data: allSessions } = await supabase
+      const { data: allSessions, error: sessionsError } = await supabase
         .from('fasting_sessions')
         .select('start_time, end_time')
         .eq('user_id', user.id)
         .not('end_time', 'is', null)
         .order('start_time', { ascending: false });
+      
+      if (sessionsError) {
+        console.error('Error fetching sessions:', sessionsError);
+      }
       
       if (allSessions && allSessions.length > 0) {
         let streak = 0;
@@ -135,6 +160,16 @@ export default function Dashboard() {
         }
         
         setCurrentStreak(streak);
+      }
+      } catch (error) {
+        console.error('Unexpected error fetching dashboard data:', error);
+        toast({
+          title: '❌ Erro inesperado',
+          description: 'Ocorreu um erro ao carregar os dados. Tente recarregar a página.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
       }
     };
     
@@ -377,35 +412,45 @@ export default function Dashboard() {
             transition={{ delay: 0.3 }}
             className="grid grid-cols-3 gap-3"
           >
-            <div className="p-4 rounded-2xl bg-card border border-border text-center">
-              <p className="text-2xl font-bold text-foreground tabular-nums">
-                {weeklyFasts}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Esta semana
-              </p>
-            </div>
-            
-            <div className="p-4 rounded-2xl bg-card border border-border text-center">
-              <p className="text-2xl font-bold text-foreground tabular-nums">
-                {currentStreak}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Sequência
-              </p>
-            </div>
-            
-            <div className="p-4 rounded-2xl bg-card border border-border text-center">
-              <div className="flex items-center justify-center gap-1.5 mb-1">
-                <FitCoinIcon size={20} />
-                <p className="text-2xl font-bold text-foreground tabular-nums">
-                  {profile?.token_balance || 0}
-                </p>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                FitCoins
-              </p>
-            </div>
+            {loading ? (
+              <>
+                <Skeleton className="h-20 rounded-2xl" />
+                <Skeleton className="h-20 rounded-2xl" />
+                <Skeleton className="h-20 rounded-2xl" />
+              </>
+            ) : (
+              <>
+                <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                  <p className="text-2xl font-bold text-foreground tabular-nums">
+                    {weeklyFasts}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Esta semana
+                  </p>
+                </div>
+                
+                <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                  <p className="text-2xl font-bold text-foreground tabular-nums">
+                    {currentStreak}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Sequência
+                  </p>
+                </div>
+                
+                <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    <FitCoinIcon size={20} />
+                    <p className="text-2xl font-bold text-foreground tabular-nums">
+                      {profile?.token_balance || 0}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    FitCoins
+                  </p>
+                </div>
+              </>
+            )}
           </motion.div>
         </div>
       </main>

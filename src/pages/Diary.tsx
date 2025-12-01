@@ -10,7 +10,8 @@ import { MealInputDialog } from '@/components/diary/MealInputDialog';
 import { MealEditDialog } from '@/components/diary/MealEditDialog';
 import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
-import { Calendar as CalendarIcon, Camera } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Calendar as CalendarIcon, Camera, Coffee } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry, EmotionTag } from '@/types';
 import { supabase } from '@/integrations/supabase';
@@ -43,26 +44,32 @@ export default function Diary() {
     }
 
     const fetchLogsForDate = async () => {
-      // Get start and end of selected date
-      const startOfDay = new Date(selectedDate);
-      startOfDay.setHours(0, 0, 0, 0);
-      
-      const endOfDay = new Date(selectedDate);
-      endOfDay.setHours(23, 59, 59, 999);
-      
-      const { data, error } = await supabase
-        .from('meal_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('created_at', startOfDay.toISOString())
-        .lte('created_at', endOfDay.toISOString())
-        .order('created_at', { ascending: false });
+      try {
+        // Get start and end of selected date
+        const startOfDay = new Date(selectedDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        
+        const endOfDay = new Date(selectedDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        
+        const { data, error } = await supabase
+          .from('meal_logs')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('created_at', startOfDay.toISOString())
+          .lte('created_at', endOfDay.toISOString())
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching meal logs:', error);
-        setLoading(false);
-        return;
-      }
+        if (error) {
+          console.error('Error fetching meal logs:', error);
+          toast({
+            title: '❌ Erro ao carregar',
+            description: 'Não foi possível carregar os registros. Tente novamente.',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
 
       if (data) {
         const entries: TimelineEntry[] = data.map(log => {
@@ -115,7 +122,16 @@ export default function Diary() {
         
         setTimeline(entries);
       }
-      setLoading(false);
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        toast({
+          title: '❌ Erro inesperado',
+          description: 'Ocorreu um erro ao carregar os dados.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchLogsForDate();
@@ -614,41 +630,46 @@ export default function Diary() {
               Linha do tempo
             </motion.h2>
             
-            {sortedTimeline.map((entry, index) => (
+            {loading ? (
+              <>
+                <Skeleton className="h-24 rounded-2xl" />
+                <Skeleton className="h-24 rounded-2xl" />
+                <Skeleton className="h-24 rounded-2xl" />
+              </>
+            ) : sortedTimeline.length > 0 ? (
+              sortedTimeline.map((entry, index) => (
+                <motion.div
+                  key={entry.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + index * 0.05 }}
+                >
+                  <SwipeableRow onDelete={() => handleDeleteEntry(entry.id)}>
+                    <TimelineEntryCard 
+                      entry={entry} 
+                      onEdit={entry.type === 'meal' ? () => handleEditMeal(entry) : undefined}
+                    />
+                  </SwipeableRow>
+                </motion.div>
+              ))
+            ) : (
               <motion.div
-                key={entry.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + index * 0.05 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-12 rounded-2xl bg-card border border-border"
               >
-                <SwipeableRow onDelete={() => handleDeleteEntry(entry.id)}>
-                  <TimelineEntryCard 
-                    entry={entry} 
-                    onEdit={entry.type === 'meal' ? () => handleEditMeal(entry) : undefined}
-                  />
-                </SwipeableRow>
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                  <Coffee className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p className="text-foreground font-medium mb-1">
+                  Nenhum registro hoje
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Use os botões acima para começar seu diário
+                </p>
               </motion.div>
-            ))}
+            )}
           </div>
-
-          {/* Empty state */}
-          {sortedTimeline.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-12"
-            >
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                <Camera className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground">
-                Nenhum registro hoje
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Use os botões acima para começar
-              </p>
-            </motion.div>
-          )}
         </div>
       </main>
 

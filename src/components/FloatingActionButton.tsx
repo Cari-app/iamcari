@@ -13,7 +13,7 @@ export function FloatingActionButton({ onClick, className }: FloatingActionButto
       onClick={onClick}
       className={cn(
         'fixed bottom-28 right-6 z-40 flex items-center justify-center',
-        'w-10 h-10 rounded-full gradient-primary',
+        'w-14 h-14 rounded-full gradient-primary',
         'shadow-lg shadow-violet/30',
         'press-effect transition-shadow duration-300',
         className
@@ -41,7 +41,7 @@ export function FloatingActionButton({ onClick, className }: FloatingActionButto
         }
       }}
     >
-      <Plus className="h-4 w-4 text-white" strokeWidth={2.5} />
+      <Plus className="h-6 w-6 text-white" strokeWidth={2.5} />
     </motion.button>
   );
 }

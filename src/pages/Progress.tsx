@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Flame, Target, Trophy, TrendingUp, Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
@@ -37,13 +38,14 @@ export default function Progress() {
     }
 
     const fetchData = async () => {
-      const referenceDate = new Date(selectedDate);
-      referenceDate.setHours(23, 59, 59, 999);
-      const ninetyDaysAgo = new Date(referenceDate);
-      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+      try {
+        const referenceDate = new Date(selectedDate);
+        referenceDate.setHours(23, 59, 59, 999);
+        const ninetyDaysAgo = new Date(referenceDate);
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
-      // Fetch fasting sessions
-      const { data: fastingSessions, error: fastingError } = await supabase
+        // Fetch fasting sessions
+        const { data: fastingSessions, error: fastingError } = await supabase
         .from('fasting_sessions')
         .select('*')
         .eq('user_id', user.id)
@@ -60,6 +62,11 @@ export default function Progress() {
 
       if (fastingError || mealError) {
         console.error('Error fetching data:', fastingError || mealError);
+        toast({
+          title: '❌ Erro ao carregar',
+          description: 'Não foi possível carregar os dados de progresso.',
+          variant: 'destructive',
+        });
         setLoading(false);
         return;
       }
@@ -182,7 +189,16 @@ export default function Progress() {
       }
 
       setAchievements(achievementsList);
-      setLoading(false);
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        toast({
+          title: '❌ Erro inesperado',
+          description: 'Ocorreu um erro ao processar os dados.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
@@ -288,16 +304,25 @@ export default function Progress() {
             transition={{ delay: 0.1 }}
             className="grid grid-cols-2 gap-3"
           >
-            {stats.map((stat, index) => (
-              <div
-                key={stat.label}
-                className="p-4 rounded-2xl bg-card border border-border"
-              >
-                <stat.icon className={cn("h-5 w-5 mb-2", stat.color)} />
-                <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                <p className="text-xs text-muted-foreground">{stat.label}</p>
-              </div>
-            ))}
+            {loading ? (
+              <>
+                <Skeleton className="h-28 rounded-2xl" />
+                <Skeleton className="h-28 rounded-2xl" />
+                <Skeleton className="h-28 rounded-2xl" />
+                <Skeleton className="h-28 rounded-2xl" />
+              </>
+            ) : (
+              stats.map((stat, index) => (
+                <div
+                  key={stat.label}
+                  className="p-4 rounded-2xl bg-card border border-border"
+                >
+                  <stat.icon className={cn("h-5 w-5 mb-2", stat.color)} />
+                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                </div>
+              ))
+            )}
           </motion.div>
 
           {/* Heatmap */}
@@ -311,7 +336,11 @@ export default function Progress() {
               Contribution Graph
             </h2>
             
-            <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-2">
+            {loading ? (
+              <Skeleton className="h-32 rounded-xl" />
+            ) : (
+              <>
+                <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-2">
               {weeks.map((week, weekIndex) => (
                 <div key={weekIndex} className="flex flex-col gap-1">
                   {week.map((day, dayIndex) => (
@@ -332,21 +361,23 @@ export default function Progress() {
                     />
                   ))}
                 </div>
-              ))}
-            </div>
-
-            {/* Legend */}
-            <div className="flex items-center justify-end gap-2 mt-4 text-xs text-muted-foreground">
-              <span>Menos</span>
-              <div className="flex gap-1">
-                <div className="w-3 h-3 rounded-sm bg-muted" />
-                <div className="w-3 h-3 rounded-sm bg-secondary/30" />
-                <div className="w-3 h-3 rounded-sm bg-secondary/50" />
-                <div className="w-3 h-3 rounded-sm bg-secondary/70" />
-                <div className="w-3 h-3 rounded-sm bg-secondary" />
+                ))}
               </div>
-              <span>Mais</span>
-            </div>
+
+              {/* Legend */}
+              <div className="flex items-center justify-end gap-2 mt-4 text-xs text-muted-foreground">
+                <span>Menos</span>
+                <div className="flex gap-1">
+                  <div className="w-3 h-3 rounded-sm bg-muted" />
+                  <div className="w-3 h-3 rounded-sm bg-secondary/30" />
+                  <div className="w-3 h-3 rounded-sm bg-secondary/50" />
+                  <div className="w-3 h-3 rounded-sm bg-secondary/70" />
+                  <div className="w-3 h-3 rounded-sm bg-secondary" />
+                </div>
+                <span>Mais</span>
+              </div>
+            </>
+            )}
           </motion.div>
 
           {/* Achievements */}
@@ -360,7 +391,14 @@ export default function Progress() {
               Conquistas recentes
             </h2>
             
-            <div className="space-y-3">
+            {loading ? (
+              <>
+                <Skeleton className="h-16 rounded-xl mb-3" />
+                <Skeleton className="h-16 rounded-xl mb-3" />
+                <Skeleton className="h-16 rounded-xl" />
+              </>
+            ) : (
+              <div className="space-y-3">
               {achievements.map((achievement, index) => (
                 <div
                   key={`${achievement.title}-${index}`}
@@ -374,6 +412,7 @@ export default function Progress() {
                 </div>
               ))}
             </div>
+            )}
           </motion.div>
         </div>
       </main>
