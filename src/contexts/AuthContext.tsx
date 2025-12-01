@@ -21,6 +21,7 @@ interface Profile {
   avatar_url: string | null;
   full_name: string | null;
   nickname: string | null;
+  active_diet: string | null;
 }
 
 interface AuthContextType {

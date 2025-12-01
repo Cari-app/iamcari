@@ -178,7 +178,7 @@ export default function NutritionQuiz() {
 
       // Wait 2 seconds for DB trigger to process
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/diet-result');
       }, 2000);
     } catch (error) {
       console.error('Error submitting nutrition assessment:', error);
