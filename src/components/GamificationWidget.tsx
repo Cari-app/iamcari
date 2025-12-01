@@ -35,7 +35,7 @@ export function GamificationWidget() {
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
-      <div className="hidden sm:flex flex-col items-start gap-1">
+      <div className="flex flex-col items-start gap-1">
         <span className="text-xs font-semibold text-foreground">
           Nível {level}
         </span>
