@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Zap, Moon, Target, ChefHat, Wheat, Beef, Clock, Heart, TrendingUp, Calendar, UtensilsCrossed, ShieldAlert, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase';
@@ -13,6 +13,8 @@ interface Question {
   question: string;
   dbColumn: string;
   options: string[];
+  icon: LucideIcon;
+  color: string;
 }
 
 const questions: Question[] = [
@@ -20,73 +22,97 @@ const questions: Question[] = [
     id: 1,
     question: "Como você come?",
     dbColumn: "eating_habit",
-    options: ["Rápido/Impulso", "Por Ansiedade", "Só com Fome", "Disciplinado", "Esqueço de comer"]
+    options: ["Rápido/Impulso", "Por Ansiedade", "Só com Fome", "Disciplinado", "Esqueço de comer"],
+    icon: Zap,
+    color: "text-violet-500"
   },
   {
     id: 2,
     question: "Sente fome à noite?",
     dbColumn: "night_hunger",
-    options: ["Sempre", "Às vezes", "Quase nunca"]
+    options: ["Sempre", "Às vezes", "Quase nunca"],
+    icon: Moon,
+    color: "text-indigo-500"
   },
   {
     id: 3,
     question: "Nível de disciplina?",
     dbColumn: "discipline_level",
-    options: ["Baixo", "Médio", "Alto"]
+    options: ["Baixo", "Médio", "Alto"],
+    icon: Target,
+    color: "text-teal-500"
   },
   {
     id: 4,
     question: "Tempo para cozinhar?",
     dbColumn: "cooking_time",
-    options: ["Zero", "Pouco", "Médio", "Bastante"]
+    options: ["Zero", "Pouco", "Médio", "Bastante"],
+    icon: ChefHat,
+    color: "text-amber-500"
   },
   {
     id: 5,
     question: "Gosta de carboidratos?",
     dbColumn: "carb_preference",
-    options: ["Amo", "Gosto", "Tanto faz", "Evito"]
+    options: ["Amo", "Gosto", "Tanto faz", "Evito"],
+    icon: Wheat,
+    color: "text-yellow-500"
   },
   {
     id: 6,
     question: "Consumo de carne?",
     dbColumn: "meat_consumption",
-    options: ["Muito", "Normal", "Pouco", "Não como"]
+    options: ["Muito", "Normal", "Pouco", "Não como"],
+    icon: Beef,
+    color: "text-rose-500"
   },
   {
     id: 7,
     question: "Experiência com jejum?",
     dbColumn: "fasting_history",
-    options: ["Horrível", "Difícil", "Fácil", "Nunca tentei"]
+    options: ["Horrível", "Difícil", "Fácil", "Nunca tentei"],
+    icon: Clock,
+    color: "text-violet-500"
   },
   {
     id: 8,
     question: "Come mais por...",
     dbColumn: "eating_trigger",
-    options: ["Fome", "Ansiedade", "Rotina", "Tédio"]
+    options: ["Fome", "Ansiedade", "Rotina", "Tédio"],
+    icon: Heart,
+    color: "text-pink-500"
   },
   {
     id: 9,
     question: "Objetivo principal?",
     dbColumn: "main_goal",
-    options: ["Emagrecer Rápido", "Saúde", "Energia"]
+    options: ["Emagrecer Rápido", "Saúde", "Energia"],
+    icon: TrendingUp,
+    color: "text-teal-500"
   },
   {
     id: 10,
     question: "Preferência de rotina?",
     dbColumn: "structure_preference",
-    options: ["Regras Simples", "Liberdade", "Rotina Fixa"]
+    options: ["Regras Simples", "Liberdade", "Rotina Fixa"],
+    icon: Calendar,
+    color: "text-blue-500"
   },
   {
     id: 11,
     question: "Quantas refeições por dia?",
     dbColumn: "meals_per_day",
-    options: ["1-2", "3-4", "5+"]
+    options: ["1-2", "3-4", "5+"],
+    icon: UtensilsCrossed,
+    color: "text-orange-500"
   },
   {
     id: 12,
     question: "Alguma restrição alimentar?",
     dbColumn: "dietary_restrictions",
-    options: ["Sem Lactose", "Sem Glúten", "Vegetariano", "Nenhuma"]
+    options: ["Sem Lactose", "Sem Glúten", "Vegetariano", "Nenhuma"],
+    icon: ShieldAlert,
+    color: "text-emerald-500"
   }
 ];
 
@@ -192,7 +218,7 @@ export default function NutritionQuiz() {
 
       {/* Main Content */}
       <main className="pt-32 pb-16 px-4">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-lg mx-auto">
           <AnimatePresence mode="wait">
             {!isSubmitting ? (
               <motion.div
@@ -204,32 +230,44 @@ export default function NutritionQuiz() {
                 className="space-y-8"
               >
                 {/* Question */}
-                <div className="text-center">
-                  <h1 className="text-3xl font-bold text-foreground mb-2">
-                    {currentQuestion.question}
-                  </h1>
-                  <p className="text-muted-foreground">
-                    Escolha a opção que mais se encaixa com você
-                  </p>
+                <div className="text-center space-y-4">
+                  {/* Icon Illustration */}
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.1, type: "spring" }}
+                    className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-card border border-border/50"
+                  >
+                    <currentQuestion.icon className={`h-10 w-10 ${currentQuestion.color}`} />
+                  </motion.div>
+
+                  <div>
+                    <h1 className="text-2xl font-bold text-foreground mb-2">
+                      {currentQuestion.question}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                      Escolha a opção que mais se encaixa com você
+                    </p>
+                  </div>
                 </div>
 
                 {/* Options */}
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {currentQuestion.options.map((option) => {
                     const isSelected = answers[currentQuestion.dbColumn] === option;
                     return (
                       <motion.button
                         key={option}
                         onClick={() => handleOptionSelect(option)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`w-full p-6 rounded-2xl border-2 transition-all text-left press-effect ${
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        className={`w-full p-4 rounded-2xl border transition-all text-left press-effect ${
                           isSelected
                             ? 'border-primary bg-primary/10 shadow-violet'
-                            : 'border-border bg-card hover:border-primary/50 hover:bg-card/80'
+                            : 'border-border bg-card hover:border-primary/50 hover:bg-accent/30'
                         }`}
                       >
-                        <span className={`text-lg font-semibold ${
+                        <span className={`text-base font-medium ${
                           isSelected ? 'text-primary' : 'text-foreground'
                         }`}>
                           {option}
