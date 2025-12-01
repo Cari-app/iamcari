@@ -18,6 +18,7 @@ import DietResult from "./pages/DietResult";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Plans from "./pages/Plans";
+import ExploreDiets from "./pages/ExploreDiets";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
+            <Route path="/diets" element={<ProtectedRoute><ExploreDiets /></ProtectedRoute>} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="*" element={<NotFound />} />
