@@ -18,6 +18,8 @@ interface Profile {
   activity_level: string | null;
   daily_calories_target: number | null;
   fasting_protocol: string | null;
+  avatar_url: string | null;
+  full_name: string | null;
 }
 
 interface AuthContextType {

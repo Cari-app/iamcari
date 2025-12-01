@@ -1,4 +1,5 @@
 import { Logo } from './Logo';
+import { GamificationWidget } from './GamificationWidget';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,24 +19,28 @@ export function Navbar() {
         <div className="glass rounded-2xl px-4 py-3 shadow-sm flex items-center justify-between">
           <Logo size="xs" />
           
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            className="h-9 w-9 rounded-xl press-effect"
-          >
-            <motion.div
-              initial={false}
-              animate={{ rotate: theme === 'dark' ? 180 : 0 }}
-              transition={{ duration: 0.3 }}
+          <div className="flex items-center gap-2">
+            <GamificationWidget />
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="h-9 w-9 rounded-xl press-effect"
             >
-              {theme === 'dark' ? (
-                <Sun className="h-5 w-5 text-yellow-400" />
-              ) : (
-                <Moon className="h-5 w-5 text-primary" />
-              )}
-            </motion.div>
-          </Button>
+              <motion.div
+                initial={false}
+                animate={{ rotate: theme === 'dark' ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-5 w-5 text-yellow-400" />
+                ) : (
+                  <Moon className="h-5 w-5 text-primary" />
+                )}
+              </motion.div>
+            </Button>
+          </div>
         </div>
       </div>
     </motion.header>
