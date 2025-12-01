@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Plus, Users } from 'lucide-react';
 import { PostCard } from '@/components/community/PostCard';
 import { CreatePostModal } from '@/components/community/CreatePostModal';
-import { RightSidebar } from '@/components/community/RightSidebar';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -20,10 +19,10 @@ export interface FeedPost {
   profiles: {
     id: string;
     whatsapp_number: string | null;
-    user_stats: {
-      current_level: number;
-    }[];
   };
+  user_stats: {
+    level: number;
+  }[];
   feed_likes: {
     user_id: string;
   }[];
@@ -46,10 +45,10 @@ export default function Community() {
           *,
           profiles!feed_posts_user_id_fkey (
             id,
-            whatsapp_number,
-            user_stats (
-              current_level
-            )
+            whatsapp_number
+          ),
+          user_stats!feed_posts_user_id_fkey (
+            level
           ),
           feed_likes (
             user_id
@@ -172,60 +171,62 @@ export default function Community() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-24 pt-16 md:pb-0 md:pt-0">
+    <div className="min-h-[100dvh] bg-background pb-24 pt-20">
       <Navbar />
       
-      {/* Floating Action Button - Bottom Right */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.3, type: 'spring', stiffness: 260, damping: 20 }}
-        onClick={() => setIsCreateModalOpen(true)}
-        className="fixed bottom-24 right-4 z-50 w-14 h-14 rounded-full bg-gradient-primary shadow-lg hover:shadow-xl flex items-center justify-center press-effect md:bottom-8"
-        style={{ boxShadow: '0 8px 24px -4px rgba(139, 92, 246, 0.4)' }}
-      >
-        <Plus className="h-6 w-6 text-white" />
-      </motion.button>
-      
-      <div className="md:max-w-screen-xl md:mx-auto md:py-8">
-        <div className="md:flex md:gap-8">
-          {/* Main Feed */}
-          <main className="pb-6 md:flex-1 md:max-w-2xl md:mx-auto">
+      <main className="px-4 py-6 max-w-2xl mx-auto">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between mb-6"
+        >
+          <h1 className="text-2xl font-bold gradient-text">
+            Comunidade LeveStay
+          </h1>
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            size="sm"
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Novo Post
+          </Button>
+        </motion.div>
 
         {/* Feed */}
         {loading ? (
           <div className="space-y-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="animate-pulse">
-                <div className="flex items-center gap-2.5 px-4 mb-3">
-                  <div className="h-9 w-9 rounded-full bg-muted/50" />
+              <div key={i} className="glass rounded-3xl p-4 animate-pulse">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-12 w-12 rounded-full bg-muted" />
                   <div className="flex-1">
-                    <div className="h-3 bg-muted/50 rounded w-24 mb-1.5" />
-                    <div className="h-2 bg-muted/50 rounded w-16" />
+                    <div className="h-4 bg-muted rounded w-32 mb-2" />
+                    <div className="h-3 bg-muted rounded w-20" />
                   </div>
                 </div>
-                <div className="w-full aspect-[4/5] bg-muted/50 mb-3" />
-                <div className="px-4">
-                  <div className="h-8 bg-muted/50 rounded w-32 mb-2" />
-                  <div className="h-3 bg-muted/50 rounded w-full mb-1.5" />
-                  <div className="h-3 bg-muted/50 rounded w-3/4" />
-                </div>
+                <div className="aspect-square bg-muted rounded-2xl mb-4" />
+                <div className="h-4 bg-muted rounded w-full mb-2" />
+                <div className="h-4 bg-muted rounded w-3/4" />
               </div>
             ))}
           </div>
         ) : posts.length === 0 ? (
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center px-6 py-32 text-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="glass rounded-3xl p-12 text-center"
           >
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500/20 to-teal-500/20 flex items-center justify-center mb-6">
-              <Users className="h-10 w-10 text-violet-500" />
-            </div>
-            <h3 className="text-lg font-bold mb-2">A arena está vazia</h3>
-            <p className="text-sm text-muted-foreground max-w-xs">
-              Seja o primeiro a inspirar a comunidade!
+            <Users className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-semibold mb-2">Nenhum post ainda</h3>
+            <p className="text-muted-foreground mb-6">
+              Seja o primeiro a compartilhar sua jornada!
             </p>
+            <Button onClick={() => setIsCreateModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Criar Primeiro Post
+            </Button>
           </motion.div>
         ) : (
           <div className="space-y-6">
@@ -234,7 +235,7 @@ export default function Community() {
                 key={post.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
+                transition={{ delay: index * 0.1 }}
               >
                 <PostCard
                   post={post}
@@ -247,20 +248,13 @@ export default function Community() {
         )}
       </main>
 
-      {/* Right Sidebar - Desktop Only */}
-      <div className="hidden lg:block">
-        <RightSidebar />
-      </div>
+      <BottomNav />
+      
+      <CreatePostModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onPostCreated={fetchPosts}
+      />
     </div>
-  </div>
-
-  <BottomNav />
-  
-  <CreatePostModal
-    open={isCreateModalOpen}
-    onOpenChange={setIsCreateModalOpen}
-    onPostCreated={fetchPosts}
-  />
-</div>
-);
+  );
 }
