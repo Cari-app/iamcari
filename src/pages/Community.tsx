@@ -19,10 +19,10 @@ export interface FeedPost {
   profiles: {
     id: string;
     whatsapp_number: string | null;
+    user_stats: {
+      current_level: number;
+    }[];
   };
-  user_stats: {
-    level: number;
-  }[];
   feed_likes: {
     user_id: string;
   }[];
@@ -45,10 +45,10 @@ export default function Community() {
           *,
           profiles!feed_posts_user_id_fkey (
             id,
-            whatsapp_number
-          ),
-          user_stats!feed_posts_user_id_fkey (
-            level
+            whatsapp_number,
+            user_stats (
+              current_level
+            )
           ),
           feed_likes (
             user_id
