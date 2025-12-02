@@ -88,7 +88,7 @@ export default function FitCoinHistory() {
       
       <div className="max-w-md mx-auto relative">
         {/* Header */}
-        <div className="pt-24 px-4 pb-6">
+        <div className="pt-32 px-4 pb-6">
           <motion.button
             onClick={() => navigate('/profile')}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 press-effect group"
