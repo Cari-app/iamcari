@@ -319,9 +319,7 @@ export default function Login() {
         delay: 0.1
       }} className="text-center mb-10">
           <h1 className="text-2xl font-bold text-foreground mb-2">Emagrecimento Inteligente</h1>
-          <p className="text-muted-foreground">
-            IA + Psicologia para sua jornada de saúde
-          </p>
+          <p className="text-muted-foreground">IA + Planejamento Gameficado para sua jornada de saúde</p>
         </motion.div>
 
         {/* Login Form */}
