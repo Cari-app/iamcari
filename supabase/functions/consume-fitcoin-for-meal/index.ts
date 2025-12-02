@@ -13,42 +13,49 @@ serve(async (req) => {
   }
 
   try {
-    // Log incoming request
-    console.log('=== Edge Function Request ===');
-    console.log('Authorization header present:', !!req.headers.get('Authorization'));
-    console.log('SUPABASE_URL:', Deno.env.get('SUPABASE_URL'));
-    console.log('SUPABASE_ANON_KEY present:', !!Deno.env.get('SUPABASE_ANON_KEY'));
-    
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
-    );
-
-    // Get user from JWT
-    console.log('Attempting to get user...');
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    
-    if (userError) {
-      console.error('Auth error:', userError);
-    }
-    
-    if (!user) {
-      console.error('No user found');
-    } else {
-      console.log('User authenticated:', user.id);
-    }
-    
-    if (userError || !user) {
+    // Get JWT token from request
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('Missing Authorization header');
       return new Response(
         JSON.stringify({ error: 'Não autorizado' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log('Creating Supabase client...');
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    );
+
+    // Get user from JWT using the token directly
+    console.log('Getting user from token...');
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    
+    if (userError) {
+      console.error('Auth error:', userError);
+      return new Response(
+        JSON.stringify({ error: 'Não autorizado', details: userError.message }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (!user) {
+      console.error('No user found');
+      return new Response(
+        JSON.stringify({ error: 'Não autorizado' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    console.log('User authenticated:', user.id);
 
     const { imageBlob, fileName, isEmotional } = await req.json();
 
