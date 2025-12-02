@@ -150,7 +150,46 @@ export default function Dashboard() {
     };
     
     fetchDashboardData();
-  }, [user]);
+    
+    // Realtime subscriptions for stats updates
+    const statsChannel = supabase
+      .channel('dashboard-stats-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'user_stats',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('User stats updated:', payload);
+          if (payload.new) {
+            setCurrentStreak(payload.new.current_streak || 0);
+            setGameCoins(payload.new.game_coins || 0);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Profile updated (FitCoins may have changed):', payload);
+          // Profile update will trigger AuthContext refresh automatically
+          refreshProfile();
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(statsChannel);
+    };
+  }, [user, refreshProfile]);
 
   const handleProtocolSelect = async (hours: number, isCustom: boolean = false) => {
     setSelectedProtocol(hours);
