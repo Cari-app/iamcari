@@ -748,23 +748,6 @@ export default function Profile() {
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </button>
 
-                  {/* Admin Panel - Only visible for admins */}
-                  {isAdmin && (
-                    <button
-                      onClick={() => navigate('/admin')}
-                      className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border bg-gradient-to-r from-amber-500/5 to-orange-500/5"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Shield className="h-5 w-5 text-amber-500" />
-                        <div className="text-left">
-                          <span className="font-medium text-foreground">Painel Admin</span>
-                          <p className="text-xs text-amber-500">Acesso total ao sistema</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    </button>
-                  )}
-
                   {/* TODO: Arena feature coming soon - Remove this button or create Arena page */}
                   <button
                     onClick={() => toast({
