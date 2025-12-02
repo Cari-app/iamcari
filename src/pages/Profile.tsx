@@ -722,13 +722,18 @@ export default function Profile() {
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </button>
 
+                  {/* TODO: Arena feature coming soon - Remove this button or create Arena page */}
                   <button
-                    onClick={() => navigate('/arena')}
+                    onClick={() => toast({
+                      title: '🚧 Em breve',
+                      description: 'A Arena está em desenvolvimento. Aguarde novidades!',
+                    })}
                     className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
                   >
                     <div className="flex items-center gap-3">
                       <Swords className="h-5 w-5 text-violet-500" />
                       <span className="font-medium text-foreground">Arena</span>
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Em breve</Badge>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </button>

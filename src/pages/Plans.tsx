@@ -8,6 +8,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { motion } from "framer-motion";
 import { FitCoinIcon } from "@/components/FitCoinIcon";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
 const Plans = () => {
   const {
     user
@@ -20,7 +21,7 @@ const Plans = () => {
     price: "27,00",
     fitcoins: 30,
     features: ["Diário Inteligente", "Acesso Básico à Dona", "Análise de Jejum", "Suporte via Email"],
-    checkoutUrl: "",
+    checkoutUrl: "", // TODO: INSERT STRIPE CHECKOUT LINK FOR TRIAL PLAN
     highlighted: false,
     tier: "trial"
   }, {
@@ -31,7 +32,7 @@ const Plans = () => {
     price: "67,00",
     fitcoins: 80,
     features: ["Diário Inteligente", "Acesso à Dona (WhatsApp)", "Análise de Jejum Avançada", "Suporte Prioritário", "Acesso Antecipado a Features"],
-    checkoutUrl: "",
+    checkoutUrl: "", // TODO: INSERT STRIPE CHECKOUT LINK FOR VIP PLAN
     highlighted: true,
     tier: "vip"
   }, {
@@ -42,13 +43,17 @@ const Plans = () => {
     price: "97,00",
     fitcoins: 190,
     features: ["Diário Inteligente", "Acesso à Dona (WhatsApp)", "Análise de Jejum Avançada", "Suporte Prioritário", "Acesso Ilimitado a Novas Features", "Consultoria Mensal"],
-    checkoutUrl: "",
+    checkoutUrl: "", // TODO: INSERT STRIPE CHECKOUT LINK FOR PREMIUM PLAN
     highlighted: false,
     tier: "premium"
   }];
   const handleSelectPlan = (plan: typeof plans[0]) => {
     if (!plan.checkoutUrl) {
-      console.log("Checkout URL will be configured later");
+      console.warn("⚠️ Checkout URL not configured for plan:", plan.tier);
+      toast({
+        title: '🚧 Em breve',
+        description: 'Checkout em desenvolvimento. Entre em contato para assinar.',
+      });
       return;
     }
     const checkoutUrl = new URL(plan.checkoutUrl);

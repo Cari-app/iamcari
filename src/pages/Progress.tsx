@@ -397,7 +397,7 @@ export default function Progress() {
                 <Skeleton className="h-16 rounded-xl mb-3" />
                 <Skeleton className="h-16 rounded-xl" />
               </>
-            ) : (
+            ) : achievements.length > 0 ? (
               <div className="space-y-3">
               {achievements.map((achievement, index) => (
                 <div
@@ -412,6 +412,18 @@ export default function Progress() {
                 </div>
               ))}
             </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">
+                  <Trophy className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <p className="text-foreground font-medium mb-1">
+                  Nenhuma conquista ainda
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Complete jejuns e registre refeições para desbloquear conquistas
+                </p>
+              </div>
             )}
           </motion.div>
         </div>
