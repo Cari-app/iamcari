@@ -461,7 +461,7 @@ export default function Dashboard() {
             </button>
 
             <button
-              onClick={() => toast({ title: 'Em breve', description: 'Jejum Prime estará disponível em breve!' })}
+              onClick={() => navigate('/fasting-quiz')}
               className="p-4 rounded-2xl bg-card border border-border hover:bg-accent/50 transition-colors press-effect text-center"
             >
               <div className="flex justify-center mb-2">
