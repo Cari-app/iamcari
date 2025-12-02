@@ -1,1 +1,4 @@
-project_id = "vamdftekumwykmqyoaem"
+project_id = "kjxtihzksqmrbatezecq"
+
+[functions.consume-fitcoin-for-meal]
+verify_jwt = true
