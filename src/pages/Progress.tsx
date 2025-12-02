@@ -254,7 +254,7 @@ export default function Progress() {
     <div className="min-h-screen bg-background pb-24 pt-20">
       <Navbar />
       
-      <main className="px-4 py-6">
+      <main className="px-4 pt-11 pb-6">
         <div className="mx-auto max-w-lg space-y-6">
           {/* Header */}
           <motion.div
