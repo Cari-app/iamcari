@@ -78,8 +78,8 @@ export function ProtocolSelector({
       </Badge>
 
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
-        <DrawerContent className="bg-background/95 backdrop-blur-xl border-border">
-          <div className="mx-auto w-full max-w-lg">
+        <DrawerContent className="bg-transparent border-none">
+          <div className="mx-auto w-full max-w-lg bg-background/95 backdrop-blur-xl border border-border rounded-t-3xl">
             <DrawerHeader className="text-center pb-2">
               <DrawerTitle className="text-xl">Escolha seu Protocolo</DrawerTitle>
               <DrawerDescription>
