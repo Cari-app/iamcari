@@ -966,8 +966,8 @@ export default function Profile() {
 
       {/* Achievement Details Drawer */}
       <Drawer open={achievementDrawerOpen} onOpenChange={setAchievementDrawerOpen}>
-        <DrawerContent>
-          <DrawerHeader className="text-left">
+        <DrawerContent className="max-w-[600px] mx-auto">
+          <DrawerHeader className="text-left px-6">
             <DrawerTitle className="flex items-center gap-3 text-2xl">
               <span className="text-4xl">{selectedAchievement?.icon || '🏆'}</span>
               {selectedAchievement?.name}
@@ -1000,7 +1000,7 @@ export default function Profile() {
               )}
             </DrawerDescription>
           </DrawerHeader>
-          <div className="p-4">
+          <div className="px-6 pb-6">
             <DrawerClose asChild>
               <Button variant="outline" className="w-full">
                 Fechar
