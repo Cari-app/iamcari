@@ -24,6 +24,7 @@ import Plans from "./pages/Plans";
 import ExploreDiets from "./pages/ExploreDiets";
 import DietDetail from "./pages/DietDetail";
 import NotFound from "./pages/NotFound";
+import Help from "./pages/Help";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
             <Route path="/diets" element={<ProtectedRoute><ExploreDiets /></ProtectedRoute>} />
             <Route path="/diet-detail" element={<ProtectedRoute><DietDetail /></ProtectedRoute>} />
+            <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="*" element={<NotFound />} />
