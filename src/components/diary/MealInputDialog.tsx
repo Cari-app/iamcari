@@ -184,8 +184,10 @@ export function MealInputDialog({
 
       // Success!
       toast({
-        title: '✅ Análise iniciada!',
-        description: `1 FitCoin consumido. Saldo: ${result.newBalance}`,
+        title: result.isAdmin ? '👑 Análise Admin' : '✅ Análise iniciada!',
+        description: result.isAdmin 
+          ? 'FitCoins ilimitados para admins!' 
+          : `1 FitCoin consumido. Saldo: ${result.newBalance}`,
       });
 
       // Trigger refetch in parent component

@@ -6,6 +6,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGamification } from '@/hooks/useGamification';
+import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase';
 import { toast } from '@/hooks/use-toast';
 import { 
@@ -74,6 +75,7 @@ export default function Profile() {
   const { theme, toggleTheme } = useTheme();
   const { user, signOut, profile } = useAuth();
   const { stats, loading: statsLoading } = useGamification();
+  const { isAdmin } = useUserRole();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -497,9 +499,17 @@ export default function Profile() {
                   {/* Name, Title & XP */}
                   <div className="flex-1 min-w-0 space-y-2">
                     <div>
-                      <h1 className="text-xl font-bold text-foreground truncate">
-                        {fullName}
-                      </h1>
+                      <div className="flex items-center gap-2">
+                        <h1 className="text-xl font-bold text-foreground truncate">
+                          {fullName}
+                        </h1>
+                        {isAdmin && (
+                          <Badge className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs border-none">
+                            <Shield className="h-3 w-3 mr-1" />
+                            ADMIN
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         {getPlayerTitle()}
                       </p>
@@ -735,6 +745,23 @@ export default function Profile() {
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </button>
+
+                  {/* Admin Panel - Only visible for admins */}
+                  {isAdmin && (
+                    <button
+                      onClick={() => navigate('/admin')}
+                      className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border bg-gradient-to-r from-amber-500/5 to-orange-500/5"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Shield className="h-5 w-5 text-amber-500" />
+                        <div className="text-left">
+                          <span className="font-medium text-foreground">Painel Admin</span>
+                          <p className="text-xs text-amber-500">Acesso total ao sistema</p>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  )}
 
                   {/* TODO: Arena feature coming soon - Remove this button or create Arena page */}
                   <button
