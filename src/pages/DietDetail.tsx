@@ -285,7 +285,7 @@ export default function DietDetail() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mt-8 space-y-3"
+          className="mt-8 space-y-3 pb-8"
         >
           <Button
             onClick={() => navigate('/dashboard')}
