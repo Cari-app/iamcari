@@ -485,7 +485,7 @@ export default function Login() {
           </span>
           <span className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-destructive" />
-            Suporte TCC
+            Suporte Personalizado
           </span>
         </motion.div>
       </div>
