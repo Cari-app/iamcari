@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
+import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Flame, Target, Trophy, TrendingUp, Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -27,7 +28,7 @@ export default function Progress() {
   const [bestStreak, setBestStreak] = useState(0);
   const [successRate, setSuccessRate] = useState('--');
   const [heatmapData, setHeatmapData] = useState<DayActivity[]>([]);
-  const [achievements, setAchievements] = useState<Array<{ emoji: string; title: string; description: string }>>([]);
+  const [achievements, setAchievements] = useState<Array<{ id: string; emoji: string; title: string; description: string }>>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [calendarOpen, setCalendarOpen] = useState(false);
 
@@ -165,7 +166,7 @@ export default function Progress() {
 
       // Generate achievements - separar concluídos e pausados
       const finishedFasts = fastingSessions?.filter(s => s.end_time !== null) || [];
-      const achievementsList: Array<{ emoji: string; title: string; description: string }> = [];
+      const achievementsList: Array<{ id: string; emoji: string; title: string; description: string }> = [];
 
       if (finishedFasts.length > 0) {
         finishedFasts.slice(-5).reverse().forEach(fast => {
@@ -189,6 +190,7 @@ export default function Progress() {
           }
           
           achievementsList.push({
+            id: fast.id,
             emoji: wasCompleted ? '🔥' : '⏸️',
             title: wasCompleted 
               ? `Jejum de ${timeText} concluído`
@@ -200,6 +202,7 @@ export default function Progress() {
 
       if (achievementsList.length === 0) {
         achievementsList.push({
+          id: 'empty',
           emoji: '🎯',
           title: 'Comece sua jornada',
           description: 'Complete seu primeiro jejum para ganhar medalhas',
@@ -254,6 +257,31 @@ export default function Progress() {
       supabase.removeChannel(channel);
     };
   }, [user, selectedDate]);
+
+  const handleDeleteFasting = async (id: string) => {
+    if (!user || id === 'empty') return;
+
+    const { error } = await supabase
+      .from('fasting_sessions')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting fasting session:', error);
+      toast({
+        title: '❌ Erro ao deletar',
+        description: 'Não foi possível remover o jejum',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setAchievements(prev => prev.filter(a => a.id !== id));
+    toast({
+      title: '🗑️ Jejum removido',
+      description: 'O registro de jejum foi apagado',
+    });
+  };
 
   // Group heatmap data into weeks
   const weeks: DayActivity[][] = [];
@@ -418,16 +446,22 @@ export default function Progress() {
             ) : achievements.length > 0 ? (
               <div className="space-y-3">
               {achievements.map((achievement, index) => (
-                <div
-                  key={`${achievement.title}-${index}`}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/50"
+                <motion.div
+                  key={achievement.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + index * 0.05 }}
                 >
-                  <span className="text-2xl">{achievement.emoji}</span>
-                  <div>
-                    <p className="font-medium text-foreground">{achievement.title}</p>
-                    <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                  </div>
-                </div>
+                  <SwipeableRow onDelete={() => handleDeleteFasting(achievement.id)}>
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                      <span className="text-2xl">{achievement.emoji}</span>
+                      <div>
+                        <p className="font-medium text-foreground">{achievement.title}</p>
+                        <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                      </div>
+                    </div>
+                  </SwipeableRow>
+                </motion.div>
               ))}
             </div>
             ) : (
