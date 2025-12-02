@@ -15,6 +15,7 @@ import Onboarding from "./pages/Onboarding";
 import Assessment from "./pages/Assessment";
 import NutritionQuiz from "./pages/NutritionQuiz";
 import FastingQuiz from "./pages/FastingQuiz";
+import FastingResult from "./pages/FastingResult";
 import DietResult from "./pages/DietResult";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/assessment" element={<ProtectedRoute><Assessment /></ProtectedRoute>} />
             <Route path="/nutrition-quiz" element={<ProtectedRoute><NutritionQuiz /></ProtectedRoute>} />
             <Route path="/fasting-quiz" element={<ProtectedRoute><FastingQuiz /></ProtectedRoute>} />
+            <Route path="/fasting-result" element={<ProtectedRoute><FastingResult /></ProtectedRoute>} />
             <Route path="/diet-result" element={<ProtectedRoute><DietResult /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/diary" element={<ProtectedRoute><Diary /></ProtectedRoute>} />

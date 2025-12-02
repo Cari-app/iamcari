@@ -280,7 +280,7 @@ export default function FastingQuiz() {
 
       // Wait 2 seconds for processing
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/fasting-result');
       }, 2000);
     } catch (error) {
       console.error('Error submitting fasting assessment:', error);
