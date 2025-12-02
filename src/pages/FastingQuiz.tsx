@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Utensils, Moon, Frown, UtensilsCrossed, BrainCircuit, Candy, Coffee, Clock, Shield, Briefcase, Cookie, Sunrise, Target, Heart, Timer, LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +13,8 @@ interface Question {
   question: string;
   dbColumn: string;
   options: string[];
+  icon: LucideIcon;
+  color: string;
 }
 
 const questions: Question[] = [
@@ -28,7 +28,9 @@ const questions: Question[] = [
       'Como quando sinto fome',
       'Pulo refeições sem perceber',
       'Sou disciplinado na maior parte do tempo'
-    ]
+    ],
+    icon: Utensils,
+    color: 'text-violet-500'
   },
   {
     id: 2,
@@ -39,7 +41,9 @@ const questions: Question[] = [
       'Média',
       'Pouca',
       'Quase nenhuma'
-    ]
+    ],
+    icon: Moon,
+    color: 'text-indigo-500'
   },
   {
     id: 3,
@@ -51,7 +55,9 @@ const questions: Question[] = [
       'Consigo segurar um pouco',
       'Lido bem com fome leve',
       'Fome raramente aparece'
-    ]
+    ],
+    icon: Frown,
+    color: 'text-amber-500'
   },
   {
     id: 4,
@@ -61,7 +67,9 @@ const questions: Question[] = [
       '1 a 2',
       '3 a 4',
       '5 ou mais'
-    ]
+    ],
+    icon: UtensilsCrossed,
+    color: 'text-orange-500'
   },
   {
     id: 5,
@@ -71,7 +79,9 @@ const questions: Question[] = [
       'Alto',
       'Moderado',
       'Baixo'
-    ]
+    ],
+    icon: BrainCircuit,
+    color: 'text-pink-500'
   },
   {
     id: 6,
@@ -82,7 +92,9 @@ const questions: Question[] = [
       'Como às vezes, quando bate vontade',
       'Como raramente',
       'Não ligo para doces'
-    ]
+    ],
+    icon: Candy,
+    color: 'text-rose-500'
   },
   {
     id: 7,
@@ -93,7 +105,9 @@ const questions: Question[] = [
       'Média, consigo comer rápido',
       'Tranquila, gosto de comer pela manhã',
       'Geralmente não sinto fome cedo'
-    ]
+    ],
+    icon: Coffee,
+    color: 'text-amber-500'
   },
   {
     id: 8,
@@ -104,7 +118,9 @@ const questions: Question[] = [
       'Sim, foi difícil mas deu certo',
       'Sim, foi tranquilo',
       'Nunca tentei'
-    ]
+    ],
+    icon: Clock,
+    color: 'text-violet-500'
   },
   {
     id: 9,
@@ -115,7 +131,9 @@ const questions: Question[] = [
       'Gosto de flexibilidade',
       'Consigo seguir algumas regras simples',
       'Sigo regras com facilidade'
-    ]
+    ],
+    icon: Shield,
+    color: 'text-teal-500'
   },
   {
     id: 10,
@@ -126,7 +144,9 @@ const questions: Question[] = [
       'Variáveis',
       'Previsíveis',
       'Muito fixos'
-    ]
+    ],
+    icon: Briefcase,
+    color: 'text-blue-500'
   },
   {
     id: 11,
@@ -137,7 +157,9 @@ const questions: Question[] = [
       'Às vezes',
       'Pouco',
       'Raramente'
-    ]
+    ],
+    icon: Cookie,
+    color: 'text-yellow-500'
   },
   {
     id: 12,
@@ -149,7 +171,9 @@ const questions: Question[] = [
       'Média',
       'Boa',
       'Muito boa'
-    ]
+    ],
+    icon: Sunrise,
+    color: 'text-orange-500'
   },
   {
     id: 13,
@@ -161,7 +185,9 @@ const questions: Question[] = [
       'Melhorar energia',
       'Organizar rotina alimentar',
       'Reduzir compulsão'
-    ]
+    ],
+    icon: Target,
+    color: 'text-teal-500'
   },
   {
     id: 14,
@@ -173,7 +199,9 @@ const questions: Question[] = [
       'Como por hábito',
       'Como só quando sinto fome',
       'Controlo bem minhas emoções'
-    ]
+    ],
+    icon: Heart,
+    color: 'text-pink-500'
   },
   {
     id: 15,
@@ -184,47 +212,57 @@ const questions: Question[] = [
       'Talvez',
       'Sim, tranquilo',
       'Sim, já faço isso naturalmente'
-    ]
+    ],
+    icon: Timer,
+    color: 'text-violet-500'
   }
 ];
 
 export default function FastingQuiz() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(1);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const currentQuestion = questions[currentStep];
-  const progress = ((currentStep + 1) / questions.length) * 100;
-  const canGoNext = answers[currentQuestion?.dbColumn];
+  const currentQuestion = questions[currentStep - 1];
+  const progressPercentage = (currentStep / questions.length) * 100;
 
-  const handleSelect = (value: string) => {
-    setAnswers(prev => ({
-      ...prev,
-      [currentQuestion.dbColumn]: value
-    }));
-  };
+  const handleOptionSelect = (option: string) => {
+    const newAnswers = {
+      ...answers,
+      [currentQuestion.dbColumn]: option
+    };
+    setAnswers(newAnswers);
 
-  const handleNext = () => {
-    if (currentStep < questions.length - 1) {
-      setCurrentStep(prev => prev + 1);
-    }
+    // Auto-advance to next question after selection
+    setTimeout(() => {
+      if (currentStep < questions.length) {
+        setCurrentStep(currentStep + 1);
+      }
+    }, 300);
   };
 
   const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
     } else {
       navigate('/dashboard');
     }
   };
 
   const handleSubmit = async () => {
-    if (!user) return;
-    
+    if (!user) {
+      toast({
+        title: '❌ Erro',
+        description: 'Você precisa estar logado para completar a avaliação.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
-    
+
     try {
       const { error } = await supabase
         .from('fasting_assessments')
@@ -236,19 +274,18 @@ export default function FastingQuiz() {
       if (error) throw error;
 
       toast({
-        title: '✅ Análise concluída!',
-        description: 'Estamos preparando seu protocolo personalizado',
+        title: '✅ Avaliação Concluída!',
+        description: 'A IA está analisando seu perfil...',
       });
 
-      // Redirect after delay
+      // Wait 2 seconds for processing
       setTimeout(() => {
         navigate('/dashboard');
       }, 2000);
-
     } catch (error) {
-      console.error('Error submitting fasting quiz:', error);
+      console.error('Error submitting fasting assessment:', error);
       toast({
-        title: '❌ Erro',
+        title: '❌ Erro ao enviar',
         description: 'Não foi possível salvar suas respostas. Tente novamente.',
         variant: 'destructive',
       });
@@ -256,115 +293,129 @@ export default function FastingQuiz() {
     }
   };
 
+  const isComplete = Object.keys(answers).length === questions.length;
+
   return (
-    <div className="min-h-[100dvh] bg-background flex flex-col">
+    <div className="min-h-[100dvh] bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-xl border-b border-border/50">
-        <div className="px-4 py-4">
-          <div className="flex items-center gap-4 mb-4">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border">
+        <div className="max-w-2xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between mb-4">
             <Button
-              onClick={handleBack}
               variant="ghost"
-              size="icon"
-              className="h-10 w-10 rounded-full"
+              size="sm"
+              onClick={handleBack}
+              className="press-effect"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
             </Button>
-            <div className="flex-1">
-              <h1 className="text-lg font-semibold text-foreground">
-                Quiz Jejum Prime
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Pergunta {currentStep + 1} de {questions.length}
-              </p>
-            </div>
+            <span className="text-sm font-medium text-muted-foreground">
+              Passo {currentStep} de {questions.length}
+            </span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progressPercentage} className="h-2" />
         </div>
-      </div>
+      </header>
 
-      {/* Content */}
-      <div className="flex-1 px-4 py-8 overflow-y-auto">
-        <div className="mx-auto max-w-lg">
+      {/* Main Content */}
+      <main className="pt-32 pb-16 px-4">
+        <div className="max-w-lg mx-auto">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-6"
-            >
-              {/* Question */}
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-foreground">
-                  {currentQuestion.question}
-                </h2>
-              </div>
-
-              {/* Options */}
-              <RadioGroup
-                value={answers[currentQuestion.dbColumn] || ''}
-                onValueChange={handleSelect}
-                className="space-y-3"
+            {!isSubmitting ? (
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-8"
               >
-                {currentQuestion.options.map((option, index) => (
+                {/* Question */}
+                <div className="text-center space-y-4">
+                  {/* Icon Illustration */}
                   <motion.div
-                    key={option}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.1, type: "spring" }}
+                    className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-card border border-border/50"
+                  >
+                    <currentQuestion.icon className={`h-10 w-10 ${currentQuestion.color}`} />
+                  </motion.div>
+
+                  <div>
+                    <h1 className="text-2xl font-bold text-foreground mb-2">
+                      {currentQuestion.question}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                      Escolha a opção que mais se encaixa com você
+                    </p>
+                  </div>
+                </div>
+
+                {/* Options */}
+                <div className="space-y-2.5">
+                  {currentQuestion.options.map((option) => {
+                    const isSelected = answers[currentQuestion.dbColumn] === option;
+                    return (
+                      <motion.button
+                        key={option}
+                        onClick={() => handleOptionSelect(option)}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        className={`w-full p-4 rounded-2xl border transition-all text-left press-effect ${
+                          isSelected
+                            ? 'border-primary bg-primary/10 shadow-violet'
+                            : 'border-border bg-card hover:border-primary/50 hover:bg-accent/30'
+                        }`}
+                      >
+                        <span className={`text-base font-medium ${
+                          isSelected ? 'text-primary' : 'text-foreground'
+                        }`}>
+                          {option}
+                        </span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+
+                {/* Submit Button (only on last question) */}
+                {currentStep === questions.length && (
+                  <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    className="pt-4"
                   >
-                    <Label
-                      htmlFor={`option-${index}`}
-                      className="flex items-center gap-4 p-4 rounded-2xl bg-card border-2 border-border hover:border-primary/50 cursor-pointer transition-all press-effect has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={!isComplete}
+                      className="w-full h-14 rounded-2xl gradient-primary text-white font-semibold text-lg press-effect shadow-violet"
                     >
-                      <RadioGroupItem
-                        value={option}
-                        id={`option-${index}`}
-                        className="shrink-0"
-                      />
-                      <span className="text-base font-medium text-foreground">
-                        {option}
-                      </span>
-                    </Label>
+                      Descobrir Meu Protocolo
+                    </Button>
                   </motion.div>
-                ))}
-              </RadioGroup>
-            </motion.div>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-20"
+              >
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/20 mb-6">
+                  <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                </div>
+                <h2 className="text-2xl font-bold text-foreground mb-2">
+                  Analisando seu perfil...
+                </h2>
+                <p className="text-muted-foreground">
+                  A IA está processando suas respostas
+                </p>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
-      </div>
-
-      {/* Footer */}
-      <div className="sticky bottom-0 bg-background/95 backdrop-blur-xl border-t border-border/50 px-4 py-4">
-        <div className="mx-auto max-w-lg">
-          {currentStep < questions.length - 1 ? (
-            <Button
-              onClick={handleNext}
-              disabled={!canGoNext}
-              className="w-full h-14 rounded-2xl gradient-primary text-white font-semibold text-base"
-            >
-              Próxima
-            </Button>
-          ) : (
-            <Button
-              onClick={handleSubmit}
-              disabled={!canGoNext || isSubmitting}
-              className="w-full h-14 rounded-2xl gradient-primary text-white font-semibold text-base"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Analisando seu perfil...
-                </>
-              ) : (
-                'Descobrir Meu Protocolo'
-              )}
-            </Button>
-          )}
-        </div>
-      </div>
+      </main>
     </div>
   );
 }
