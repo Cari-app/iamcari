@@ -148,36 +148,34 @@ export function MealInputDialog({
       const fileName = `${user.id}/${timestamp}.jpg`;
 
       // Step 3: Call edge function to consume FitCoin and upload
-      const { data: authData } = await supabase.auth.getSession();
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/consume-fitcoin-for-meal`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authData.session?.access_token}`,
-          },
-          body: JSON.stringify({
-            imageBlob: imageBase64,
-            fileName,
-            isEmotional,
-          }),
-        }
-      );
+      const { data, error: functionError } = await supabase.functions.invoke('consume-fitcoin-for-meal', {
+        body: {
+          imageBlob: imageBase64,
+          fileName,
+          isEmotional,
+        },
+      });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        if (result.error === 'insufficient_balance') {
-          toast({
-            title: '💎 Saldo insuficiente',
-            description: `Você precisa de ${FITCOIN_COST} FitCoin. Saldo atual: ${result.currentBalance || 0}`,
-            variant: 'destructive',
-          });
-          return;
-        }
-        throw new Error(result.error || 'Erro ao processar');
+      if (functionError) {
+        console.error('Function error:', functionError);
+        throw new Error(functionError.message || 'Erro ao processar');
       }
+
+      if (!data) {
+        throw new Error('Nenhum dado retornado');
+      }
+
+      // Check for insufficient balance error
+      if (data.error === 'insufficient_balance') {
+        toast({
+          title: '💎 Saldo insuficiente',
+          description: `Você precisa de ${FITCOIN_COST} FitCoin. Saldo atual: ${data.currentBalance || 0}`,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const result = data;
 
       // Update local balance
       setFitCoinBalance(result.newBalance);
@@ -198,9 +196,23 @@ export function MealInputDialog({
       handleClose();
     } catch (error) {
       console.error('Error uploading image:', error);
+      
+      // Handle specific error types
+      let errorMessage = 'Não foi possível enviar a foto.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('401') || error.message.includes('unauthorized') || error.message.includes('autorizado')) {
+          errorMessage = 'Sessão expirada. Por favor, faça login novamente.';
+        } else if (error.message.includes('402') || error.message.includes('insufficient')) {
+          errorMessage = 'Saldo insuficiente de FitCoins';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: '❌ Erro no envio',
-        description: error instanceof Error ? error.message : 'Não foi possível enviar a foto.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
