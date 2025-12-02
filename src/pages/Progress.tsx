@@ -171,17 +171,28 @@ export default function Progress() {
         finishedFasts.slice(-5).reverse().forEach(fast => {
           const start = new Date(fast.start_time);
           const end = new Date(fast.end_time!);
-          const hours = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60));
-          const minutes = Math.floor(((end.getTime() - start.getTime()) / (1000 * 60)) % 60);
+          const totalMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
+          const hours = Math.floor(totalMinutes / 60);
+          const minutes = totalMinutes % 60;
           
           // Verificar se foi concluído (atingiu a meta) ou pausado
           const wasCompleted = fast.status === 'completed' || hours >= (fast.target_hours || 16);
           
+          // Formatar tempo com horas e minutos
+          let timeText = '';
+          if (hours > 0 && minutes > 0) {
+            timeText = `${hours}h${minutes}min`;
+          } else if (hours > 0) {
+            timeText = `${hours}h`;
+          } else {
+            timeText = `${minutes}min`;
+          }
+          
           achievementsList.push({
             emoji: wasCompleted ? '🔥' : '⏸️',
             title: wasCompleted 
-              ? `Jejum de ${hours}h concluído`
-              : `Jejum de ${hours}h${minutes > 0 ? `${minutes}min` : ''} pausado`,
+              ? `Jejum de ${timeText} concluído`
+              : `Jejum de ${timeText} pausado`,
             description: new Date(fast.end_time!).toLocaleDateString('pt-BR'),
           });
         });
