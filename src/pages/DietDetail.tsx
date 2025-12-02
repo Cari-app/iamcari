@@ -140,7 +140,12 @@ export default function DietDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        {/* Background gradient effects */}
+        <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+        
         <Navbar />
         <div className="pt-24 pb-24 px-4 max-w-lg mx-auto space-y-4">
           <Skeleton className="h-32 w-full rounded-2xl" />
@@ -155,7 +160,12 @@ export default function DietDetail() {
   if (!diet) return null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background gradient effects */}
+      <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+      
       <Navbar />
 
       <main className="pt-28 pb-24 px-4 max-w-lg mx-auto">

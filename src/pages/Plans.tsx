@@ -68,7 +68,12 @@ const Plans = () => {
 
   // Reorder for mobile: VIP first
   const mobilePlans = [plans.find(p => p.id === "vip")!, plans.find(p => p.id === "trial")!, plans.find(p => p.id === "premium")!];
-  return <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background gradient effects */}
+      <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+      
       <Navbar />
       
       <main className="container max-w-6xl mx-auto px-4 pt-[180px] pb-32 md:pb-20">
