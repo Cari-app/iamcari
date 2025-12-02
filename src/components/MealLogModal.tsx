@@ -1,22 +1,30 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Camera, Pencil, Heart, Wind } from 'lucide-react';
+import { X, Camera, Pencil, Heart, Wind, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { FitCoinIcon } from '@/components/FitCoinIcon';
+import { supabase } from '@/integrations/supabase/client';
+import { compressImage } from '@/lib/imageCompression';
+import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MealLogModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onPhotoSubmitted?: () => void;
 }
 
 type Step = 'hunger-check' | 'breathing' | 'log-type';
 
-export function MealLogModal({ isOpen, onClose }: MealLogModalProps) {
+export function MealLogModal({ isOpen, onClose, onPhotoSubmitted }: MealLogModalProps) {
+  const { user, profile, refreshProfile } = useAuth();
   const [step, setStep] = useState<Step>('hunger-check');
   const [hungerLevel, setHungerLevel] = useState(5);
   const [breathingTime, setBreathingTime] = useState(60);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEmotionalHunger = hungerLevel > 5;
 
@@ -36,7 +44,103 @@ export function MealLogModal({ isOpen, onClose }: MealLogModalProps) {
     setStep('hunger-check');
     setHungerLevel(5);
     setBreathingTime(60);
+    setIsUploading(false);
     onClose();
+  };
+
+  const handlePhotoClick = () => {
+    if (!user || !profile) {
+      toast.error('Você precisa estar logado');
+      return;
+    }
+
+    if (profile.token_balance < 1) {
+      toast.error('Saldo insuficiente de FitCoins', {
+        description: 'Você precisa de pelo menos 1 FitCoin para análise com IA',
+      });
+      return;
+    }
+
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    setIsUploading(true);
+
+    try {
+      // Show progress toast
+      const progressToast = toast.loading('Comprimindo imagem...');
+
+      // Compress image
+      const compressedBlob = await compressImage(file);
+      
+      toast.loading('Enviando para a nuvem...', { id: progressToast });
+
+      // Convert blob to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(compressedBlob);
+      
+      reader.onloadend = async () => {
+        const base64data = reader.result as string;
+        const base64 = base64data.split(',')[1];
+
+        const fileName = `${user.id}/${Date.now()}.jpeg`;
+
+        toast.loading('A Dona está analisando...', { id: progressToast });
+
+        // Call edge function
+        const { data, error } = await supabase.functions.invoke('consume-fitcoin-for-meal', {
+          body: {
+            imageBlob: base64,
+            fileName: fileName,
+            isEmotional: hungerLevel > 5,
+          },
+        });
+
+        if (error) {
+          console.error('Error calling edge function:', error);
+          
+          if (error.message?.includes('402') || error.message?.includes('insufficient_balance')) {
+            toast.error('Saldo insuficiente', {
+              id: progressToast,
+              description: 'Você precisa de FitCoins para análise com IA',
+            });
+          } else {
+            toast.error('Erro ao enviar imagem', {
+              id: progressToast,
+              description: error.message || 'Tente novamente',
+            });
+          }
+          setIsUploading(false);
+          return;
+        }
+
+        toast.success('Imagem enviada! ✅', {
+          id: progressToast,
+          description: 'A análise será concluída em instantes',
+        });
+
+        // Refresh profile to update balance
+        await refreshProfile();
+
+        // Close modal and notify parent
+        handleClose();
+        onPhotoSubmitted?.();
+      };
+
+      reader.onerror = () => {
+        toast.error('Erro ao processar imagem');
+        setIsUploading(false);
+      };
+
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Erro ao processar imagem');
+      setIsUploading(false);
+    }
   };
 
   // Countdown effect for breathing
@@ -220,15 +324,32 @@ export function MealLogModal({ isOpen, onClose }: MealLogModalProps) {
                         Como deseja registrar sua refeição?
                       </p>
 
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      
                       <Button
+                        onClick={handlePhotoClick}
+                        disabled={isUploading}
                         variant="outline"
-                        className="w-full h-16 rounded-2xl justify-start gap-4 press-effect border-primary/30 hover:border-primary hover:bg-primary/5"
+                        className="w-full h-16 rounded-2xl justify-start gap-4 press-effect border-primary/30 hover:border-primary hover:bg-primary/5 disabled:opacity-50"
                       >
                         <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center">
-                          <Camera className="h-6 w-6 text-white" />
+                          {isUploading ? (
+                            <Loader2 className="h-6 w-6 text-white animate-spin" />
+                          ) : (
+                            <Camera className="h-6 w-6 text-white" />
+                          )}
                         </div>
                         <div className="text-left">
-                          <p className="font-medium text-foreground">Foto com IA</p>
+                          <p className="font-medium text-foreground">
+                            {isUploading ? 'Enviando...' : 'Foto com IA'}
+                          </p>
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
                             <FitCoinIcon size={14} /> 1 FitCoin
                           </p>
