@@ -72,7 +72,7 @@ interface UserAchievement {
 
 export default function Profile() {
   const { theme, toggleTheme } = useTheme();
-  const { user, signOut } = useAuth();
+  const { user, signOut, profile } = useAuth();
   const { stats, loading: statsLoading } = useGamification();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -718,6 +718,20 @@ export default function Profile() {
                     <div className="flex items-center gap-3">
                       <Crown className="h-5 w-5 text-primary" />
                       <span className="font-medium text-foreground">Planos & FitCoins</span>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/fitcoin-history')}
+                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
+                  >
+                    <div className="flex items-center gap-3">
+                      <FitCoinIcon size={20} />
+                      <div className="text-left">
+                        <span className="font-medium text-foreground">Histórico de FitCoins</span>
+                        <p className="text-xs text-muted-foreground">{profile?.token_balance || 0} disponíveis</p>
+                      </div>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </button>

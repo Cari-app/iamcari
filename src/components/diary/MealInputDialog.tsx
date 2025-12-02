@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Pencil, Utensils, Sparkles, Heart, Star } from 'lucide-react';
+import { Camera, Pencil, Utensils, Sparkles, Heart, Star, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { compressImage } from '@/lib/imageCompression';
+import { FitCoinIcon } from '@/components/FitCoinIcon';
 import {
   Dialog,
   DialogContent,
@@ -37,7 +38,7 @@ export function MealInputDialog({
   onSubmit,
   onPhotoSubmitted,
 }: MealInputDialogProps) {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [method, setMethod] = useState<InputMethod>('select');
   const [description, setDescription] = useState('');
   const [calories, setCalories] = useState('');
@@ -46,7 +47,10 @@ export function MealInputDialog({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadStep, setUploadStep] = useState(0);
+  const [fitCoinBalance, setFitCoinBalance] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const FITCOIN_COST = 1;
 
   const uploadSteps = [
     'Comprimindo imagem...',
@@ -54,6 +58,13 @@ export function MealInputDialog({
     'A Dona está analisando...',
     'Calculando calorias...',
   ];
+
+  // Update FitCoin balance when profile changes
+  useEffect(() => {
+    if (profile?.token_balance !== undefined) {
+      setFitCoinBalance(profile.token_balance);
+    }
+  }, [profile]);
 
   // Cycle through upload steps
   useEffect(() => {
@@ -104,6 +115,16 @@ export function MealInputDialog({
       return;
     }
 
+    // Check FitCoin balance
+    if (fitCoinBalance < FITCOIN_COST) {
+      toast({
+        title: '💎 Saldo insuficiente',
+        description: `Você precisa de ${FITCOIN_COST} FitCoin para análise de IA. Saldo atual: ${fitCoinBalance}`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setUploading(true);
     setUploadStep(0);
 
@@ -111,50 +132,60 @@ export function MealInputDialog({
       // Step 1: Compress image
       const compressedBlob = await compressImage(selectedImage);
 
-      // Step 2: Upload compressed image to Supabase Storage
+      // Step 2: Convert blob to base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64 = (reader.result as string).split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(compressedBlob);
+      });
+
+      const imageBase64 = await base64Promise;
       const timestamp = Date.now();
-      const filePath = `${user.id}/${timestamp}.jpg`; // Always JPEG
+      const fileName = `${user.id}/${timestamp}.jpg`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('meal_photos')
-        .upload(filePath, compressedBlob, {
-          contentType: 'image/jpeg',
-          cacheControl: '3600',
-        });
+      // Step 3: Call edge function to consume FitCoin and upload
+      const { data: authData } = await supabase.auth.getSession();
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/consume-fitcoin-for-meal`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authData.session?.access_token}`,
+          },
+          body: JSON.stringify({
+            imageBlob: imageBase64,
+            fileName,
+            isEmotional,
+          }),
+        }
+      );
 
-      if (uploadError) {
-        console.error('Storage upload error:', uploadError);
-        throw uploadError;
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (result.error === 'insufficient_balance') {
+          toast({
+            title: '💎 Saldo insuficiente',
+            description: `Você precisa de ${FITCOIN_COST} FitCoin. Saldo atual: ${result.currentBalance || 0}`,
+            variant: 'destructive',
+          });
+          return;
+        }
+        throw new Error(result.error || 'Erro ao processar');
       }
 
-      // Step 3: Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('meal_photos')
-        .getPublicUrl(filePath);
-
-      console.log('Image uploaded successfully:', publicUrl);
-
-      // Step 4: Insert initial record into meal_logs with status 'pending'
-      const { error: insertError } = await supabase
-        .from('meal_logs')
-        .insert({
-          user_id: user.id,
-          entry_type: 'meal',
-          image_url: publicUrl,
-          status: 'pending',
-          food_name: 'Aguardando análise de imagem...',
-          is_emotional: isEmotional,
-        });
-
-      if (insertError) {
-        console.error('Database insert error:', insertError);
-        throw insertError;
-      }
+      // Update local balance
+      setFitCoinBalance(result.newBalance);
 
       // Success!
       toast({
-        title: '📸 Foto enviada com sucesso!',
-        description: 'Aguarde a análise da Dona.',
+        title: '✅ Análise iniciada!',
+        description: `1 FitCoin consumido. Saldo: ${result.newBalance}`,
       });
 
       // Trigger refetch in parent component
@@ -167,7 +198,7 @@ export function MealInputDialog({
       console.error('Error uploading image:', error);
       toast({
         title: '❌ Erro no envio',
-        description: 'Não foi possível enviar a foto. Tente novamente.',
+        description: error instanceof Error ? error.message : 'Não foi possível enviar a foto.',
         variant: 'destructive',
       });
     } finally {
@@ -335,11 +366,38 @@ export function MealInputDialog({
                 )}
               </div>
 
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-violet-500/10 border border-violet-500/20">
-                <Sparkles className="h-4 w-4 text-violet-400 flex-shrink-0" />
-                <p className="text-xs text-violet-300">
-                  Esta funcionalidade consome FitCoins de IA
-                </p>
+              {/* FitCoin Balance & Cost Info */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-teal-500/10 border border-teal-500/20">
+                  <div className="flex items-center gap-2">
+                    <FitCoinIcon size={16} />
+                    <span className="text-sm font-medium text-teal-300">Saldo</span>
+                  </div>
+                  <span className="text-sm font-bold text-teal-400">{fitCoinBalance} FitCoins</span>
+                </div>
+
+                <div className={cn(
+                  "flex items-center gap-2 p-3 rounded-xl border",
+                  fitCoinBalance >= FITCOIN_COST
+                    ? "bg-violet-500/10 border-violet-500/20"
+                    : "bg-rose-500/10 border-rose-500/20"
+                )}>
+                  {fitCoinBalance >= FITCOIN_COST ? (
+                    <>
+                      <Sparkles className="h-4 w-4 text-violet-400 flex-shrink-0" />
+                      <p className="text-xs text-violet-300">
+                        Custo: {FITCOIN_COST} FitCoin para análise de IA
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="h-4 w-4 text-rose-400 flex-shrink-0" />
+                      <p className="text-xs text-rose-300">
+                        Saldo insuficiente. Você precisa de {FITCOIN_COST} FitCoin
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-2">
@@ -348,11 +406,11 @@ export function MealInputDialog({
                 </Button>
                 <Button 
                   onClick={handleCameraSubmit} 
-                  disabled={!selectedImage || uploading}
-                  className="flex-1 gradient-primary text-white"
+                  disabled={!selectedImage || uploading || fitCoinBalance < FITCOIN_COST}
+                  className="flex-1 gradient-primary text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Camera className="h-4 w-4 mr-2" />
-                  {uploading ? 'Enviando...' : 'Capturar'}
+                  {uploading ? 'Enviando...' : fitCoinBalance < FITCOIN_COST ? 'Saldo insuficiente' : 'Analisar'}
                 </Button>
               </div>
             </div>

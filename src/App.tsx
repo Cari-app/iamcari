@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Diary from "./pages/Diary";
 import Progress from "./pages/Progress";
 import Profile from "./pages/Profile";
+import FitCoinHistory from "./pages/FitCoinHistory";
 import Onboarding from "./pages/Onboarding";
 import Assessment from "./pages/Assessment";
 import NutritionQuiz from "./pages/NutritionQuiz";
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/diary" element={<ProtectedRoute><Diary /></ProtectedRoute>} />
             <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/fitcoin-history" element={<ProtectedRoute><FitCoinHistory /></ProtectedRoute>} />
             <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
             <Route path="/diets" element={<ProtectedRoute><ExploreDiets /></ProtectedRoute>} />
             <Route path="/diet-detail" element={<ProtectedRoute><DietDetail /></ProtectedRoute>} />
