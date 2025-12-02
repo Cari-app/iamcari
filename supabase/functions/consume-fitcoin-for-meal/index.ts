@@ -13,6 +13,12 @@ serve(async (req) => {
   }
 
   try {
+    // Log incoming request
+    console.log('=== Edge Function Request ===');
+    console.log('Authorization header present:', !!req.headers.get('Authorization'));
+    console.log('SUPABASE_URL:', Deno.env.get('SUPABASE_URL'));
+    console.log('SUPABASE_ANON_KEY present:', !!Deno.env.get('SUPABASE_ANON_KEY'));
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -24,7 +30,19 @@ serve(async (req) => {
     );
 
     // Get user from JWT
+    console.log('Attempting to get user...');
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    
+    if (userError) {
+      console.error('Auth error:', userError);
+    }
+    
+    if (!user) {
+      console.error('No user found');
+    } else {
+      console.log('User authenticated:', user.id);
+    }
+    
     if (userError || !user) {
       return new Response(
         JSON.stringify({ error: 'Não autorizado' }),
