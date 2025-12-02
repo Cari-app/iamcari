@@ -386,10 +386,11 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="grid grid-cols-3 gap-3"
+            className="grid grid-cols-2 sm:grid-cols-4 gap-3"
           >
             {loading ? (
               <>
+                <Skeleton className="h-20 rounded-2xl" />
                 <Skeleton className="h-20 rounded-2xl" />
                 <Skeleton className="h-20 rounded-2xl" />
                 <Skeleton className="h-20 rounded-2xl" />
@@ -418,11 +419,23 @@ export default function Dashboard() {
                   <div className="flex items-center justify-center gap-1.5 mb-1">
                     <FitCoinIcon size={20} />
                     <p className="text-2xl font-bold text-foreground tabular-nums">
-                      {gameCoins}
+                      {profile?.token_balance || 0}
                     </p>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     FitCoins
+                  </p>
+                </div>
+                
+                <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    <Zap className="h-5 w-5 text-amber-500" />
+                    <p className="text-2xl font-bold text-foreground tabular-nums">
+                      {gameCoins}
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Game Coins
                   </p>
                 </div>
               </>

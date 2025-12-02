@@ -26,6 +26,7 @@ import {
   Shield,
   ChevronRight,
   Gem,
+  Zap,
   Swords,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -526,10 +527,10 @@ export default function Profile() {
 
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-1">
-                      <FitCoinIcon size={20} />
+                      <Zap className="h-5 w-5 text-amber-500" />
                     </div>
                     <p className="text-lg font-bold text-foreground">{stats?.game_coins || 0}</p>
-                    <p className="text-xs text-muted-foreground">Moedas</p>
+                    <p className="text-xs text-muted-foreground">Game Coins</p>
                   </div>
 
                   <div className="text-center">
