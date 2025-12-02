@@ -163,9 +163,18 @@ export function useFastingTimer() {
   const stopFasting = useCallback(async () => {
     if (!session?.id || !user) return;
 
+    const endTime = new Date();
+    const elapsedHours = (endTime.getTime() - session.startTime) / (1000 * 60 * 60);
+    
+    // Determinar se o jejum foi concluído ou pausado
+    const status = elapsedHours >= session.targetHours ? 'completed' : 'paused';
+
     const { error } = await supabase
       .from('fasting_sessions')
-      .update({ end_time: new Date().toISOString() })
+      .update({ 
+        end_time: endTime.toISOString(),
+        status: status
+      })
       .eq('id', session.id);
 
     if (error) {
@@ -173,7 +182,7 @@ export function useFastingTimer() {
       return;
     }
 
-    console.log('Fasting session stopped successfully');
+    console.log(`Fasting session ${status} successfully`);
     setSession(null);
   }, [session, user]);
 

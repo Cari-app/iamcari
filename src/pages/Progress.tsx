@@ -163,18 +163,25 @@ export default function Progress() {
       }
       setHeatmapData(heatmap);
 
-      // Generate achievements
-      const completedFastsWithDuration = fastingSessions?.filter(s => s.end_time !== null) || [];
+      // Generate achievements - separar concluídos e pausados
+      const finishedFasts = fastingSessions?.filter(s => s.end_time !== null) || [];
       const achievementsList: Array<{ emoji: string; title: string; description: string }> = [];
 
-      if (completedFastsWithDuration.length > 0) {
-        completedFastsWithDuration.slice(-3).forEach(fast => {
+      if (finishedFasts.length > 0) {
+        finishedFasts.slice(-5).reverse().forEach(fast => {
           const start = new Date(fast.start_time);
           const end = new Date(fast.end_time!);
           const hours = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60));
+          const minutes = Math.floor(((end.getTime() - start.getTime()) / (1000 * 60)) % 60);
+          
+          // Verificar se foi concluído (atingiu a meta) ou pausado
+          const wasCompleted = fast.status === 'completed' || hours >= (fast.target_hours || 16);
+          
           achievementsList.push({
-            emoji: '🔥',
-            title: `Jejum de ${hours}h concluído`,
+            emoji: wasCompleted ? '🔥' : '⏸️',
+            title: wasCompleted 
+              ? `Jejum de ${hours}h concluído`
+              : `Jejum de ${hours}h${minutes > 0 ? `${minutes}min` : ''} pausado`,
             description: new Date(fast.end_time!).toLocaleDateString('pt-BR'),
           });
         });
