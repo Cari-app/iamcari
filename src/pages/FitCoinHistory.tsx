@@ -97,9 +97,10 @@ export default function FitCoinHistory() {
   return (
     <div className="min-h-screen bg-background pb-20">
       <Navbar />
-
-      {/* Header */}
-      <div className="pt-20 px-4 pb-6">
+      
+      <div className="max-w-2xl mx-auto">
+        {/* Header */}
+        <div className="pt-20 px-4 pb-6">
         <button
           onClick={() => navigate('/profile')}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4"
@@ -143,10 +144,10 @@ export default function FitCoinHistory() {
             </div>
           </Card>
         </motion.div>
-      </div>
+        </div>
 
-      {/* Transactions List */}
-      <div className="px-4 space-y-3">
+        {/* Transactions List */}
+        <div className="px-4 space-y-3">
         {loading ? (
           // Loading skeleton
           Array.from({ length: 5 }).map((_, i) => (
@@ -216,6 +217,7 @@ export default function FitCoinHistory() {
             </motion.div>
           ))
         )}
+        </div>
       </div>
 
       <BottomNav />
