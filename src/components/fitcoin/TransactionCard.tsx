@@ -36,40 +36,61 @@ export function TransactionCard({ amount, description, createdAt, index }: Trans
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.05 }}
+      transition={{ 
+        delay: index * 0.05,
+        type: "spring",
+        stiffness: 100
+      }}
+      whileHover={{ scale: 1.02, x: 4 }}
+      whileTap={{ scale: 0.98 }}
     >
-      <Card className="glass p-4 border-border/50 hover:border-border transition-all duration-300">
-        <div className="flex items-center justify-between">
+      <Card className={cn(
+        "relative glass p-4 border-border/50 hover:border-border transition-all duration-300 overflow-hidden group cursor-pointer",
+        amount > 0 && "hover:border-teal-500/30",
+        amount < 0 && "hover:border-violet-500/30"
+      )}>
+        {/* Hover glow effect */}
+        <div className={cn(
+          "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
+          amount > 0 && "bg-gradient-to-r from-teal-500/5 to-transparent",
+          amount < 0 && "bg-gradient-to-r from-violet-500/5 to-transparent"
+        )} />
+        
+        <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={cn(
-              "h-10 w-10 rounded-xl flex items-center justify-center backdrop-blur-sm",
-              amount > 0 
-                ? "bg-teal-500/20 border border-teal-500/30" 
-                : "bg-violet-500/20 border border-violet-500/30"
-            )}>
+            <motion.div 
+              className={cn(
+                "h-11 w-11 rounded-xl flex items-center justify-center backdrop-blur-sm relative",
+                amount > 0 
+                  ? "bg-teal-500/20 border border-teal-500/30 shadow-lg shadow-teal-500/20" 
+                  : "bg-violet-500/20 border border-violet-500/30 shadow-lg shadow-violet-500/20"
+              )}
+              whileHover={{ rotate: 360 }}
+              transition={{ duration: 0.5 }}
+            >
               {amount > 0 ? (
                 <TrendingUp className="h-5 w-5 text-teal-400" />
               ) : (
                 <TrendingDown className="h-5 w-5 text-violet-400" />
               )}
-            </div>
+            </motion.div>
             <div>
-              <p className="font-medium text-foreground text-sm">
+              <p className="font-semibold text-foreground text-sm">
                 {description}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
                 {formatDate(createdAt)}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
             <span className={cn(
-              "text-lg font-bold",
+              "text-lg font-bold tabular-nums",
               amount > 0 ? "text-teal-400" : "text-foreground"
             )}>
               {amount > 0 ? '+' : ''}{amount}
             </span>
-            <FitCoinIcon size={16} />
+            <FitCoinIcon size={18} />
           </div>
         </div>
       </Card>

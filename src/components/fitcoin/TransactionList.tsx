@@ -20,7 +20,14 @@ export function TransactionList({ transactions, loading }: TransactionListProps)
     return (
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, i) => (
-          <Skeleton key={i} className="h-20 rounded-2xl bg-muted/20" />
+          <motion.div
+            key={i}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: i * 0.1 }}
+          >
+            <Skeleton className="h-20 rounded-2xl bg-muted/10 backdrop-blur-sm animate-pulse" />
+          </motion.div>
         ))}
       </div>
     );
@@ -29,18 +36,26 @@ export function TransactionList({ transactions, loading }: TransactionListProps)
   if (transactions.length === 0) {
     return (
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="text-center py-16"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: "spring", stiffness: 100 }}
+        className="text-center py-20"
       >
-        <div className="h-20 w-20 rounded-full bg-muted/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 border border-border/50">
-          <FitCoinIcon size={40} className="opacity-50" />
-        </div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">
+        <motion.div 
+          className="relative inline-flex mb-6"
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <div className="absolute inset-0 bg-teal-500/20 blur-2xl rounded-full" />
+          <div className="relative h-24 w-24 rounded-2xl glass border border-border/50 flex items-center justify-center">
+            <FitCoinIcon size={48} className="opacity-50" />
+          </div>
+        </motion.div>
+        <h3 className="text-xl font-bold text-foreground mb-2">
           Nenhuma transação ainda
         </h3>
-        <p className="text-sm text-muted-foreground">
-          Suas transações de FitCoins aparecerão aqui
+        <p className="text-sm text-muted-foreground max-w-[250px] mx-auto">
+          Suas transações de FitCoins aparecerão aqui quando você comprar ou usar
         </p>
       </motion.div>
     );
