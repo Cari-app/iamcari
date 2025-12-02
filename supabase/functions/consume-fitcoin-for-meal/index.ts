@@ -34,7 +34,17 @@ serve(async (req) => {
 
     const { imageBlob, fileName, isEmotional } = await req.json();
 
-    // 1. Check FitCoin balance
+    // 1. Check if user is admin
+    const { data: userRole, error: roleError } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    const isAdmin = !!userRole;
+
+    // 2. Check FitCoin balance (skip for admins)
     const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('token_balance')
@@ -51,7 +61,8 @@ serve(async (req) => {
 
     const FITCOIN_COST = 1;
     
-    if (!profile || profile.token_balance < FITCOIN_COST) {
+    // Admins have unlimited FitCoins
+    if (!isAdmin && (!profile || profile.token_balance < FITCOIN_COST)) {
       return new Response(
         JSON.stringify({ 
           error: 'insufficient_balance',
@@ -86,34 +97,40 @@ serve(async (req) => {
       .from('meal_photos')
       .getPublicUrl(fileName);
 
-    // 4. Deduct FitCoin and record transaction (in a transaction-like manner)
-    const { error: updateError } = await supabaseClient
-      .from('profiles')
-      .update({ token_balance: profile.token_balance - FITCOIN_COST })
-      .eq('id', user.id);
+    // 4. Deduct FitCoin and record transaction (only for non-admins)
+    let newBalance = profile.token_balance;
+    
+    if (!isAdmin) {
+      const { error: updateError } = await supabaseClient
+        .from('profiles')
+        .update({ token_balance: profile.token_balance - FITCOIN_COST })
+        .eq('id', user.id);
 
-    if (updateError) {
-      console.error('Error updating balance:', updateError);
-      // Rollback: delete uploaded image
-      await supabaseClient.storage.from('meal_photos').remove([fileName]);
-      return new Response(
-        JSON.stringify({ error: 'Erro ao processar pagamento' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+      if (updateError) {
+        console.error('Error updating balance:', updateError);
+        // Rollback: delete uploaded image
+        await supabaseClient.storage.from('meal_photos').remove([fileName]);
+        return new Response(
+          JSON.stringify({ error: 'Erro ao processar pagamento' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
 
-    // 5. Record transaction
-    const { error: transactionError } = await supabaseClient
-      .from('token_transactions')
-      .insert({
-        user_id: user.id,
-        amount: -FITCOIN_COST,
-        description: 'Análise de refeição com IA',
-      });
+      newBalance = profile.token_balance - FITCOIN_COST;
 
-    if (transactionError) {
-      console.error('Error recording transaction:', transactionError);
-      // Continue anyway - the deduction was successful
+      // 5. Record transaction
+      const { error: transactionError } = await supabaseClient
+        .from('token_transactions')
+        .insert({
+          user_id: user.id,
+          amount: -FITCOIN_COST,
+          description: 'Análise de refeição com IA',
+        });
+
+      if (transactionError) {
+        console.error('Error recording transaction:', transactionError);
+        // Continue anyway - the deduction was successful
+      }
     }
 
     // 6. Insert meal log
@@ -139,8 +156,9 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true,
-        newBalance: profile.token_balance - FITCOIN_COST,
-        imageUrl: publicUrl
+        newBalance: newBalance,
+        imageUrl: publicUrl,
+        isAdmin: isAdmin
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
