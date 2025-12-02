@@ -15,11 +15,15 @@ import { Play, Pause, RotateCcw, Flame, Zap, Sparkles, Target, MapPin, UtensilsC
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGamification } from '@/hooks/useGamification';
+import { useUserRole } from '@/hooks/useUserRole';
+import { useAchievementNotifications } from '@/hooks/useAchievementNotifications';
 import { FitCoinIcon } from '@/components/FitCoinIcon';
 import { toast } from '@/hooks/use-toast';
 
 export default function Dashboard() {
   const { user, profile, refreshProfile } = useAuth();
+  useAchievementNotifications(); // Enable achievement notifications
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProtocolOpen, setIsProtocolOpen] = useState(false);
