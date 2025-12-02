@@ -7,6 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGamification } from '@/hooks/useGamification';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAchievementNotifications } from '@/hooks/useAchievementNotifications';
 import { supabase } from '@/integrations/supabase';
 import { toast } from '@/hooks/use-toast';
 import { 
@@ -76,6 +77,7 @@ export default function Profile() {
   const { user, signOut, profile } = useAuth();
   const { stats, loading: statsLoading } = useGamification();
   const { isAdmin } = useUserRole();
+  useAchievementNotifications(); // Enable achievement notifications
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
