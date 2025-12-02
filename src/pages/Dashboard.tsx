@@ -5,7 +5,7 @@ import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
 import { CircularProgress } from '@/components/CircularProgress';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
-import { MealInputDialog } from '@/components/diary/MealInputDialog';
+import { MealLogModal } from '@/components/MealLogModal';
 import { ProtocolSelector } from '@/components/dashboard/ProtocolSelector';
 import { BentoStats } from '@/components/dashboard/BentoStats';
 import { useFastingTimer } from '@/hooks/useFastingTimer';
@@ -539,10 +539,9 @@ export default function Dashboard() {
       <FloatingActionButton onClick={() => setIsModalOpen(true)} />
       <BottomNav />
       
-      <MealInputDialog
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        onSubmit={handleMealSubmit}
+      <MealLogModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onPhotoSubmitted={handlePhotoSubmitted}
       />
     </div>
