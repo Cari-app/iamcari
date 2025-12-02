@@ -56,8 +56,8 @@ export function MoodCheckInDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="bg-card border-border">
-        <div className="mx-auto w-full max-w-lg">
+      <DrawerContent className="bg-transparent border-none">
+        <div className="mx-auto w-full max-w-lg bg-card border border-border rounded-t-3xl">
           <DrawerHeader className="text-left">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-violet-500/20 flex items-center justify-center">
