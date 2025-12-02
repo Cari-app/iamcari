@@ -133,6 +133,78 @@ export type Database = {
         }
         Relationships: []
       }
+      fasting_assessments: {
+        Row: {
+          anxiety_level: string | null
+          created_at: string
+          eating_pattern: string | null
+          emotional_eating: string | null
+          fasting_experience: string | null
+          hunger_tolerance: string | null
+          id: string
+          main_goals: string | null
+          meals_per_day: string | null
+          morning_energy: string | null
+          morning_routine: string | null
+          night_hunger: string | null
+          readiness_score: number | null
+          rules_tolerance: string | null
+          scores: Json | null
+          snacking_habit: string | null
+          suggested_protocol: string | null
+          sweet_relationship: string | null
+          twelve_hour_tolerance: string | null
+          user_id: string
+          work_schedule: string | null
+        }
+        Insert: {
+          anxiety_level?: string | null
+          created_at?: string
+          eating_pattern?: string | null
+          emotional_eating?: string | null
+          fasting_experience?: string | null
+          hunger_tolerance?: string | null
+          id?: string
+          main_goals?: string | null
+          meals_per_day?: string | null
+          morning_energy?: string | null
+          morning_routine?: string | null
+          night_hunger?: string | null
+          readiness_score?: number | null
+          rules_tolerance?: string | null
+          scores?: Json | null
+          snacking_habit?: string | null
+          suggested_protocol?: string | null
+          sweet_relationship?: string | null
+          twelve_hour_tolerance?: string | null
+          user_id: string
+          work_schedule?: string | null
+        }
+        Update: {
+          anxiety_level?: string | null
+          created_at?: string
+          eating_pattern?: string | null
+          emotional_eating?: string | null
+          fasting_experience?: string | null
+          hunger_tolerance?: string | null
+          id?: string
+          main_goals?: string | null
+          meals_per_day?: string | null
+          morning_energy?: string | null
+          morning_routine?: string | null
+          night_hunger?: string | null
+          readiness_score?: number | null
+          rules_tolerance?: string | null
+          scores?: Json | null
+          snacking_habit?: string | null
+          suggested_protocol?: string | null
+          sweet_relationship?: string | null
+          twelve_hour_tolerance?: string | null
+          user_id?: string
+          work_schedule?: string | null
+        }
+        Relationships: []
+      }
       fasting_sessions: {
         Row: {
           created_at: string
