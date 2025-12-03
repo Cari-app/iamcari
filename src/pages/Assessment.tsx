@@ -154,7 +154,10 @@ const Assessment = () => {
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col">
       {/* Header with Progress */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border">
+      <div 
+        className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border"
+        style={{ paddingTop: 'calc(0.5rem + env(safe-area-inset-top, 0px))' }}
+      >
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3 mb-3">
             <Button

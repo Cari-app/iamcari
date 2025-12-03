@@ -285,7 +285,7 @@ export default function Login() {
     }} animate={{
       opacity: 1,
       y: 0
-    }} className="absolute top-4 right-4 safe-area-inset-top">
+    }} className="absolute right-4" style={{ top: 'calc(1rem + env(safe-area-inset-top, 0px))' }}>
         <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-10 w-10 rounded-xl glass press-effect">
           {theme === 'dark' ? <Sun className="h-5 w-5 text-yellow-400" /> : <Moon className="h-5 w-5 text-primary" />}
         </Button>
