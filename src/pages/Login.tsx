@@ -285,7 +285,9 @@ export default function Login() {
     }} animate={{
       opacity: 1,
       y: 0
-    }} className="absolute right-4" style={{ top: 'calc(1rem + env(safe-area-inset-top, 0px))' }}>
+    }} className="absolute right-4" style={{
+      top: 'calc(1rem + env(safe-area-inset-top, 0px))'
+    }}>
         <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-10 w-10 rounded-xl glass press-effect">
           {theme === 'dark' ? <Sun className="h-5 w-5 text-yellow-400" /> : <Moon className="h-5 w-5 text-primary" />}
         </Button>
@@ -319,7 +321,7 @@ export default function Login() {
         delay: 0.1
       }} className="text-center mb-10">
           <h1 className="text-2xl font-bold text-foreground mb-2">Emagrecimento Inteligente</h1>
-          <p className="text-muted-foreground">IA + Planejamento Gameficado para sua jornada de saúde</p>
+          <p className="text-muted-foreground">IA + Planejamento Inteligente para sua jornada de saúde</p>
         </motion.div>
 
         {/* Login Form */}
