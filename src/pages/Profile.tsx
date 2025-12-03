@@ -117,21 +117,29 @@ export default function Profile() {
   const [editNickname, setEditNickname] = useState('');
   const [savingPersonalData, setSavingPersonalData] = useState(false);
 
-  // Fetch profile data
+  // Fetch essential profile data (fast)
   useEffect(() => {
     if (!user) {
       setLoading(false);
       return;
     }
 
-    const fetchData = async () => {
-      // Fetch profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('full_name, nickname, avatar_url, weight, height, active_diet')
-        .eq('id', user.id)
-        .single();
+    const fetchEssentialData = async () => {
+      // Run essential queries in parallel
+      const [profileResult, fastingResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('full_name, nickname, avatar_url, weight, height, active_diet')
+          .eq('id', user.id)
+          .single(),
+        supabase
+          .from('fasting_sessions')
+          .select('start_time, end_time')
+          .eq('user_id', user.id)
+          .not('end_time', 'is', null)
+      ]);
 
+      const profileData = profileResult.data;
       if (profileData) {
         setFullName(profileData.full_name || user.email?.split('@')[0] || 'Jogador');
         setNickname(profileData.nickname || '');
@@ -139,62 +147,58 @@ export default function Profile() {
         setBodyWeight(profileData.weight || 0);
         setBodyHeight(profileData.height || 0);
         
-        // Fetch active diet details if exists
+        // Fetch diet in background (non-blocking)
         if (profileData.active_diet) {
-          const { data: dietData } = await supabase
+          supabase
             .from('diet_types')
             .select('id, name, icon, short_description, color_theme')
             .eq('id', profileData.active_diet)
-            .single();
-          
-          if (dietData) {
-            setActiveDiet(dietData);
-          }
+            .single()
+            .then(({ data: dietData }) => {
+              if (dietData) setActiveDiet(dietData);
+            });
         }
       }
 
-      // Fetch total fasting hours
-      const { data: fastingData } = await supabase
-        .from('fasting_sessions')
-        .select('start_time, end_time')
-        .eq('user_id', user.id)
-        .not('end_time', 'is', null);
-
+      // Calculate fasting hours
+      const fastingData = fastingResult.data;
       if (fastingData) {
         const totalHours = fastingData.reduce((acc, session) => {
           const start = new Date(session.start_time);
           const end = new Date(session.end_time!);
-          const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-          return acc + hours;
+          return acc + (end.getTime() - start.getTime()) / (1000 * 60 * 60);
         }, 0);
         setTotalFastingHours(Math.floor(totalHours));
-      }
-
-      // Fetch all achievements
-      const { data: achievementsData } = await supabase
-        .from('achievements')
-        .select('*')
-        .order('id', { ascending: true });
-
-      if (achievementsData) {
-        setAchievements(achievementsData);
-      }
-
-      // Fetch user's unlocked achievements
-      const { data: userAchievementsData } = await supabase
-        .from('user_achievements')
-        .select('achievement_code, unlocked_at')
-        .eq('user_id', user.id);
-
-      if (userAchievementsData) {
-        setUserAchievements(userAchievementsData);
       }
 
       setLoading(false);
     };
 
-    fetchData();
+    fetchEssentialData();
   }, [user]);
+
+  // Fetch achievements data (lazy - after main content loads)
+  useEffect(() => {
+    if (!user || loading) return;
+
+    const fetchAchievements = async () => {
+      const [achievementsResult, userAchievementsResult] = await Promise.all([
+        supabase
+          .from('achievements')
+          .select('*')
+          .order('id', { ascending: true }),
+        supabase
+          .from('user_achievements')
+          .select('achievement_code, unlocked_at')
+          .eq('user_id', user.id)
+      ]);
+
+      if (achievementsResult.data) setAchievements(achievementsResult.data);
+      if (userAchievementsResult.data) setUserAchievements(userAchievementsResult.data);
+    };
+
+    fetchAchievements();
+  }, [user, loading]);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
