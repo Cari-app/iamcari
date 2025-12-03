@@ -88,7 +88,7 @@ export default function FitCoinHistory() {
       
       <div className="max-w-md mx-auto relative">
         {/* Header */}
-        <div className="px-4 pb-6" style={{ paddingTop: 'calc(8rem + env(safe-area-inset-top, 0px))' }}>
+        <div className="px-4 pb-6" style={{ paddingTop: 'calc(9rem + env(safe-area-inset-top, 0px))' }}>
           <motion.button
             onClick={() => navigate('/profile')}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8 press-effect group"
