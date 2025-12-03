@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { FitCoinIcon } from '@/components/FitCoinIcon';
+import { toast } from 'sonner';
 
 interface Transaction {
   id: string;
@@ -26,6 +27,35 @@ export default function FitCoinHistory() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [customAmount, setCustomAmount] = useState<number[]>([10]);
+  const [purchasing, setPurchasing] = useState(false);
+
+  const handlePurchase = async (quantity: number, packageType: 'fixed' | 'custom') => {
+    if (purchasing) return;
+    setPurchasing(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-fitcoin-checkout', {
+        body: { quantity, packageType },
+      });
+
+      if (error) {
+        console.error('Checkout error:', error);
+        toast.error('Erro ao iniciar compra. Tente novamente.');
+        return;
+      }
+
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      } else {
+        toast.error('Erro ao criar sessão de pagamento.');
+      }
+    } catch (err) {
+      console.error('Purchase error:', err);
+      toast.error('Erro inesperado. Tente novamente.');
+    } finally {
+      setPurchasing(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -142,7 +172,10 @@ export default function FitCoinHistory() {
             className="grid grid-cols-3 gap-3"
           >
             {/* Plan 10 FitCoins */}
-            <Card className="glass-card border-violet-500/20 hover:border-violet-500/40 transition-all cursor-pointer group overflow-hidden relative">
+            <Card 
+              onClick={() => handlePurchase(10, 'fixed')}
+              className="glass-card border-violet-500/20 hover:border-violet-500/40 transition-all cursor-pointer group overflow-hidden relative"
+            >
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="p-4 relative z-10">
                 <div className="flex items-center justify-center mb-3">
@@ -159,7 +192,10 @@ export default function FitCoinHistory() {
             </Card>
 
             {/* Plan 50 FitCoins */}
-            <Card className="glass-card border-teal-500/20 hover:border-teal-500/40 transition-all cursor-pointer group overflow-hidden relative scale-105">
+            <Card 
+              onClick={() => handlePurchase(50, 'fixed')}
+              className="glass-card border-teal-500/20 hover:border-teal-500/40 transition-all cursor-pointer group overflow-hidden relative scale-105"
+            >
               <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="absolute top-0 right-0 bg-teal-500 text-xs px-2 py-0.5 rounded-bl-lg font-medium">
                 Popular
@@ -179,7 +215,10 @@ export default function FitCoinHistory() {
             </Card>
 
             {/* Plan 100 FitCoins */}
-            <Card className="glass-card border-violet-500/20 hover:border-violet-500/40 transition-all cursor-pointer group overflow-hidden relative">
+            <Card 
+              onClick={() => handlePurchase(100, 'fixed')}
+              className="glass-card border-violet-500/20 hover:border-violet-500/40 transition-all cursor-pointer group overflow-hidden relative"
+            >
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="p-4 relative z-10">
                 <div className="flex items-center justify-center mb-3">
@@ -234,8 +273,12 @@ export default function FitCoinHistory() {
                     R$ {(customAmount[0] * 0.9).toFixed(2)}
                   </span>
                 </div>
-                <Button className="w-full bg-gradient-to-r from-violet-600 to-teal-600 hover:from-violet-700 hover:to-teal-700 text-white font-semibold">
-                  Comprar {customAmount[0]} FitCoins
+                <Button 
+                  onClick={() => handlePurchase(customAmount[0], 'custom')}
+                  disabled={purchasing}
+                  className="w-full bg-gradient-to-r from-violet-600 to-teal-600 hover:from-violet-700 hover:to-teal-700 text-white font-semibold"
+                >
+                  {purchasing ? 'Processando...' : `Comprar ${customAmount[0]} FitCoins`}
                 </Button>
               </div>
             </Card>
