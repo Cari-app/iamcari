@@ -23,7 +23,7 @@ export function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 px-4"
       style={{ 
         paddingTop: isMobile 
-          ? 'calc(max(3rem, env(safe-area-inset-top, 3rem)) + 0.5rem)' 
+          ? 'calc(1rem + env(safe-area-inset-top, 0px))' 
           : '1rem' 
       }}
     >
