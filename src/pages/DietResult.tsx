@@ -131,7 +131,7 @@ export default function DietResult() {
       </header>
 
       {/* Main Content */}
-      <main className="pt-24 px-4 max-w-lg mx-auto">
+      <main className="safe-pt-24 px-4 max-w-lg mx-auto">
         {/* Reveal Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

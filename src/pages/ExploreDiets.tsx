@@ -85,7 +85,7 @@ export default function ExploreDiets() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-24 pt-[100px] relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-background pb-24 safe-pt-navbar-sm relative overflow-hidden">
       {/* Background gradient effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />

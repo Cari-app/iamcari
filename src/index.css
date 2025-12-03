@@ -156,6 +156,59 @@
   }
 }
 
+/* Safe Area Utilities for iOS */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-pt-navbar {
+    padding-top: calc(130px + env(safe-area-inset-top, 0px));
+  }
+  
+  .safe-pt-navbar-sm {
+    padding-top: calc(100px + env(safe-area-inset-top, 0px));
+  }
+  
+  .safe-pt-navbar-lg {
+    padding-top: calc(180px + env(safe-area-inset-top, 0px));
+  }
+  
+  .safe-pt-20 {
+    padding-top: calc(5rem + env(safe-area-inset-top, 0px));
+  }
+  
+  .safe-pt-24 {
+    padding-top: calc(6rem + env(safe-area-inset-top, 0px));
+  }
+  
+  .safe-pt-28 {
+    padding-top: calc(7rem + env(safe-area-inset-top, 0px));
+  }
+}
+
+@supports not (padding-top: env(safe-area-inset-top)) {
+  .safe-pt-navbar {
+    padding-top: 130px;
+  }
+  
+  .safe-pt-navbar-sm {
+    padding-top: 100px;
+  }
+  
+  .safe-pt-navbar-lg {
+    padding-top: 180px;
+  }
+  
+  .safe-pt-20 {
+    padding-top: 5rem;
+  }
+  
+  .safe-pt-24 {
+    padding-top: 6rem;
+  }
+  
+  .safe-pt-28 {
+    padding-top: 7rem;
+  }
+}
+
 @layer components {
   /* Glass Effect */
   .glass {

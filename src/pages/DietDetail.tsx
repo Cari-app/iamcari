@@ -147,7 +147,7 @@ export default function DietDetail() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <Navbar />
-        <div className="pt-24 pb-24 px-4 max-w-lg mx-auto space-y-4">
+        <div className="safe-pt-24 pb-24 px-4 max-w-lg mx-auto space-y-4">
           <Skeleton className="h-32 w-full rounded-2xl" />
           <Skeleton className="h-64 w-full rounded-2xl" />
           <Skeleton className="h-48 w-full rounded-2xl" />
@@ -168,7 +168,7 @@ export default function DietDetail() {
       
       <Navbar />
 
-      <main className="pt-28 pb-24 px-4 max-w-lg mx-auto">
+      <main className="safe-pt-28 pb-24 px-4 max-w-lg mx-auto">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

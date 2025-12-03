@@ -297,7 +297,7 @@ export default function Progress() {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-24 pt-20 relative overflow-hidden">
+    <div className="min-h-screen bg-background pb-24 safe-pt-20 relative overflow-hidden">
       {/* Background gradient effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />

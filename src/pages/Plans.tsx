@@ -76,7 +76,7 @@ const Plans = () => {
       
       <Navbar />
       
-      <main className="container max-w-6xl mx-auto px-4 pt-[180px] pb-32 md:pb-20">
+      <main className="container max-w-6xl mx-auto px-4 safe-pt-navbar-lg pb-32 md:pb-20">
         {/* Hero Section - Minimalista */}
         <motion.div initial={{
         opacity: 0,
