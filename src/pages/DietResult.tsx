@@ -174,7 +174,7 @@ export default function DietResult() {
 
           {/* Short Description */}
           <p className="text-muted-foreground text-center leading-relaxed mb-4">
-            {diet.full_description?.split('\n')[0] || 'Sua dieta personalizada'}
+            {diet.full_description?.split('\n')[0]?.replace(/^##\s*/, '') || 'Sua dieta personalizada'}
           </p>
 
           <Button
