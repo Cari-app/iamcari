@@ -305,7 +305,7 @@ export default function FastingQuiz() {
       {/* Header */}
       <header 
         className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border"
-        style={{ paddingTop: 'calc(1.5rem + env(safe-area-inset-top, 0px))' }}
+        style={{ paddingTop: 'calc(2rem + env(safe-area-inset-top, 0px))' }}
       >
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
