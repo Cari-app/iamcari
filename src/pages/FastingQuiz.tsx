@@ -327,7 +327,7 @@ export default function FastingQuiz() {
       </header>
 
       {/* Main Content */}
-      <main className="pt-32 pb-16 px-4">
+      <main className="pt-40 pb-16 px-4">
         <div className="max-w-lg mx-auto">
           <AnimatePresence mode="wait">
             {!isSubmitting ? (

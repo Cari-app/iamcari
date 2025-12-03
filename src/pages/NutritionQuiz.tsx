@@ -194,7 +194,7 @@ export default function NutritionQuiz() {
       </header>
 
       {/* Main Content */}
-      <main className="pt-32 pb-16 px-4">
+      <main className="pt-40 pb-16 px-4">
         <div className="max-w-lg mx-auto">
           <AnimatePresence mode="wait">
             {!isSubmitting ? <motion.div key={currentStep} initial={{
@@ -221,7 +221,7 @@ export default function NutritionQuiz() {
               }} transition={{
                 delay: 0.1,
                 type: "spring"
-              }} className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-card border border-border/50 mt-[50px]">
+              }} className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-card border border-border/50">
                     <currentQuestion.icon className={`h-10 w-10 ${currentQuestion.color}`} />
                   </motion.div>
 
