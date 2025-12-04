@@ -133,33 +133,34 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-[100dvh] bg-background pb-24">
-      {/* Green Gradient Header */}
-      <div className="bg-gradient-to-b from-primary via-primary/90 to-primary/80 pt-safe-top">
-        {/* Top Bar */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <h1 className="text-2xl font-bold text-white">Cari</h1>
-          <Link to="/profile">
-            <Avatar className="h-10 w-10 border-2 border-white/30">
-              <AvatarImage src={profile?.avatar_url || ''} />
-              <AvatarFallback className="bg-white/20 text-white">
-                {profile?.full_name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
-          </Link>
+      <div className="mx-auto max-w-lg">
+        {/* Green Gradient Header */}
+        <div className="bg-gradient-to-b from-primary via-primary/90 to-primary/80 pt-safe-top rounded-b-3xl">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between px-4 pt-4 pb-2">
+            <h1 className="text-2xl font-bold text-white">Cari</h1>
+            <Link to="/profile">
+              <Avatar className="h-10 w-10 border-2 border-white/30">
+                <AvatarImage src={profile?.avatar_url || ''} />
+                <AvatarFallback className="bg-white/20 text-white">
+                  {profile?.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          </div>
+
+          {/* Week Calendar */}
+          <WeekCalendar 
+            selectedDate={selectedDate} 
+            onDateSelect={setSelectedDate} 
+          />
+
+          {/* Calorie Header */}
+          <CalorieHeader 
+            consumed={totalCalories} 
+            target={caloriesTarget} 
+          />
         </div>
-
-        {/* Week Calendar */}
-        <WeekCalendar 
-          selectedDate={selectedDate} 
-          onDateSelect={setSelectedDate} 
-        />
-
-        {/* Calorie Header */}
-        <CalorieHeader 
-          consumed={totalCalories} 
-          target={caloriesTarget} 
-        />
-      </div>
 
       {/* Main Content */}
       <main className="relative z-10">
@@ -237,6 +238,8 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+
+      </div>
 
       {/* FAB */}
       <FloatingActionButton onClick={() => setIsModalOpen(true)} />
