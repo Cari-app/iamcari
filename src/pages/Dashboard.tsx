@@ -38,11 +38,14 @@ export default function Dashboard() {
   // Memoized calculations
   const totalCalories = useMemo(() => meals.reduce((sum, m) => sum + (m.calories || 0), 0), [meals]);
   const totalMacros = useMemo(() => meals.reduce((acc, meal) => {
+    // Try ai_analysis first, then fallback to macros field
     const analysis = typeof meal.ai_analysis === 'object' ? meal.ai_analysis : null;
+    const macros = typeof meal.macros === 'object' ? meal.macros : null;
+    
     return {
-      protein: acc.protein + (analysis?.protein || 0),
-      carbs: acc.carbs + (analysis?.carbs || 0),
-      fat: acc.fat + (analysis?.fat || 0)
+      protein: acc.protein + (analysis?.protein || macros?.protein || 0),
+      carbs: acc.carbs + (analysis?.carbs || macros?.carbs || 0),
+      fat: acc.fat + (analysis?.fat || macros?.fat || 0)
     };
   }, {
     protein: 0,
@@ -107,6 +110,7 @@ export default function Dashboard() {
             is_emotional: log.is_emotional || false,
             hunger_level: log.hunger_level,
             ai_analysis: log.ai_analysis as any,
+            macros: log.macros as { protein?: number; carbs?: number; fat?: number } | undefined,
             status: log.status || 'manual'
           })));
         }
