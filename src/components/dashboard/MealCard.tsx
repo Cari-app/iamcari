@@ -60,12 +60,18 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
         </div>
         
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 text-sm text-green-800">
-            <span>Prot: <span className="font-bold text-green-900">{macros.protein}g</span></span>
-            <span>Carb: <span className="font-bold text-green-900">{macros.carbs}g</span></span>
-            <span>Fat: <span className="font-bold text-green-900">{macros.fat}g</span></span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-800">
+              Prot: <span className="font-semibold">{macros.protein}g</span>
+            </span>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-800">
+              Carb: <span className="font-semibold">{macros.carbs}g</span>
+            </span>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-800">
+              Fat: <span className="font-semibold">{macros.fat}g</span>
+            </span>
           </div>
-          <span className="text-green-700 text-sm font-medium">{reachPercentage}% reach</span>
+          <span className="text-green-700 text-xs font-medium">{reachPercentage}% reach</span>
         </div>
       </div>
     </motion.div>
