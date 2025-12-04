@@ -12,9 +12,9 @@ export function FloatingActionButton({ onClick, className }: FloatingActionButto
     <motion.button
       onClick={onClick}
       className={cn(
-        'fixed bottom-28 right-6 z-40 flex items-center justify-center',
+        'fixed bottom-28 right-6 z-50 flex items-center justify-center',
         'w-14 h-14 rounded-full bg-green-900',
-        'shadow-lg shadow-green-900/30',
+        'shadow-xl shadow-green-950/50',
         'press-effect transition-shadow duration-300',
         className
       )}
@@ -25,9 +25,9 @@ export function FloatingActionButton({ onClick, className }: FloatingActionButto
         scale: 1, 
         opacity: 1,
         boxShadow: [
-          '0 10px 25px -5px rgba(20, 83, 45, 0.3)',
-          '0 10px 35px -5px rgba(20, 83, 45, 0.5)',
-          '0 10px 25px -5px rgba(20, 83, 45, 0.3)',
+          '0 10px 25px -5px rgba(5, 46, 22, 0.5)',
+          '0 10px 35px -5px rgba(5, 46, 22, 0.7)',
+          '0 10px 25px -5px rgba(5, 46, 22, 0.5)',
         ]
       }}
       transition={{ 
