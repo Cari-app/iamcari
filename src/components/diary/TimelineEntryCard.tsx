@@ -1,128 +1,99 @@
-import { Camera, Utensils, Heart, Clock, Droplet, Scale, BrainCircuit, Star, Edit } from 'lucide-react';
+import { memo, useMemo } from 'react';
+import { Droplet, Scale, BrainCircuit, Edit } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TimelineEntry, EMOTION_TAGS } from '@/types';
 
 interface TimelineEntryCardProps {
   entry: TimelineEntry;
   onEdit?: () => void;
+  dailyTarget?: number;
 }
 
-export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
-  // Meal Entry Card - Compact style like Dashboard
+export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit, dailyTarget = 2000 }: TimelineEntryCardProps) {
+  // Meal Entry Card - Same style as MealCard from Dashboard
   if (entry.type === 'meal') {
-    const hasAnalysis = typeof entry.ai_analysis === 'string' && entry.ai_analysis.trim().length > 0;
-    const isPending = !hasAnalysis && (entry.status === 'pending' || entry.image_url);
-    
-    // Parse macros from ai_analysis if available
-    let protein = 0, carbs = 0, fat = 0;
-    if (hasAnalysis && typeof entry.ai_analysis === 'string') {
-      const protMatch = entry.ai_analysis.match(/Proteínas?:?\s*(\d+)/i);
-      const carbMatch = entry.ai_analysis.match(/Carboidratos?:?\s*(\d+)/i);
-      const fatMatch = entry.ai_analysis.match(/Gorduras?:?\s*(\d+)/i);
-      if (protMatch) protein = parseInt(protMatch[1]);
-      if (carbMatch) carbs = parseInt(carbMatch[1]);
-      if (fatMatch) fat = parseInt(fatMatch[1]);
-    }
-    
-    // Get calorie percentage (mock for visual effect)
-    const calorieTarget = 2000;
-    const percentage = entry.calories > 0 ? Math.round((entry.calories / calorieTarget) * 100) : 0;
-    
+    const { reachPercentage, macros, isPending } = useMemo(() => {
+      const reach = dailyTarget > 0 
+        ? Math.round((entry.calories || 0) / dailyTarget * 100) 
+        : 0;
+      
+      const analysis = typeof entry.ai_analysis === 'object' ? entry.ai_analysis : null;
+      
+      return {
+        reachPercentage: reach,
+        macros: {
+          protein: analysis?.protein || 0,
+          carbs: analysis?.carbs || 0,
+          fat: analysis?.fat || 0,
+        },
+        isPending: entry.status === 'pending'
+      };
+    }, [entry.calories, entry.ai_analysis, dailyTarget, entry.status]);
+
     return (
-      <div className="p-3 bg-card border border-border rounded-2xl group">
-        <div className="flex items-center gap-3">
-          {/* Thumbnail or Icon */}
-          {entry.image_url ? (
-            <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-muted">
+      <div className="p-4 rounded-2xl bg-card border border-border group">
+        <div className="flex gap-4">
+          {/* Image */}
+          <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted shrink-0">
+            {entry.image_url ? (
               <img 
                 src={entry.image_url} 
-                alt="" 
+                alt={entry.food_name} 
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
-            </div>
-          ) : (
-            <div className={cn(
-              'w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0',
-              entry.entry_method === 'ai' ? 'gradient-primary' : 'bg-muted'
-            )}>
-              {entry.entry_method === 'ai' ? (
-                <Camera className="h-6 w-6 text-white" />
-              ) : (
-                <Utensils className="h-6 w-6 text-muted-foreground" />
-              )}
-            </div>
-          )}
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-[#84cc16]/20 to-[#84cc16]/5 flex items-center justify-center">
+                <span className="text-2xl">🍽️</span>
+              </div>
+            )}
+          </div>
           
           {/* Content */}
           <div className="flex-1 min-w-0">
-            {/* Top row: time + badge */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground tabular-nums">{entry.time}</span>
-              {isPending ? (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-violet-500/15 text-violet-400 text-[10px] font-medium">
-                  <div className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-pulse" />
-                  Processando
-                </span>
-              ) : entry.is_emotional ? (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-rose-500/15 text-rose-400 text-[10px] font-medium">
-                  <Heart className="h-2.5 w-2.5" />
-                  Emocional
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#84cc16]/15 text-[#84cc16] text-[10px] font-medium">
-                  <Star className="h-2.5 w-2.5 fill-current" />
-                  Planejada
-                </span>
-              )}
+            <div className="flex items-start justify-between">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">{entry.time}</p>
+                <h3 className="font-semibold text-foreground truncate">
+                  {isPending ? 'Aguardando análise de imagem...' : (entry.food_name || 'Refeição')}
+                </h3>
+                <p className="text-lg text-muted-foreground">
+                  {entry.calories || 0}kcal
+                </p>
+              </div>
+              <div className="text-right shrink-0 flex flex-col items-end gap-1">
+                <span className="text-sm font-medium text-[#84cc16]">{reachPercentage}% reach</span>
+                {!isPending && onEdit && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                    className="h-7 w-7 rounded-lg bg-muted/80 hover:bg-muted flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity press-effect"
+                    aria-label="Editar refeição"
+                  >
+                    <Edit className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
             </div>
             
-            {/* Food name */}
-            <p className="text-sm font-medium text-foreground truncate mt-0.5">
-              {isPending ? 'Aguardando análise de imagem...' : (entry.food_name || 'Refeição')}
-            </p>
-            
-            {/* Calories */}
-            <p className="text-sm text-foreground/80 tabular-nums">
-              {entry.calories > 0 ? `${entry.calories}kcal` : '—'}
-            </p>
-          </div>
-          
-          {/* Right side: percentage + edit button */}
-          <div className="flex flex-col items-end gap-1">
-            {percentage > 0 && (
-              <span className="text-xs font-medium text-[#84cc16] tabular-nums">
-                {percentage}% reach
+            {/* Macro badges */}
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-xs px-2.5 py-1 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
+                Prot: {macros.protein}g
               </span>
-            )}
-            {!isPending && onEdit && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                className="h-7 w-7 rounded-lg bg-muted/80 hover:bg-muted flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity press-effect"
-                aria-label="Editar refeição"
-              >
-                <Edit className="h-3.5 w-3.5 text-muted-foreground" />
-              </button>
-            )}
+              <span className="text-xs px-2.5 py-1 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
+                Carb: {macros.carbs}g
+              </span>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
+                Fat: {macros.fat}g
+              </span>
+            </div>
           </div>
-        </div>
-        
-        {/* Macros pills */}
-        <div className="flex items-center gap-2 mt-2">
-          <span className="px-2 py-0.5 rounded-full bg-muted text-[10px] text-muted-foreground">
-            Prot: {protein}g
-          </span>
-          <span className="px-2 py-0.5 rounded-full bg-muted text-[10px] text-muted-foreground">
-            Carb: {carbs}g
-          </span>
-          <span className="px-2 py-0.5 rounded-full bg-muted text-[10px] text-muted-foreground">
-            Fat: {fat}g
-          </span>
         </div>
       </div>
     );
   }
 
-  // Mood Entry Card - Compact
+  // Mood Entry Card
   if (entry.type === 'mood') {
     const emotionData = EMOTION_TAGS.find(e => e.value === entry.emotion_tag);
     const isPositive = ['calmo', 'focado', 'feliz', 'energizado'].includes(entry.emotion_tag || '');
@@ -140,16 +111,19 @@ export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
           </div>
           
           <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground">{entry.time}</p>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground tabular-nums">{entry.time}</span>
+              <span className="text-sm font-medium text-foreground">
+                Sentindo-se
+              </span>
               <span className={cn(
-                'px-1.5 py-0.5 rounded-full text-[10px] font-medium',
+                'px-2 py-0.5 rounded-full text-xs font-medium',
                 emotionData?.color || 'bg-muted text-muted-foreground'
               )}>
                 {emotionData?.label || entry.emotion_tag}
               </span>
             </div>
-            <p className="text-sm font-medium text-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground">
               Energia: {entry.mood_score}/10
             </p>
           </div>
@@ -158,34 +132,34 @@ export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
     );
   }
 
-  // Water Entry Card - Compact
+  // Water Entry Card
   if (entry.type === 'water') {
     return (
-      <div className="px-3 py-2.5 bg-sky-500/10 border border-sky-500/20 rounded-2xl">
+      <div className="px-4 py-3 bg-sky-500/10 border border-sky-500/20 rounded-2xl">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-sky-500/20 flex items-center justify-center">
-            <Droplet className="h-4 w-4 text-sky-400" />
+          <div className="w-10 h-10 rounded-xl bg-sky-500/20 flex items-center justify-center">
+            <Droplet className="h-5 w-5 text-sky-400" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-sky-400/70 tabular-nums">{entry.time}</p>
-            <p className="text-sm font-semibold text-sky-400 tabular-nums">+{entry.value}ml</p>
+            <p className="text-xs text-sky-400/70">{entry.time}</p>
+            <p className="text-lg font-semibold text-sky-400">+{entry.value}ml</p>
           </div>
         </div>
       </div>
     );
   }
 
-  // Weight Entry Card - Compact
+  // Weight Entry Card
   if (entry.type === 'weight') {
     return (
-      <div className="px-3 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+      <div className="px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-            <Scale className="h-4 w-4 text-emerald-400" />
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+            <Scale className="h-5 w-5 text-emerald-400" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-emerald-400/70 tabular-nums">{entry.time}</p>
-            <p className="text-sm font-semibold text-emerald-400 tabular-nums">{entry.value}kg</p>
+            <p className="text-xs text-emerald-400/70">{entry.time}</p>
+            <p className="text-lg font-semibold text-emerald-400">{entry.value}kg</p>
           </div>
         </div>
       </div>
@@ -193,4 +167,4 @@ export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
   }
 
   return null;
-}
+});
