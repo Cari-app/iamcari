@@ -146,7 +146,7 @@ export default function Dashboard() {
           <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
             <img src={logoImage} alt="Cari" className="h-8" />
             <Link to="/profile">
-              <Avatar className="h-10 w-10 border-2 border-white/30">
+              <Avatar className="h-10 w-10">
                 <AvatarImage src={profile?.avatar_url || ''} />
                 <AvatarFallback className="bg-white/20 text-white">
                   {profile?.full_name?.charAt(0) || 'U'}
