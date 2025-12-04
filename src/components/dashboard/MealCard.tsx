@@ -16,18 +16,21 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
       ? Math.round((meal.calories || 0) / dailyTarget * 100) 
       : 0;
     
-    const analysis = typeof meal.ai_analysis === 'object' ? meal.ai_analysis : null;
+    const mealMacros = meal.macros && typeof meal.macros === 'object' ? meal.macros : null;
+    const analysis = meal.ai_analysis && typeof meal.ai_analysis === 'object' && !Array.isArray(meal.ai_analysis) 
+      ? meal.ai_analysis as unknown as Record<string, number> 
+      : null;
     
     return {
       reachPercentage: reach,
       macros: {
-        protein: analysis?.protein || 0,
-        carbs: analysis?.carbs || 0,
-        fat: analysis?.fat || 0,
+        protein: Number(mealMacros?.protein) || Number(analysis?.protein) || 0,
+        carbs: Number(mealMacros?.carbs) || Number(analysis?.carbs) || 0,
+        fat: Number(mealMacros?.fat) || Number(analysis?.fat) || 0,
       },
       isPending: meal.status === 'pending'
     };
-  }, [meal.calories, meal.ai_analysis, dailyTarget, meal.status]);
+  }, [meal.calories, meal.ai_analysis, meal.macros, dailyTarget, meal.status]);
 
   return (
     <motion.div
