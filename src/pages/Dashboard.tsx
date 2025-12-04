@@ -8,7 +8,18 @@ import { MacroCards } from '@/components/dashboard/MacroCards';
 import { MealCard } from '@/components/dashboard/MealCard';
 import { MealInputDialog } from '@/components/diary/MealInputDialog';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
+import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -30,6 +41,7 @@ export default function Dashboard() {
   const [meals, setMeals] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mealToDelete, setMealToDelete] = useState<TimelineEntry | null>(null);
   const caloriesTarget = profile?.daily_calories_target || 2000;
 
   // Memoized calculations
@@ -124,6 +136,37 @@ export default function Dashboard() {
   }, [user, selectedDate]);
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
   const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
+  
+  // Handle delete meal with confirmation
+  const handleDeleteMeal = async () => {
+    if (!user || !mealToDelete) return;
+    
+    const mealId = mealToDelete.id;
+    setMealToDelete(null);
+    
+    // Optimistic UI update
+    setMeals(prev => prev.filter(m => m.id !== mealId));
+    
+    const { error } = await supabase
+      .from('meal_logs')
+      .delete()
+      .eq('id', mealId)
+      .eq('user_id', user.id);
+    
+    if (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível deletar a refeição.',
+        variant: 'destructive',
+      });
+      // Refetch on error
+    } else {
+      toast({
+        title: 'Refeição deletada',
+        description: 'O registro e macros foram removidos.',
+      });
+    }
+  };
   return <div className="min-h-[100dvh] pb-24 bg-background">
       <div className="mx-auto max-w-lg relative">
         {/* Green Gradient Background */}
@@ -164,19 +207,32 @@ export default function Dashboard() {
 
             {/* Meal List */}
             <div className="px-4 py-4 space-y-3">
-              {loading ? <>
+              {loading ? (
+                <>
                   <Skeleton className="h-32 rounded-2xl" />
                   <Skeleton className="h-32 rounded-2xl" />
-                </> : meals.length > 0 ? meals.map(meal => <MealCard key={meal.id} meal={meal} dailyTarget={caloriesTarget} />) : <motion.div initial={{
-              opacity: 0
-            }} animate={{
-              opacity: 1
-            }} className="text-center py-12">
+                </>
+              ) : meals.length > 0 ? (
+                meals.map(meal => (
+                  <SwipeableRow
+                    key={meal.id}
+                    onDelete={() => setMealToDelete(meal)}
+                  >
+                    <MealCard meal={meal} dailyTarget={caloriesTarget} />
+                  </SwipeableRow>
+                ))
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-12"
+                >
                   <p className="text-muted-foreground">Nenhuma refeição registrada hoje</p>
                   <button onClick={handleOpenModal} className="mt-4 text-primary font-medium">
                     Adicionar primeira refeição
                   </button>
-                </motion.div>}
+                </motion.div>
+              )}
             </div>
           </main>
         </div>
@@ -186,5 +242,23 @@ export default function Dashboard() {
       <BottomNav />
       
       <MealInputDialog open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={() => {}} onPhotoSubmitted={handleCloseModal} />
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!mealToDelete} onOpenChange={(open) => !open && setMealToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar refeição?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você perderá todos os dados e macros desta refeição. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteMeal} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Deletar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 }
