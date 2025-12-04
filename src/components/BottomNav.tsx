@@ -1,13 +1,13 @@
 import { memo } from 'react';
 import { NavLink } from 'react-router-dom';
-import { UtensilsCrossed, Clock, BarChart3, User } from 'lucide-react';
+import { UtensilsCrossed, Clock, ChartBar, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 const NAV_ITEMS = [
   { icon: UtensilsCrossed, label: 'Dieta', path: '/dashboard' },
   { icon: Clock, label: 'Jejum', path: '/fasting' },
-  { icon: BarChart3, label: 'Progresso', path: '/progress' },
+  { icon: ChartBar, label: 'Progresso', path: '/progress' },
   { icon: User, label: 'Perfil', path: '/profile' },
 ] as const;
 
