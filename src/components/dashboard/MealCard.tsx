@@ -1,7 +1,6 @@
 import { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { TimelineEntry } from '@/types';
-import { Loader2 } from 'lucide-react';
 
 interface MealCardProps {
   meal: TimelineEntry;
