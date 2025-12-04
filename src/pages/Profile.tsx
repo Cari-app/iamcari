@@ -467,30 +467,13 @@ export default function Profile() {
                 
                 <div className="flex items-center gap-4">
                   {/* Diet Icon */}
-                  <div className={cn(
-                    "w-16 h-16 rounded-2xl flex items-center justify-center text-3xl",
-                    "border-2",
-                    activeDiet.color_theme === 'violet' && "bg-violet-500/10 border-violet-500/50",
-                    activeDiet.color_theme === 'teal' && "bg-teal-500/10 border-teal-500/50",
-                    activeDiet.color_theme === 'blue' && "bg-blue-500/10 border-blue-500/50",
-                    activeDiet.color_theme === 'red' && "bg-red-500/10 border-red-500/50",
-                    activeDiet.color_theme === 'orange' && "bg-orange-500/10 border-orange-500/50",
-                    activeDiet.color_theme === 'green' && "bg-green-500/10 border-green-500/50",
-                  )}>
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl border-2 bg-[#84cc16]/10 border-[#84cc16]/50">
                     {activeDiet.icon}
                   </div>
 
                   {/* Diet Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className={cn(
-                      "text-lg font-bold mb-1",
-                      activeDiet.color_theme === 'violet' && "text-violet-400",
-                      activeDiet.color_theme === 'teal' && "text-teal-400",
-                      activeDiet.color_theme === 'blue' && "text-blue-400",
-                      activeDiet.color_theme === 'red' && "text-red-400",
-                      activeDiet.color_theme === 'orange' && "text-orange-400",
-                      activeDiet.color_theme === 'green' && "text-green-400",
-                    )}>
+                    <h3 className="text-lg font-bold mb-1 text-[#84cc16]">
                       {activeDiet.name}
                     </h3>
                     <p className="text-xs text-muted-foreground leading-relaxed">
