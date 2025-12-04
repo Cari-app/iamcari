@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
+import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { DeleteConfirmationDrawer } from '@/components/DeleteConfirmationDrawer';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Flame, Target, Trophy, TrendingUp, Calendar as CalendarIcon } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Flame, Target, Trophy, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from '@/hooks/use-toast';
+import logoImage from '@/assets/logo-cari.png';
 
 interface DayActivity {
   date: Date;
@@ -22,7 +23,7 @@ interface DayActivity {
 }
 
 export default function Progress() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [loading, setLoading] = useState(true);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [weeklyGoal, setWeeklyGoal] = useState({ current: 0, total: 7 });
@@ -31,7 +32,6 @@ export default function Progress() {
   const [heatmapData, setHeatmapData] = useState<DayActivity[]>([]);
   const [achievements, setAchievements] = useState<Array<{ id: string; emoji: string; title: string; description: string }>>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [calendarOpen, setCalendarOpen] = useState(false);
   const [achievementToDelete, setAchievementToDelete] = useState<string | null>(null);
 
   useEffect(() => {
@@ -297,201 +297,181 @@ export default function Progress() {
   }
 
   const stats = [
-    { icon: Flame, label: 'Sequência atual', value: `${currentStreak} ${currentStreak === 1 ? 'dia' : 'dias'}`, color: 'text-secondary' },
-    { icon: Target, label: 'Meta semanal', value: `${weeklyGoal.current}/${weeklyGoal.total}`, color: 'text-primary' },
-    { icon: Trophy, label: 'Melhor sequência', value: `${bestStreak} ${bestStreak === 1 ? 'dia' : 'dias'}`, color: 'text-yellow-500' },
-    { icon: TrendingUp, label: 'Taxa de sucesso', value: successRate, color: 'text-secondary' },
+    { icon: Flame, label: 'Sequência atual', value: `${currentStreak} ${currentStreak === 1 ? 'dia' : 'dias'}`, color: 'text-[#84cc16]' },
+    { icon: Target, label: 'Meta semanal', value: `${weeklyGoal.current}/${weeklyGoal.total}`, color: 'text-[#84cc16]' },
+    { icon: Trophy, label: 'Melhor sequência', value: `${bestStreak} ${bestStreak === 1 ? 'dia' : 'dias'}`, color: 'text-[#84cc16]' },
+    { icon: TrendingUp, label: 'Taxa de sucesso', value: successRate, color: 'text-[#84cc16]' },
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-24 safe-pt-20 relative overflow-hidden">
-      {/* Background gradient effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
-      
-      <Navbar />
-      
-      <main className="px-4 pt-11 pb-6">
-        <div className="mx-auto max-w-lg space-y-6">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between"
-          >
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Progresso</h1>
-              <p className="text-muted-foreground">
-                Últimos 90 dias até {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
-                {selectedDate.toDateString() === new Date().toDateString() && ' (Hoje)'}
-              </p>
-            </div>
-            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-              <PopoverTrigger asChild>
-                <button className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center press-effect hover:bg-accent transition-colors">
-                  <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => {
-                    if (date) {
-                      setSelectedDate(date);
-                      setCalendarOpen(false);
-                      toast({
-                        title: '📅 Data selecionada',
-                        description: `Mostrando progresso até ${format(date, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}`,
-                      });
-                    }
-                  }}
-                  disabled={(date) => date > new Date()}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-          </motion.div>
+    <div className="min-h-[100dvh] pb-32 bg-background">
+      <div className="mx-auto max-w-lg relative">
+        {/* Green Gradient Background */}
+        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+        
+        <div className="relative z-10">
+          {/* Top Bar */}
+          <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
+            <img src={logoImage} alt="Cari" className="h-8" />
+            <Link to="/profile">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={profile?.avatar_url || ''} />
+                <AvatarFallback className="bg-white/20 text-white">
+                  {profile?.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          </header>
 
-          {/* Stats Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="grid grid-cols-2 gap-3"
-          >
-            {loading ? (
-              <>
-                <Skeleton className="h-28 rounded-2xl" />
-                <Skeleton className="h-28 rounded-2xl" />
-                <Skeleton className="h-28 rounded-2xl" />
-                <Skeleton className="h-28 rounded-2xl" />
-              </>
-            ) : (
-              stats.map((stat, index) => (
-                <div
-                  key={stat.label}
-                  className="p-4 rounded-2xl bg-card border border-border"
-                >
-                  <stat.icon className={cn("h-5 w-5 mb-2", stat.color)} />
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                </div>
-              ))
-            )}
-          </motion.div>
+          <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
 
-          {/* Heatmap */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="p-4 rounded-2xl bg-card border border-border"
-          >
-            <h2 className="text-lg font-semibold text-foreground mb-4">
-              Contribution Graph
-            </h2>
-            
-            {loading ? (
-              <Skeleton className="h-32 rounded-xl" />
-            ) : (
-              <>
-                <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-2">
-              {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-1">
-                  {week.map((day, dayIndex) => (
+          {/* Status Text */}
+          <div className="text-center px-4 mt-4">
+            <h2 className="text-2xl text-white font-semibold">Seu Progresso</h2>
+            <p className="text-white/60 text-sm mt-1">
+              Últimos 90 dias até {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
+            </p>
+          </div>
+
+          <main className="px-4 pt-6 space-y-4">
+            {/* Stats Grid */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="grid grid-cols-2 gap-3"
+            >
+              {loading ? (
+                <>
+                  <Skeleton className="h-24 rounded-2xl" />
+                  <Skeleton className="h-24 rounded-2xl" />
+                  <Skeleton className="h-24 rounded-2xl" />
+                  <Skeleton className="h-24 rounded-2xl" />
+                </>
+              ) : (
+                stats.map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="p-4 rounded-2xl bg-card border border-border text-center"
+                  >
+                    <stat.icon className={cn("h-5 w-5 mx-auto mb-2", stat.color)} />
+                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  </div>
+                ))
+              )}
+            </motion.div>
+
+            {/* Heatmap */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="p-4 rounded-2xl bg-card border border-border"
+            >
+              <h2 className="text-base font-semibold text-foreground mb-4">
+                Gráfico de Atividades
+              </h2>
+              
+              {loading ? (
+                <Skeleton className="h-32 rounded-xl" />
+              ) : (
+                <>
+                  <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-2">
+                    {weeks.map((week, weekIndex) => (
+                      <div key={weekIndex} className="flex flex-col gap-1">
+                        {week.map((day, dayIndex) => (
+                          <motion.div
+                            key={`${weekIndex}-${dayIndex}`}
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.3 + weekIndex * 0.02 + dayIndex * 0.01 }}
+                            className={cn(
+                              "w-4 h-4 rounded-sm transition-colors cursor-pointer",
+                              day.intensity === 0 && "bg-muted",
+                              day.intensity === 1 && "bg-[#84cc16]/30",
+                              day.intensity === 2 && "bg-[#84cc16]/50",
+                              day.intensity === 3 && "bg-[#84cc16]/70",
+                              day.intensity === 4 && "bg-[#84cc16]"
+                            )}
+                            title={`${day.date.toLocaleDateString('pt-BR')} - ${day.count} ${day.count === 1 ? 'atividade' : 'atividades'}`}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Legend */}
+                  <div className="flex items-center justify-end gap-2 mt-4 text-xs text-muted-foreground">
+                    <span>Menos</span>
+                    <div className="flex gap-1">
+                      <div className="w-3 h-3 rounded-sm bg-muted" />
+                      <div className="w-3 h-3 rounded-sm bg-[#84cc16]/30" />
+                      <div className="w-3 h-3 rounded-sm bg-[#84cc16]/50" />
+                      <div className="w-3 h-3 rounded-sm bg-[#84cc16]/70" />
+                      <div className="w-3 h-3 rounded-sm bg-[#84cc16]" />
+                    </div>
+                    <span>Mais</span>
+                  </div>
+                </>
+              )}
+            </motion.div>
+
+            {/* Achievements */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="p-4 rounded-2xl bg-card border border-border"
+            >
+              <h2 className="text-base font-semibold text-foreground mb-4">
+                Conquistas recentes
+              </h2>
+              
+              {loading ? (
+                <>
+                  <Skeleton className="h-16 rounded-xl mb-3" />
+                  <Skeleton className="h-16 rounded-xl mb-3" />
+                  <Skeleton className="h-16 rounded-xl" />
+                </>
+              ) : achievements.length > 0 ? (
+                <div className="space-y-3">
+                  {achievements.map((achievement, index) => (
                     <motion.div
-                      key={`${weekIndex}-${dayIndex}`}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: 0.3 + weekIndex * 0.02 + dayIndex * 0.01 }}
-                       className={cn(
-                        "w-4 h-4 rounded-sm transition-colors cursor-pointer",
-                        day.intensity === 0 && "bg-muted",
-                        day.intensity === 1 && "bg-secondary/30",
-                        day.intensity === 2 && "bg-secondary/60",
-                        day.intensity === 3 && "bg-secondary/90",
-                        day.intensity === 4 && "bg-secondary"
-                      )}
-                      title={`${day.date.toLocaleDateString('pt-BR')} - ${day.count} ${day.count === 1 ? 'atividade' : 'atividades'}`}
-                    />
+                      key={achievement.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 + index * 0.05 }}
+                    >
+                      <SwipeableRow onDelete={() => setAchievementToDelete(achievement.id)}>
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                          <span className="text-2xl">{achievement.emoji}</span>
+                          <div>
+                            <p className="font-medium text-foreground">{achievement.title}</p>
+                            <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                          </div>
+                        </div>
+                      </SwipeableRow>
+                    </motion.div>
                   ))}
                 </div>
-                ))}
-              </div>
-
-              {/* Legend */}
-              <div className="flex items-center justify-end gap-2 mt-4 text-xs text-muted-foreground">
-                <span>Menos</span>
-                <div className="flex gap-1">
-                  <div className="w-3 h-3 rounded-sm bg-muted" />
-                  <div className="w-3 h-3 rounded-sm bg-secondary/30" />
-                  <div className="w-3 h-3 rounded-sm bg-secondary/50" />
-                  <div className="w-3 h-3 rounded-sm bg-secondary/70" />
-                  <div className="w-3 h-3 rounded-sm bg-secondary" />
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">
+                    <Trophy className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-foreground font-medium mb-1">
+                    Nenhuma conquista ainda
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Complete jejuns e registre refeições para desbloquear conquistas
+                  </p>
                 </div>
-                <span>Mais</span>
-              </div>
-            </>
-            )}
-          </motion.div>
-
-          {/* Achievements */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="p-4 rounded-2xl bg-card border border-border"
-          >
-            <h2 className="text-lg font-semibold text-foreground mb-4">
-              Conquistas recentes
-            </h2>
-            
-            {loading ? (
-              <>
-                <Skeleton className="h-16 rounded-xl mb-3" />
-                <Skeleton className="h-16 rounded-xl mb-3" />
-                <Skeleton className="h-16 rounded-xl" />
-              </>
-            ) : achievements.length > 0 ? (
-              <div className="space-y-3">
-              {achievements.map((achievement, index) => (
-                <motion.div
-                  key={achievement.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + index * 0.05 }}
-                >
-                  <SwipeableRow onDelete={() => setAchievementToDelete(achievement.id)}>
-                    <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                      <span className="text-2xl">{achievement.emoji}</span>
-                      <div>
-                        <p className="font-medium text-foreground">{achievement.title}</p>
-                        <p className="text-sm text-muted-foreground">{achievement.description}</p>
-                      </div>
-                    </div>
-                  </SwipeableRow>
-                </motion.div>
-              ))}
-            </div>
-            ) : (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">
-                  <Trophy className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <p className="text-foreground font-medium mb-1">
-                  Nenhuma conquista ainda
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Complete jejuns e registre refeições para desbloquear conquistas
-                </p>
-              </div>
-            )}
-          </motion.div>
+              )}
+            </motion.div>
+          </main>
         </div>
-      </main>
+      </div>
 
       <DeleteConfirmationDrawer
         open={!!achievementToDelete}
