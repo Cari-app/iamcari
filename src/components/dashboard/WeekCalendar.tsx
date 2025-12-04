@@ -19,7 +19,33 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
   const today = new Date();
   const days = Array.from({ length: 31 }, (_, i) => subDays(today, 15 - i));
 
-  const scrollToCenter = useCallback((index: number, behavior: ScrollBehavior = 'smooth') => {
+  const ITEM_WIDTH = 44; // w-11 = 44px
+
+  const findCenterItem = useCallback(() => {
+    if (!scrollRef.current) return;
+    
+    const container = scrollRef.current;
+    const containerCenter = container.scrollLeft + container.offsetWidth / 2;
+    
+    let closestIndex = 0;
+    let closestDistance = Infinity;
+    
+    itemRefs.current.forEach((element, index) => {
+      const elementCenter = element.offsetLeft + element.offsetWidth / 2;
+      const distance = Math.abs(containerCenter - elementCenter);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = index;
+      }
+    });
+    
+    const centerDay = days[closestIndex];
+    if (centerDay && !isSameDay(centerDay, selectedDate)) {
+      onDateSelect(centerDay);
+    }
+  }, [days, selectedDate, onDateSelect]);
+
+  const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = 'smooth') => {
     const element = itemRefs.current.get(index);
     if (element && scrollRef.current) {
       const container = scrollRef.current;
@@ -35,17 +61,56 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
   useEffect(() => {
     const todayIndex = days.findIndex(day => isSameDay(day, today));
     if (todayIndex !== -1) {
-      setTimeout(() => scrollToCenter(todayIndex, 'auto'), 50);
+      setTimeout(() => scrollToIndex(todayIndex, 'auto'), 50);
     }
   }, []);
 
-  // Center selected date when it changes
+  // Handle scroll end - snap to center and select
+  const handleScrollEnd = useCallback(() => {
+    findCenterItem();
+    
+    // Snap to center
+    if (!scrollRef.current) return;
+    const container = scrollRef.current;
+    const containerCenter = container.scrollLeft + container.offsetWidth / 2;
+    
+    let closestIndex = 0;
+    let closestDistance = Infinity;
+    
+    itemRefs.current.forEach((element, index) => {
+      const elementCenter = element.offsetLeft + element.offsetWidth / 2;
+      const distance = Math.abs(containerCenter - elementCenter);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = index;
+      }
+    });
+    
+    scrollToIndex(closestIndex, 'smooth');
+  }, [findCenterItem, scrollToIndex]);
+
+  // Debounced scroll handler
   useEffect(() => {
-    const selectedIndex = days.findIndex(day => isSameDay(day, selectedDate));
-    if (selectedIndex !== -1 && !isDragging) {
-      scrollToCenter(selectedIndex, 'smooth');
-    }
-  }, [selectedDate, scrollToCenter, isDragging]);
+    const container = scrollRef.current;
+    if (!container) return;
+    
+    let scrollTimeout: NodeJS.Timeout;
+    
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        if (!isDragging) {
+          handleScrollEnd();
+        }
+      }, 100);
+    };
+    
+    container.addEventListener('scroll', handleScroll);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, [handleScrollEnd, isDragging]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -63,7 +128,10 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
     }
   };
 
-  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    handleScrollEnd();
+  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setIsDragging(true);
@@ -80,10 +148,9 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
     }
   };
 
-  const handleSelect = (day: Date, index: number) => {
-    if (!isDragging) {
-      onDateSelect(day);
-    }
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    handleScrollEnd();
   };
 
   return (
@@ -96,11 +163,10 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
       onMouseLeave={handleMouseUp}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
-      onTouchEnd={() => setIsDragging(false)}
+      onTouchEnd={handleTouchEnd}
     >
       {days.map((day, index) => {
         const isSelected = isSameDay(day, selectedDate);
-        const isToday = isSameDay(day, today);
         const dayName = format(day, 'EEEEE', { locale: ptBR }).toUpperCase();
         const dayNumber = format(day, 'd');
         
@@ -110,8 +176,6 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
             ref={(el) => {
               if (el) itemRefs.current.set(index, el);
             }}
-            whileTap={{ scale: 0.92 }}
-            onClick={() => handleSelect(day, index)}
             className="flex flex-col items-center shrink-0 transition-all duration-300 ease-out w-11"
           >
             <motion.span 
