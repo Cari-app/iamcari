@@ -147,7 +147,7 @@ export default function Dashboard() {
           <CalorieHeader consumed={totalCalories} target={caloriesTarget} />
 
           <main>
-            <MacroCards className="mb-[50px]" />
+            <MacroCards {...macroProps} />
 
 
             {/* Tab Navigation */}
