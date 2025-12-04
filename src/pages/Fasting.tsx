@@ -371,50 +371,54 @@ export default function Fasting() {
           </div>
 
           {/* Timer */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="flex justify-center py-6"
-          >
-            <CircularProgress progress={isActive ? progress : 0} size={280} strokeWidth={14}>
-              <div className="text-center">
-                <div className="flex items-baseline justify-center">
-                  <span className="text-6xl font-black tabular-nums tracking-tight text-white drop-shadow-lg">
-                    {time.hours}
-                  </span>
-                  <span className="text-4xl font-bold text-white mx-1">:</span>
-                  <span className="text-6xl font-black tabular-nums tracking-tight text-white drop-shadow-lg">
-                    {time.minutes}
-                  </span>
-                  <span className="text-2xl font-semibold tabular-nums text-green-200 ml-1">
-                    :{time.seconds}
+          <div className="flex flex-col items-center py-4">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+            >
+              <CircularProgress progress={isActive ? progress : 0} size={240} strokeWidth={12}>
+                <div className="text-center">
+                  <div className="flex items-baseline justify-center">
+                    <span className="text-5xl font-black tabular-nums tracking-tight text-white drop-shadow-lg">
+                      {time.hours}
+                    </span>
+                    <span className="text-3xl font-bold text-white mx-1">:</span>
+                    <span className="text-5xl font-black tabular-nums tracking-tight text-white drop-shadow-lg">
+                      {time.minutes}
+                    </span>
+                    <span className="text-xl font-semibold tabular-nums text-green-200 ml-1">
+                      :{time.seconds}
+                    </span>
+                  </div>
+                </div>
+              </CircularProgress>
+            </motion.div>
+
+            {/* Meta Badge - Outside CircularProgress */}
+            <motion.div 
+              className="mt-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {isActive ? (
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/25">
+                  <Clock className="h-4 w-4 text-green-300" />
+                  <span className="text-sm font-semibold text-white">
+                    Meta: {targetHours}h
                   </span>
                 </div>
-                
-                <motion.div 
-                  className="mt-4"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {isActive ? (
-                    <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/25">
-                      <Clock className="h-4 w-4 text-green-300" />
-                      <span className="text-sm font-semibold text-white">
-                        Meta: {targetHours}h
-                      </span>
-                    </div>
-                  ) : (
-                    <ProtocolSelector
-                      selectedHours={selectedProtocol}
-                      onSelect={handleProtocolSelect}
-                      isOpen={isProtocolOpen}
-                      onOpenChange={setIsProtocolOpen}
-                    />
-                  )}
-                </motion.div>
-              </div>
-            </CircularProgress>
-          </motion.div>
+              ) : (
+                <ProtocolSelector
+                  selectedHours={selectedProtocol}
+                  onSelect={handleProtocolSelect}
+                  isOpen={isProtocolOpen}
+                  onOpenChange={setIsProtocolOpen}
+                />
+              )}
+            </motion.div>
+          </div>
 
           <main className="px-4 space-y-4">
             {/* Action Button */}
@@ -430,7 +434,7 @@ export default function Fasting() {
               <Button
                 onClick={handleStopFasting}
                 variant="outline"
-                className="w-full h-14 rounded-2xl font-semibold text-base border-destructive/30 text-destructive hover:bg-destructive/10"
+                className="w-full h-14 rounded-2xl font-semibold text-base border-red-500/50 text-red-500 hover:bg-red-500/10"
               >
                 <Pause className="mr-2 h-5 w-5" />
                 Encerrar Jejum
