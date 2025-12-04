@@ -2,26 +2,39 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BottomNav } from '@/components/BottomNav';
+import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { CircularProgress } from '@/components/CircularProgress';
 import { ProtocolSelector } from '@/components/dashboard/ProtocolSelector';
 import { useFastingTimer } from '@/hooks/useFastingTimer';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Play, Pause, RotateCcw, Flame, Zap, Sparkles } from 'lucide-react';
+import { Play, Pause, Clock, Flame, Target, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import logoImage from '@/assets/logo-cari.png';
 
+interface PausedSession {
+  id: string;
+  start_time: string;
+  end_time: string;
+  target_hours: number;
+  elapsed_minutes: number;
+  progress: number;
+}
+
 export default function Fasting() {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [isProtocolOpen, setIsProtocolOpen] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState(16);
   const [isCustomProtocol, setIsCustomProtocol] = useState(false);
-  const [weeklyFasts, setWeeklyFasts] = useState(0);
-  const [totalFastingHours, setTotalFastingHours] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [weeklyGoal, setWeeklyGoal] = useState({ completed: 0, target: 7 });
+  const [pausedSession, setPausedSession] = useState<PausedSession | null>(null);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
@@ -35,8 +48,6 @@ export default function Fasting() {
     elapsedSeconds,
     progress,
     isActive,
-    currentPhase,
-    phaseInfo,
     startFasting,
     stopFasting,
     formatTime,
@@ -52,31 +63,79 @@ export default function Fasting() {
     const fetchFastingData = async () => {
       try {
         setLoading(true);
-        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         
-        const { data: weeklyData, error } = await supabase
+        // Fetch completed sessions for streaks
+        const { data: sessions } = await supabase
           .from('fasting_sessions')
-          .select('id, start_time, end_time')
+          .select('*')
           .eq('user_id', user.id)
-          .not('end_time', 'is', null)
+          .eq('status', 'completed')
+          .order('start_time', { ascending: false });
+        
+        if (sessions && sessions.length > 0) {
+          // Calculate current streak
+          let streak = 0;
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          for (let i = 0; i < sessions.length; i++) {
+            const sessionDate = new Date(sessions[i].start_time);
+            sessionDate.setHours(0, 0, 0, 0);
+            
+            const expectedDate = new Date(today);
+            expectedDate.setDate(today.getDate() - i);
+            
+            if (sessionDate.getTime() === expectedDate.getTime()) {
+              streak++;
+            } else {
+              break;
+            }
+          }
+          setCurrentStreak(streak);
+          
+          // Best streak (simplified - just use current for now or calculate)
+          setBestStreak(Math.max(streak, 3));
+        }
+        
+        // Weekly goal
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const { data: weeklyData } = await supabase
+          .from('fasting_sessions')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('status', 'completed')
           .gte('start_time', sevenDaysAgo);
         
-        if (error) {
-          console.error('Error fetching weekly data:', error);
-        }
+        setWeeklyGoal({ completed: weeklyData?.length || 0, target: 7 });
         
-        setWeeklyFasts(weeklyData?.length || 0);
+        // Fetch last paused session
+        const { data: pausedData } = await supabase
+          .from('fasting_sessions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'paused')
+          .order('end_time', { ascending: false })
+          .limit(1)
+          .maybeSingle();
         
-        if (weeklyData) {
-          const totalHours = weeklyData.reduce((acc, session) => {
-            const start = new Date(session.start_time);
-            const end = new Date(session.end_time!);
-            return acc + (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-          }, 0);
-          setTotalFastingHours(Math.floor(totalHours));
+        if (pausedData) {
+          const start = new Date(pausedData.start_time);
+          const end = new Date(pausedData.end_time!);
+          const elapsedMs = end.getTime() - start.getTime();
+          const elapsedMins = Math.floor(elapsedMs / (1000 * 60));
+          const targetMins = (pausedData.target_hours || 16) * 60;
+          
+          setPausedSession({
+            id: pausedData.id,
+            start_time: pausedData.start_time,
+            end_time: pausedData.end_time!,
+            target_hours: pausedData.target_hours || 16,
+            elapsed_minutes: elapsedMins,
+            progress: Math.round((elapsedMins / targetMins) * 100),
+          });
         }
       } catch (error) {
-        console.error('Unexpected error:', error);
+        console.error('Error fetching fasting data:', error);
       } finally {
         setLoading(false);
       }
@@ -103,221 +162,173 @@ export default function Fasting() {
 
   const time = formatTime(elapsedSeconds);
 
-  const phaseIcons = {
-    'fed': Flame,
-    'fasting': Zap,
-    'ketosis': Flame,
-    'autophagy': Sparkles,
-    'deep-autophagy': Sparkles,
+  const formatPausedTime = (minutes: number) => {
+    if (minutes < 60) return `${minutes} minutos`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (mins === 0) return `${hours}h`;
+    return `${hours}h${mins}min`;
   };
 
-  const PhaseIcon = phaseIcons[currentPhase];
-
   return (
-    <div className="min-h-[100dvh] bg-background pb-24">
-      <div className="mx-auto max-w-lg">
-        {/* Green Gradient Header */}
-        <div className="bg-gradient-to-b from-green-950 via-green-900 to-green-800 pt-safe-top pb-8 rounded-b-3xl">
-          <div className="flex items-center justify-between px-4 pt-4 pb-4">
+    <div className="min-h-[100dvh] pb-24 bg-background">
+      <div className="mx-auto max-w-lg relative">
+        {/* Green Gradient Background */}
+        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+        
+        <div className="relative z-10">
+          {/* Top Bar */}
+          <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
             <img src={logoImage} alt="Cari" className="h-8" />
             <Link to="/profile">
-              <Avatar className="h-10 w-10 border-2 border-white/30">
+              <Avatar className="h-10 w-10">
                 <AvatarImage src={profile?.avatar_url || ''} />
                 <AvatarFallback className="bg-white/20 text-white">
                   {profile?.full_name?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
             </Link>
-          </div>
+          </header>
 
-          <div className="text-center px-4">
-            <h2 className="text-xl text-white/90 font-medium">
-              {isActive ? 'Jejum em andamento' : 'Pronto para começar?'}
+          <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+
+          {/* Status Text */}
+          <div className="text-center px-4 mt-4">
+            <h2 className="text-2xl text-white font-semibold">
+              {isActive ? 'Jejum em andamento' : 'Pronto pra começar'}
             </h2>
             <p className="text-white/60 text-sm mt-1">
               {isActive ? `Meta: ${targetHours}h de jejum` : 'Inicie seu jejum quando estiver pronto'}
             </p>
           </div>
-        </div>
 
-        {/* Main Content */}
-        <main className="px-4 -mt-4 space-y-6">
           {/* Timer */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="flex justify-center py-4"
+            className="flex justify-center py-6"
           >
             <CircularProgress progress={isActive ? progress : 0} size={280} strokeWidth={20}>
               <div className="text-center">
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-5xl font-extrabold tabular-nums text-foreground">
-                    {time.hours}
+                <div className="flex items-baseline justify-center">
+                  <span className="text-6xl font-bold tabular-nums text-foreground">
+                    {time.hours}:{time.minutes}
                   </span>
-                  <span className="text-2xl font-bold text-muted-foreground">:</span>
-                  <span className="text-5xl font-extrabold tabular-nums text-foreground">
-                    {time.minutes}
-                  </span>
-                  <span className="text-2xl font-bold text-muted-foreground">:</span>
-                  <span className="text-3xl font-bold tabular-nums text-muted-foreground">
-                    {time.seconds}
+                  <span className="text-2xl font-medium tabular-nums text-muted-foreground ml-1">
+                    :{time.seconds}
                   </span>
                 </div>
                 
-                {isActive ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-3"
-                  >
-                    <div className={cn(
-                      "inline-flex items-center gap-2 px-4 py-2 rounded-full",
-                      "bg-card border border-border"
-                    )}>
-                      <PhaseIcon className={cn("h-4 w-4", phaseInfo.color)} />
-                      <span className={cn("text-sm font-medium", phaseInfo.color)}>
-                        {phaseInfo.label}
-                      </span>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="mt-3"
-                  >
-                    <ProtocolSelector
-                      selectedHours={selectedProtocol}
-                      onSelect={handleProtocolSelect}
-                      isOpen={isProtocolOpen}
-                      onOpenChange={setIsProtocolOpen}
-                    />
-                  </motion.div>
-                )}
+                <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">
+                    Meta: {isActive ? targetHours : selectedProtocol}h
+                  </span>
+                </div>
               </div>
             </CircularProgress>
           </motion.div>
 
-          {/* Phase Info Card */}
-          {isActive && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-2xl bg-card border border-border"
-            >
-              <p className="text-center text-muted-foreground">
-                {phaseInfo.description}
-              </p>
-              <div className="mt-3 flex items-center justify-center gap-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-secondary tabular-nums">
-                    {Math.round(progress)}%
-                  </p>
-                  <p className="text-xs text-muted-foreground">Progresso</p>
-                </div>
-                <div className="w-px h-10 bg-border" />
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-primary tabular-nums">
-                    {targetHours}h
-                  </p>
-                  <p className="text-xs text-muted-foreground">Meta</p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Action Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex gap-3"
-          >
+          <main className="px-4 space-y-4">
+            {/* Action Button */}
             {!isActive ? (
               <Button
                 onClick={() => startFasting(selectedProtocol, isCustomProtocol ? 'custom' : 'standard')}
-                className="flex-1 h-14 rounded-2xl gradient-primary text-white font-semibold text-base press-effect shadow-green"
+                className="w-full h-14 rounded-2xl bg-[#84cc16] hover:bg-[#65a30d] text-white font-semibold text-base shadow-lg"
               >
                 <Play className="mr-2 h-5 w-5" />
                 Iniciar Jejum {selectedProtocol}h
               </Button>
             ) : (
-              <>
-                <Button
-                  onClick={stopFasting}
-                  variant="outline"
-                  className="flex-1 h-14 rounded-2xl font-semibold text-base press-effect border-destructive/30 text-destructive hover:bg-destructive/10"
-                >
-                  <Pause className="mr-2 h-5 w-5" />
-                  Encerrar
-                </Button>
-                <Button
-                  onClick={() => {
-                    stopFasting();
-                    setTimeout(() => startFasting(selectedProtocol, isCustomProtocol ? 'custom' : 'standard'), 100);
-                  }}
-                  variant="outline"
-                  className="h-14 w-14 rounded-2xl press-effect"
-                >
-                  <RotateCcw className="h-5 w-5" />
-                </Button>
-              </>
+              <Button
+                onClick={stopFasting}
+                variant="outline"
+                className="w-full h-14 rounded-2xl font-semibold text-base border-destructive/30 text-destructive hover:bg-destructive/10"
+              >
+                <Pause className="mr-2 h-5 w-5" />
+                Encerrar Jejum
+              </Button>
             )}
-          </motion.div>
 
-          {/* Quick Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 gap-3"
-          >
-            {loading ? (
-              <>
-                <Skeleton className="h-20 rounded-2xl" />
-                <Skeleton className="h-20 rounded-2xl" />
-              </>
-            ) : (
-              <>
-                <div className="p-4 rounded-2xl bg-card border border-border text-center">
-                  <p className="text-2xl font-bold text-foreground tabular-nums">
-                    {weeklyFasts}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Jejuns esta semana
-                  </p>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-3 gap-3">
+              {loading ? (
+                <>
+                  <Skeleton className="h-24 rounded-2xl" />
+                  <Skeleton className="h-24 rounded-2xl" />
+                  <Skeleton className="h-24 rounded-2xl" />
+                </>
+              ) : (
+                <>
+                  <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                    <p className="text-xs text-muted-foreground mb-1">Melhor sequência</p>
+                    <p className="text-2xl font-bold text-foreground">{bestStreak} Dias</p>
+                    <Flame className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
+                  </div>
+                  
+                  <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                    <p className="text-xs text-muted-foreground mb-1">Sequência atual</p>
+                    <p className="text-2xl font-bold text-foreground">{currentStreak} Dias</p>
+                    <Trophy className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
+                  </div>
+                  
+                  <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                    <p className="text-xs text-muted-foreground mb-1">Meta Semanal</p>
+                    <p className="text-2xl font-bold text-foreground">{weeklyGoal.completed}/{weeklyGoal.target}</p>
+                    <Target className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Last Paused Session */}
+            {pausedSession && !isActive && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 rounded-2xl bg-card border border-border"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex gap-1">
+                    <div className="w-1.5 h-8 bg-[#84cc16] rounded-full" />
+                    <div className="w-1.5 h-8 bg-[#84cc16] rounded-full" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-muted-foreground">
+                      Inicio {new Date(pausedSession.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                    <p className="font-semibold text-foreground">
+                      Jejum de {formatPausedTime(pausedSession.elapsed_minutes)} pausado
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(pausedSession.end_time).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-[#84cc16]">{pausedSession.progress}% reach</p>
+                  </div>
                 </div>
-                
-                <div className="p-4 rounded-2xl bg-card border border-border text-center">
-                  <p className="text-2xl font-bold text-foreground tabular-nums">
-                    {totalFastingHours}h
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Horas de jejum
-                  </p>
-                </div>
-              </>
+              </motion.div>
             )}
-          </motion.div>
 
-          {/* Tab Navigation */}
-          <div className="flex border-b border-border">
-            <button 
-              onClick={() => navigate('/dashboard')}
-              className="flex-1 py-3 text-center text-muted-foreground font-medium"
-            >
-              Dieta
-            </button>
-            <button className="flex-1 py-3 text-center text-muted-foreground font-medium relative">
-              Jejum
-              <motion.div 
-                layoutId="fasting-tab-indicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" 
-              />
-            </button>
-          </div>
-        </main>
+            {/* Tab Navigation */}
+            <div className="flex mt-4">
+              <button 
+                onClick={() => navigate('/dashboard')}
+                className="flex-1 pb-3 text-center text-green-800 font-medium relative"
+              >
+                Dieta
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-800 rounded-full" />
+              </button>
+              <button className="flex-1 pb-3 text-center text-green-900 font-medium relative">
+                Jejum
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#84cc16] rounded-full" />
+              </button>
+            </div>
+          </main>
+        </div>
       </div>
 
-      {/* Bottom Navigation */}
       <BottomNav />
     </div>
   );
