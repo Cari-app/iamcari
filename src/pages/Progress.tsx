@@ -417,23 +417,25 @@ export default function Progress() {
 
           <main className="px-4 pt-4 space-y-4">
             {/* Quick Stats Row */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-4 gap-2"
-            >
+            <div className="grid grid-cols-4 gap-2">
               {loading ? (
-                Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)
+                Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />)
               ) : (
-                stats.map((stat) => (
-                  <div key={stat.label} className="p-2 rounded-xl bg-card border border-border text-center">
-                    <stat.icon className="h-4 w-4 mx-auto mb-1 text-[#84cc16]" />
-                    <p className="text-sm font-bold text-foreground">{stat.value}</p>
-                    <p className="text-[10px] text-muted-foreground">{stat.label}</p>
-                  </div>
+                stats.map((stat, index) => (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="p-3 rounded-2xl bg-card border border-border text-center"
+                  >
+                    <p className="text-[10px] text-muted-foreground mb-0.5">{stat.label}</p>
+                    <p className="text-lg font-bold text-foreground">{stat.value}</p>
+                    <stat.icon className="h-4 w-4 mx-auto mt-1 text-[#84cc16]" />
+                  </motion.div>
                 ))
               )}
-            </motion.div>
+            </div>
 
             {/* Tabs */}
             <Tabs defaultValue="hoje" className="w-full">
@@ -563,12 +565,18 @@ export default function Progress() {
 
                 {/* Stats detail */}
                 <div className="grid grid-cols-2 gap-3">
-                  {stats.map((stat) => (
-                    <div key={stat.label} className="p-4 rounded-xl bg-card border border-border text-center">
-                      <stat.icon className="h-5 w-5 mx-auto mb-2 text-[#84cc16]" />
-                      <p className="text-xl font-bold text-foreground">{stat.value}</p>
-                      <p className="text-xs text-muted-foreground">{stat.label}</p>
-                    </div>
+                  {stats.map((stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="p-4 rounded-2xl bg-card border border-border text-center"
+                    >
+                      <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
+                      <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                      <stat.icon className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
+                    </motion.div>
                   ))}
                 </div>
               </TabsContent>
