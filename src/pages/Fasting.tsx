@@ -381,7 +381,7 @@ export default function Fasting() {
                 <span className="text-6xl font-black tabular-nums bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent">
                   {time.minutes}
                 </span>
-                <span className="text-2xl font-semibold tabular-nums text-green-500 ml-1">
+                <span className="text-2xl font-semibold tabular-nums bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent ml-1">
                   :{time.seconds}
                 </span>
               </div>
