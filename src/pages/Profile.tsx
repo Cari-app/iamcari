@@ -28,13 +28,14 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerClose,
+} from '@/components/ui/drawer';
 import logoImage from '@/assets/logo-cari.png';
 
 export default function Profile() {
@@ -617,114 +618,132 @@ export default function Profile() {
 
       <BottomNav />
 
-      {/* Body Stats Dialog */}
-      <Dialog open={isBodyStatsOpen} onOpenChange={setIsBodyStatsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Atualizar Dados Corporais</DialogTitle>
-            <DialogDescription>
-              Mantenha seus dados atualizados para cálculos mais precisos
-            </DialogDescription>
-          </DialogHeader>
+      {/* Body Stats Drawer */}
+      <Drawer open={isBodyStatsOpen} onOpenChange={setIsBodyStatsOpen}>
+        <DrawerContent className="bg-transparent border-none">
+          <div className="mx-auto w-full max-w-lg bg-card border border-border rounded-t-3xl">
+            <DrawerHeader className="text-left">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
+                  <Scale className="h-5 w-5 text-[#84cc16]" />
+                </div>
+                <div>
+                  <DrawerTitle className="text-foreground">Atualizar Dados Corporais</DrawerTitle>
+                  <DrawerDescription>Mantenha seus dados atualizados para cálculos mais precisos</DrawerDescription>
+                </div>
+              </div>
+            </DrawerHeader>
 
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="weight">Peso (kg)</Label>
-              <Input
-                id="weight"
-                type="number"
-                value={bodyWeight || ''}
-                onChange={(e) => setBodyWeight(parseFloat(e.target.value) || 0)}
-                placeholder="Ex: 70"
-              />
+            <div className="px-4 pb-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="weight">Peso (kg)</Label>
+                <Input
+                  id="weight"
+                  type="number"
+                  value={bodyWeight || ''}
+                  onChange={(e) => setBodyWeight(parseFloat(e.target.value) || 0)}
+                  placeholder="Ex: 70"
+                  className="bg-muted/50 border-border rounded-xl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="height">Altura (cm)</Label>
+                <Input
+                  id="height"
+                  type="number"
+                  value={bodyHeight || ''}
+                  onChange={(e) => setBodyHeight(parseFloat(e.target.value) || 0)}
+                  placeholder="Ex: 170"
+                  className="bg-muted/50 border-border rounded-xl"
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="height">Altura (cm)</Label>
-              <Input
-                id="height"
-                type="number"
-                value={bodyHeight || ''}
-                onChange={(e) => setBodyHeight(parseFloat(e.target.value) || 0)}
-                placeholder="Ex: 170"
-              />
-            </div>
+            <DrawerFooter className="pt-2">
+              <Button
+                onClick={handleSaveBodyStats}
+                disabled={savingBodyStats}
+                className="w-full bg-[#84cc16] hover:bg-[#84cc16]/90 text-white"
+              >
+                {savingBodyStats ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                Salvar
+              </Button>
+              <DrawerClose asChild>
+                <Button variant="ghost" className="w-full">
+                  Cancelar
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
           </div>
+        </DrawerContent>
+      </Drawer>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsBodyStatsOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSaveBodyStats}
-              disabled={savingBodyStats}
-            >
-              {savingBodyStats ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              Salvar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Personal Data Drawer */}
+      <Drawer open={isPersonalDataOpen} onOpenChange={setIsPersonalDataOpen}>
+        <DrawerContent className="bg-transparent border-none">
+          <div className="mx-auto w-full max-w-lg bg-card border border-border rounded-t-3xl">
+            <DrawerHeader className="text-left">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
+                  <User className="h-5 w-5 text-[#84cc16]" />
+                </div>
+                <div>
+                  <DrawerTitle className="text-foreground">Editar Meus Dados</DrawerTitle>
+                  <DrawerDescription>Atualize suas informações pessoais</DrawerDescription>
+                </div>
+              </div>
+            </DrawerHeader>
 
-      {/* Personal Data Dialog */}
-      <Dialog open={isPersonalDataOpen} onOpenChange={setIsPersonalDataOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Meus Dados</DialogTitle>
-            <DialogDescription>
-              Atualize suas informações pessoais
-            </DialogDescription>
-          </DialogHeader>
+            <div className="px-4 pb-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Nome Completo</Label>
+                <Input
+                  id="fullName"
+                  value={editFullName}
+                  onChange={(e) => setEditFullName(e.target.value)}
+                  placeholder="Seu nome"
+                  className="bg-muted/50 border-border rounded-xl"
+                />
+              </div>
 
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Nome Completo</Label>
-              <Input
-                id="fullName"
-                value={editFullName}
-                onChange={(e) => setEditFullName(e.target.value)}
-                placeholder="Seu nome"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="nickname">Apelido (opcional)</Label>
+                <Input
+                  id="nickname"
+                  value={editNickname}
+                  onChange={(e) => setEditNickname(e.target.value)}
+                  placeholder="Ex: joaosilva"
+                  className="bg-muted/50 border-border rounded-xl"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Use apenas letras, números e underscore. Entre 3-20 caracteres.
+                </p>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="nickname">Apelido (opcional)</Label>
-              <Input
-                id="nickname"
-                value={editNickname}
-                onChange={(e) => setEditNickname(e.target.value)}
-                placeholder="Ex: joaosilva"
-              />
-              <p className="text-xs text-muted-foreground">
-                Use apenas letras, números e underscore. Entre 3-20 caracteres.
-              </p>
-            </div>
+            <DrawerFooter className="pt-2">
+              <Button
+                onClick={handleSavePersonalData}
+                disabled={savingPersonalData}
+                className="w-full bg-[#84cc16] hover:bg-[#84cc16]/90 text-white"
+              >
+                {savingPersonalData ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                Salvar
+              </Button>
+              <DrawerClose asChild>
+                <Button variant="ghost" className="w-full">
+                  Cancelar
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
           </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsPersonalDataOpen(false)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSavePersonalData}
-              disabled={savingPersonalData}
-            >
-              {savingPersonalData ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              Salvar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
