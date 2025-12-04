@@ -472,11 +472,11 @@ export default function Progress() {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Água</p>
-                      <p className="text-lg font-bold text-sky-400 tabular-nums">{waterTotal}<span className="text-[10px]">ml</span></p>
+                      <p className="text-lg font-bold text-[#84cc16] tabular-nums">{waterTotal}<span className="text-[10px]">ml</span></p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Peso</p>
-                      <p className="text-lg font-bold text-emerald-400 tabular-nums">{lastWeight > 0 ? lastWeight : '--'}<span className="text-[10px]">kg</span></p>
+                      <p className="text-lg font-bold text-[#84cc16] tabular-nums">{lastWeight > 0 ? lastWeight : '--'}<span className="text-[10px]">kg</span></p>
                     </div>
                   </div>
                   <div className="mt-3 h-1.5 rounded-full bg-muted overflow-hidden">
