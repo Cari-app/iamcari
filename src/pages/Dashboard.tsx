@@ -15,50 +15,48 @@ import { toast } from '@/hooks/use-toast';
 import { TimelineEntry } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import logoImage from '@/assets/logo-cari.png';
-const MACRO_TARGETS = {
-  protein: 150,
-  carbs: 250,
-  fat: 70
-};
+
+const MACRO_TARGETS = { protein: 150, carbs: 250, fat: 70 };
+
 export default function Dashboard() {
-  const {
-    user,
-    profile
-  } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [meals, setMeals] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const caloriesTarget = profile?.daily_calories_target || 2000;
 
   // Memoized calculations
-  const totalCalories = useMemo(() => meals.reduce((sum, m) => sum + (m.calories || 0), 0), [meals]);
-  const totalMacros = useMemo(() => meals.reduce((acc, meal) => {
-    const analysis = typeof meal.ai_analysis === 'object' ? meal.ai_analysis : null;
-    return {
-      protein: acc.protein + (analysis?.protein || 0),
-      carbs: acc.carbs + (analysis?.carbs || 0),
-      fat: acc.fat + (analysis?.fat || 0)
-    };
-  }, {
-    protein: 0,
-    carbs: 0,
-    fat: 0
-  }), [meals]);
+  const totalCalories = useMemo(() => 
+    meals.reduce((sum, m) => sum + (m.calories || 0), 0), [meals]
+  );
+
+  const totalMacros = useMemo(() => 
+    meals.reduce((acc, meal) => {
+      const analysis = typeof meal.ai_analysis === 'object' ? meal.ai_analysis : null;
+      return {
+        protein: acc.protein + (analysis?.protein || 0),
+        carbs: acc.carbs + (analysis?.carbs || 0),
+        fat: acc.fat + (analysis?.fat || 0),
+      };
+    }, { protein: 0, carbs: 0, fat: 0 }), [meals]
+  );
+
   const macroProps = useMemo(() => ({
-    protein: {
-      value: totalMacros.protein,
-      percentage: Math.round(totalMacros.protein / MACRO_TARGETS.protein * 100)
+    protein: { 
+      value: totalMacros.protein, 
+      percentage: Math.round((totalMacros.protein / MACRO_TARGETS.protein) * 100) 
     },
-    carbs: {
-      value: totalMacros.carbs,
-      percentage: Math.round(totalMacros.carbs / MACRO_TARGETS.carbs * 100)
+    carbs: { 
+      value: totalMacros.carbs, 
+      percentage: Math.round((totalMacros.carbs / MACRO_TARGETS.carbs) * 100) 
     },
-    fat: {
-      value: totalMacros.fat,
-      percentage: Math.round(totalMacros.fat / MACRO_TARGETS.fat * 100)
-    }
+    fat: { 
+      value: totalMacros.fat, 
+      percentage: Math.round((totalMacros.fat / MACRO_TARGETS.fat) * 100) 
+    },
   }), [totalMacros]);
 
   // Fetch meals
@@ -67,34 +65,41 @@ export default function Dashboard() {
       setLoading(false);
       return;
     }
+
     const fetchMeals = async () => {
       setLoading(true);
       try {
         const startOfDay = new Date(selectedDate);
         startOfDay.setHours(0, 0, 0, 0);
+        
         const endOfDay = new Date(selectedDate);
         endOfDay.setHours(23, 59, 59, 999);
-        const {
-          data,
-          error
-        } = await supabase.from('meal_logs').select('*').eq('user_id', user.id).eq('entry_type', 'meal').gte('created_at', startOfDay.toISOString()).lte('created_at', endOfDay.toISOString()).order('created_at', {
-          ascending: false
-        });
+        
+        const { data, error } = await supabase
+          .from('meal_logs')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('entry_type', 'meal')
+          .gte('created_at', startOfDay.toISOString())
+          .lte('created_at', endOfDay.toISOString())
+          .order('created_at', { ascending: false });
+
         if (error) {
           toast({
             title: '❌ Erro ao carregar',
             description: 'Não foi possível carregar as refeições.',
-            variant: 'destructive'
+            variant: 'destructive',
           });
           return;
         }
+
         if (data) {
           setMeals(data.map(log => ({
             id: log.id,
             type: 'meal' as const,
-            time: new Date(log.created_at).toLocaleTimeString('pt-BR', {
-              hour: '2-digit',
-              minute: '2-digit'
+            time: new Date(log.created_at).toLocaleTimeString('pt-BR', { 
+              hour: '2-digit', 
+              minute: '2-digit' 
             }),
             created_at: log.created_at,
             entry_method: log.image_url ? 'ai' as const : 'manual' as const,
@@ -104,27 +109,34 @@ export default function Dashboard() {
             is_emotional: log.is_emotional || false,
             hunger_level: log.hunger_level,
             ai_analysis: log.ai_analysis as any,
-            status: log.status || 'manual'
+            status: log.status || 'manual',
           })));
         }
       } finally {
         setLoading(false);
       }
     };
+
     fetchMeals();
-    const channel = supabase.channel('dashboard-meals').on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'meal_logs',
-      filter: `user_id=eq.${user.id}`
-    }, fetchMeals).subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
+
+    const channel = supabase
+      .channel('dashboard-meals')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'meal_logs',
+        filter: `user_id=eq.${user.id}`,
+      }, fetchMeals)
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [user, selectedDate]);
+
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
   const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
-  return <div className="min-h-[100dvh] pb-24 bg-background">
+
+  return (
+    <div className="min-h-[100dvh] pb-24 bg-background">
       <div className="mx-auto max-w-lg relative">
         {/* Green Gradient Background */}
         <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
@@ -147,7 +159,7 @@ export default function Dashboard() {
           <CalorieHeader consumed={totalCalories} target={caloriesTarget} />
 
           <main>
-            <MacroCards className="shadow opacity-100" />
+            <MacroCards {...macroProps} />
 
             {/* Pagination Dots */}
             <div className="flex justify-center gap-1.5 my-4">
@@ -162,7 +174,10 @@ export default function Dashboard() {
                 Dieta
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#84cc16] rounded-full" />
               </button>
-              <button onClick={() => navigate('/fasting')} className="flex-1 pb-3 text-center text-green-800 font-medium relative">
+              <button 
+                onClick={() => navigate('/fasting')}
+                className="flex-1 pb-3 text-center text-green-800 font-medium relative"
+              >
                 Jejum
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-800 rounded-full" />
               </button>
@@ -170,19 +185,27 @@ export default function Dashboard() {
 
             {/* Meal List */}
             <div className="px-4 py-4 space-y-3">
-              {loading ? <>
+              {loading ? (
+                <>
                   <Skeleton className="h-32 rounded-2xl" />
                   <Skeleton className="h-32 rounded-2xl" />
-                </> : meals.length > 0 ? meals.map(meal => <MealCard key={meal.id} meal={meal} dailyTarget={caloriesTarget} />) : <motion.div initial={{
-              opacity: 0
-            }} animate={{
-              opacity: 1
-            }} className="text-center py-12">
+                </>
+              ) : meals.length > 0 ? (
+                meals.map((meal) => (
+                  <MealCard key={meal.id} meal={meal} dailyTarget={caloriesTarget} />
+                ))
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-12"
+                >
                   <p className="text-muted-foreground">Nenhuma refeição registrada hoje</p>
                   <button onClick={handleOpenModal} className="mt-4 text-primary font-medium">
                     Adicionar primeira refeição
                   </button>
-                </motion.div>}
+                </motion.div>
+              )}
             </div>
           </main>
         </div>
@@ -191,6 +214,12 @@ export default function Dashboard() {
       <FloatingActionButton onClick={handleOpenModal} />
       <BottomNav />
       
-      <MealInputDialog open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={() => {}} onPhotoSubmitted={handleCloseModal} />
-    </div>;
+      <MealInputDialog
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSubmit={() => {}}
+        onPhotoSubmitted={handleCloseModal}
+      />
+    </div>
+  );
 }
