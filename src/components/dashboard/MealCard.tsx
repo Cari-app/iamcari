@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { TimelineEntry } from '@/types';
 
@@ -6,20 +7,25 @@ interface MealCardProps {
   dailyTarget: number;
 }
 
-export function MealCard({ meal, dailyTarget }: MealCardProps) {
+export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardProps) {
   if (meal.type !== 'meal') return null;
-  
-  const reachPercentage = dailyTarget > 0 
-    ? Math.round((meal.calories || 0) / dailyTarget * 100) 
-    : 0;
 
-  // Parse AI analysis macros if available
-  const analysis = typeof meal.ai_analysis === 'object' ? meal.ai_analysis : null;
-  const macros = {
-    protein: analysis?.protein || 0,
-    carbs: analysis?.carbs || 0,
-    fat: analysis?.fat || 0,
-  };
+  const { reachPercentage, macros } = useMemo(() => {
+    const reach = dailyTarget > 0 
+      ? Math.round((meal.calories || 0) / dailyTarget * 100) 
+      : 0;
+    
+    const analysis = typeof meal.ai_analysis === 'object' ? meal.ai_analysis : null;
+    
+    return {
+      reachPercentage: reach,
+      macros: {
+        protein: analysis?.protein || 0,
+        carbs: analysis?.carbs || 0,
+        fat: analysis?.fat || 0,
+      }
+    };
+  }, [meal.calories, meal.ai_analysis, dailyTarget]);
 
   return (
     <motion.div
@@ -27,13 +33,13 @@ export function MealCard({ meal, dailyTarget }: MealCardProps) {
       animate={{ opacity: 1, y: 0 }}
       className="bg-white/95 border border-green-800 rounded-2xl p-3 flex gap-4"
     >
-      {/* Food Image */}
       <div className="w-24 h-24 rounded-xl overflow-hidden bg-green-100 shrink-0">
         {meal.image_url ? (
           <img 
             src={meal.image_url} 
             alt={meal.food_name} 
             className="w-full h-full object-cover"
+            loading="lazy"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-green-200 to-green-100 flex items-center justify-center">
@@ -42,7 +48,6 @@ export function MealCard({ meal, dailyTarget }: MealCardProps) {
         )}
       </div>
       
-      {/* Content */}
       <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
         <div>
           <p className="text-green-700 text-sm">{meal.time}</p>
@@ -54,7 +59,6 @@ export function MealCard({ meal, dailyTarget }: MealCardProps) {
           </p>
         </div>
         
-        {/* Macros Row */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 text-sm text-green-800">
             <span>Prot: <span className="font-bold text-green-900">{macros.protein}g</span></span>
@@ -66,4 +70,4 @@ export function MealCard({ meal, dailyTarget }: MealCardProps) {
       </div>
     </motion.div>
   );
-}
+});

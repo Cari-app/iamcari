@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Progress } from '@/components/ui/progress';
+import { useMemo } from 'react';
 
 interface CalorieHeaderProps {
   consumed: number;
@@ -7,23 +7,32 @@ interface CalorieHeaderProps {
 }
 
 export function CalorieHeader({ consumed, target }: CalorieHeaderProps) {
-  const percentage = target > 0 ? Math.min((consumed / target) * 100, 100) : 0;
-  
+  const percentage = useMemo(() => 
+    target > 0 ? Math.min((consumed / target) * 100, 100) : 0, 
+    [consumed, target]
+  );
+
+  const formattedConsumed = useMemo(() => 
+    consumed.toLocaleString('pt-BR'), [consumed]
+  );
+
+  const formattedTarget = useMemo(() => 
+    target.toLocaleString('pt-BR'), [target]
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="text-center px-4 pb-6"
     >
-      {/* Large Calorie Display */}
       <div className="mb-2">
         <span className="text-6xl font-extrabold text-white tabular-nums">
-          {consumed.toLocaleString('pt-BR')}
+          {formattedConsumed}
         </span>
         <p className="text-white/70 text-lg mt-1">kcal</p>
       </div>
       
-      {/* Progress Bar */}
       <div className="mt-4 space-y-2">
         <div className="h-3 bg-green-100/30 rounded-full overflow-hidden">
           <motion.div
@@ -35,7 +44,7 @@ export function CalorieHeader({ consumed, target }: CalorieHeaderProps) {
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-white font-medium">0 kcal</span>
-          <span className="text-white/80">{target.toLocaleString('pt-BR')}kcal</span>
+          <span className="text-white/80">{formattedTarget}kcal</span>
         </div>
       </div>
     </motion.div>

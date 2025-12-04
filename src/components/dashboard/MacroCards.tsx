@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 
 interface MacroCardsProps {
@@ -6,32 +7,34 @@ interface MacroCardsProps {
   fat: { value: number; percentage: number };
 }
 
-export function MacroCards({ protein, carbs, fat }: MacroCardsProps) {
-  const macros = [
-    { label: 'Protein', value: protein.value, percentage: protein.percentage },
-    { label: 'Carb', value: carbs.value, percentage: carbs.percentage },
-    { label: 'Fat', value: fat.value, percentage: fat.percentage },
-  ];
+const MACROS_CONFIG = [
+  { key: 'protein', label: 'Protein' },
+  { key: 'carbs', label: 'Carb' },
+  { key: 'fat', label: 'Fat' },
+] as const;
+
+export const MacroCards = memo(function MacroCards({ protein, carbs, fat }: MacroCardsProps) {
+  const macros = { protein, carbs, fat };
 
   return (
     <div className="grid grid-cols-3 gap-3 px-4">
-      {macros.map((macro, index) => (
+      {MACROS_CONFIG.map(({ key, label }, index) => (
         <motion.div
-          key={macro.label}
+          key={key}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
           className="bg-white/95 rounded-2xl p-4 text-center shadow-sm border border-green-800"
         >
-          <p className="text-green-800 text-sm font-medium">{macro.label}</p>
+          <p className="text-green-800 text-sm font-medium">{label}</p>
           <p className="text-2xl font-bold text-green-900 mt-1">
-            {macro.value}G
+            {macros[key].value}G
           </p>
           <p className="text-green-700/70 text-xs mt-1">
-            {macro.percentage}%
+            {macros[key].percentage}%
           </p>
         </motion.div>
       ))}
     </div>
   );
-}
+});
