@@ -192,7 +192,7 @@ export default function Login() {
       setIsSent(true);
       toast({
         title: "Link mágico enviado! ✨",
-        description: "Verifique seu email para acessar o LeveStay."
+        description: "Verifique seu email para acessar o Cari."
       });
     }
   };
@@ -249,7 +249,7 @@ export default function Login() {
           });
         } else {
           toast({
-            title: "Conta criada! Bem-vindo ao LeveStay. 🎉",
+            title: "Conta criada! Bem-vindo ao Cari. 🎉",
             description: "Redirecionando para o onboarding..."
           });
         }

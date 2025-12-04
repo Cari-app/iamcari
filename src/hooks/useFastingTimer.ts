@@ -20,7 +20,7 @@ interface FastingTimerState {
 
 type FastingPhase = 'fed' | 'fasting' | 'ketosis' | 'autophagy' | 'deep-autophagy';
 
-const STORAGE_KEY = 'levestay-fasting-session';
+const STORAGE_KEY = 'cari-fasting-session';
 
 const getPhase = (hours: number): FastingPhase => {
   if (hours < 4) return 'fed';

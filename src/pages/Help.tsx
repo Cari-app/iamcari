@@ -19,18 +19,18 @@ export default function Help() {
   const whatsappNumber = "5533999999999"; // TODO: INSERT SUPPORT WHATSAPP NUMBER
 
   const handleWhatsAppSupport = () => {
-    const message = encodeURIComponent("Olá! Preciso de ajuda com o LeveStay.");
+    const message = encodeURIComponent("Olá! Preciso de ajuda com o Cari.");
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
   };
 
   const handleEmailSupport = () => {
-    window.location.href = "mailto:suporte@levestay.com.br?subject=Preciso de Ajuda";
+    window.location.href = "mailto:suporte@cari.com.br?subject=Preciso de Ajuda";
   };
 
   const faqItems = [
     {
       question: "Como funciona a análise de refeições com IA?",
-      answer: "Tire uma foto da sua refeição e a Dona (nossa IA) analisa automaticamente as calorias e macros. Consome 1 FitCoin por análise."
+      answer: "Tire uma foto da sua refeição e a Cari (nossa IA) analisa automaticamente as calorias e macros. Consome 1 FitCoin por análise."
     },
     {
       question: "O que são FitCoins?",
@@ -115,7 +115,7 @@ export default function Help() {
                       Email de Suporte
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      suporte@levestay.com.br
+                      suporte@cari.com.br
                     </p>
                   </div>
                   <ExternalLink className="h-5 w-5 text-muted-foreground" />

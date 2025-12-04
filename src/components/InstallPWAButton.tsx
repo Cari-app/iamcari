@@ -126,7 +126,7 @@ export function InstallPWAButton() {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-foreground">
-                  Instalar LeveStay
+                  Instalar Cari
                 </h3>
                 <button
                   onClick={() => setShowIOSModal(false)}
