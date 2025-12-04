@@ -22,50 +22,22 @@ export function CircularProgress({
 
   return (
     <div className={cn('relative inline-flex items-center justify-center', className)}>
-      {/* Background blur circle */}
-      <div 
-        className="absolute rounded-full bg-white/10 backdrop-blur-sm"
-        style={{ 
-          width: size - 20, 
-          height: size - 20,
-        }}
-      />
-      
       <svg
         width={size}
         height={size}
         className="transform -rotate-90"
-        style={{ overflow: 'visible' }}
       >
-        <defs>
-          {/* Modern gradient */}
-          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="hsl(142, 76%, 36%)" />
-            <stop offset="50%" stopColor="hsl(142, 70%, 45%)" />
-            <stop offset="100%" stopColor="hsl(84, 85%, 50%)" />
-          </linearGradient>
-          
-          {/* Glow effect */}
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-
         {/* Background track */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.2)"
+          stroke="rgba(255,255,255,0.15)"
           strokeWidth={strokeWidth}
         />
         
-        {/* Progress arc with gradient */}
+        {/* Progress arc */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}
@@ -76,24 +48,17 @@ export function CircularProgress({
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          filter="url(#glow)"
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
         />
         
-        {/* Glowing dot at progress end */}
-        {progress > 0 && (
-          <motion.circle
-            cx={size / 2 + radius * Math.sin((progress / 100) * 2 * Math.PI)}
-            cy={size / 2 - radius * Math.cos((progress / 100) * 2 * Math.PI)}
-            r={strokeWidth / 2 + 4}
-            fill="hsl(84, 85%, 50%)"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.3 }}
-          />
-        )}
+        <defs>
+          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#22c55e" />
+            <stop offset="100%" stopColor="#84cc16" />
+          </linearGradient>
+        </defs>
       </svg>
       
       {/* Center content */}
