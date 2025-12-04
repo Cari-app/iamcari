@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { CircularProgress } from '@/components/CircularProgress';
+import { ProtocolSelector } from '@/components/dashboard/ProtocolSelector';
 import { useFastingTimer } from '@/hooks/useFastingTimer';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -37,6 +38,7 @@ export default function Fasting() {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [selectedProtocol, setSelectedProtocol] = useState(16);
   const [isCustomProtocol, setIsCustomProtocol] = useState(false);
+  const [isProtocolOpen, setIsProtocolOpen] = useState(false);
   const [bestStreak, setBestStreak] = useState(0);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [weeklyGoal, setWeeklyGoal] = useState({ completed: 0, target: 7 });
@@ -350,16 +352,29 @@ export default function Fasting() {
                   </span>
                 </div>
                 
-                <motion.div 
-                  className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Clock className="h-4 w-4 text-[#84cc16]" />
-                  <span className="text-sm font-semibold text-foreground">
-                    Meta: {isActive ? targetHours : selectedProtocol}h
-                  </span>
-                </motion.div>
+                {isActive ? (
+                  <motion.div 
+                    className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg"
+                  >
+                    <Clock className="h-4 w-4 text-[#84cc16]" />
+                    <span className="text-sm font-semibold text-foreground">
+                      Meta: {targetHours}h
+                    </span>
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    className="mt-4"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <ProtocolSelector
+                      selectedHours={selectedProtocol}
+                      onSelect={handleProtocolSelect}
+                      isOpen={isProtocolOpen}
+                      onOpenChange={setIsProtocolOpen}
+                    />
+                  </motion.div>
+                )}
               </div>
             </CircularProgress>
           </motion.div>
