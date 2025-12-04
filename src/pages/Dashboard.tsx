@@ -172,7 +172,7 @@ export default function Dashboard() {
             <div className="flex mx-4 mt-6">
               <button className="flex-1 pb-3 text-center text-green-900 font-medium relative">
                 Dieta
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-400 rounded-full" />
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#84cc16] rounded-full" />
               </button>
               <button 
                 onClick={() => navigate('/fasting')}
