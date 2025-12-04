@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { format, startOfWeek, addDays, isSameDay, subDays } from 'date-fns';
+import { format, isSameDay, subDays, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -11,26 +11,77 @@ interface WeekCalendarProps {
 
 export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const todayRef = useRef<HTMLButtonElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
   
-  // Generate 14 days (7 before today + today + 6 after)
   const today = new Date();
-  const days = Array.from({ length: 14 }, (_, i) => subDays(today, 7 - i));
+  // Generate 30 days (15 before today + today + 14 after)
+  const days = Array.from({ length: 31 }, (_, i) => subDays(today, 15 - i));
   
-  // Scroll to selected date on mount
+  // Center today on mount
   useEffect(() => {
-    if (scrollRef.current) {
-      const selectedIndex = days.findIndex(d => isSameDay(d, selectedDate));
-      if (selectedIndex >= 0) {
-        const scrollPosition = selectedIndex * 56 - scrollRef.current.offsetWidth / 2 + 28;
-        scrollRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
-      }
+    if (todayRef.current && scrollRef.current) {
+      const container = scrollRef.current;
+      const todayElement = todayRef.current;
+      const containerWidth = container.offsetWidth;
+      const todayLeft = todayElement.offsetLeft;
+      const todayWidth = todayElement.offsetWidth;
+      
+      // Center today in the container
+      const scrollPosition = todayLeft - (containerWidth / 2) + (todayWidth / 2);
+      container.scrollTo({ left: scrollPosition, behavior: 'auto' });
     }
   }, []);
+
+  // Mouse/Touch drag handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartX(e.pageX - (scrollRef.current?.offsetLeft || 0));
+    setScrollLeft(scrollRef.current?.scrollLeft || 0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - (scrollRef.current?.offsetLeft || 0);
+    const walk = (x - startX) * 1.5;
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollLeft - walk;
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - (scrollRef.current?.offsetLeft || 0));
+    setScrollLeft(scrollRef.current?.scrollLeft || 0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    const x = e.touches[0].pageX - (scrollRef.current?.offsetLeft || 0);
+    const walk = (x - startX) * 1.5;
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollLeft - walk;
+    }
+  };
 
   return (
     <div 
       ref={scrollRef}
-      className="flex gap-2 overflow-x-auto scrollbar-hide py-2 px-4 -mx-4"
+      className="flex gap-1 overflow-x-auto scrollbar-hide py-3 px-4 cursor-grab active:cursor-grabbing select-none"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={() => setIsDragging(false)}
     >
       {days.map((day, index) => {
         const isSelected = isSameDay(day, selectedDate);
@@ -41,18 +92,26 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
         return (
           <motion.button
             key={index}
+            ref={isToday ? todayRef : undefined}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onDateSelect(day)}
+            onClick={() => !isDragging && onDateSelect(day)}
             className={cn(
-              'flex flex-col items-center min-w-[48px] py-2 px-2 rounded-xl transition-all',
+              'flex flex-col items-center py-2 rounded-xl transition-all shrink-0',
+              isToday ? 'min-w-[56px] px-3' : 'min-w-[44px] px-2',
               isSelected 
-                ? 'text-primary font-bold' 
-                : 'text-white/60 hover:text-white/80'
+                ? 'text-primary' 
+                : 'text-white/50 hover:text-white/70'
             )}
           >
-            <span className="text-xs font-medium">{dayName}</span>
             <span className={cn(
-              'text-lg font-bold mt-1',
+              'font-medium',
+              isToday ? 'text-sm' : 'text-xs'
+            )}>
+              {dayName}
+            </span>
+            <span className={cn(
+              'font-bold mt-1',
+              isToday ? 'text-2xl' : 'text-lg',
               isSelected && 'text-primary'
             )}>
               {dayNumber}
