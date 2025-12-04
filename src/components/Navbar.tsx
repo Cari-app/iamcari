@@ -1,19 +1,22 @@
 import { Logo } from './Logo';
-import { GamificationWidget } from './GamificationWidget';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Moon, Sun } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Moon, Sun, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export function Navbar() {
   const { theme, toggleTheme } = useTheme();
+  const { profile } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
   
-  // Hide gamification widget on profile page
-  const hideGamification = location.pathname === '/profile';
+  // Hide profile avatar on profile page
+  const hideProfile = location.pathname === '/profile';
 
   return (
     <motion.header 
@@ -32,7 +35,19 @@ export function Navbar() {
           <Logo size="xs" />
           
           <div className="flex items-center gap-2">
-            {!hideGamification && <GamificationWidget />}
+            {!hideProfile && (
+              <button
+                onClick={() => navigate('/profile')}
+                className="press-effect"
+              >
+                <Avatar className="h-9 w-9 ring-2 ring-primary/20">
+                  <AvatarImage src={profile?.avatar_url || ''} alt="Avatar" />
+                  <AvatarFallback className="bg-primary/10">
+                    <User className="h-4 w-4 text-primary" />
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+            )}
             
             <Button
               variant="ghost"

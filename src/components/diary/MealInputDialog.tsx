@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Pencil, Utensils, Sparkles, Heart, Star, AlertCircle } from 'lucide-react';
+import { Camera, Pencil, Utensils, Sparkles, Heart, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { compressImage } from '@/lib/imageCompression';
-import { FitCoinIcon } from '@/components/FitCoinIcon';
 import {
   Dialog,
   DialogContent,
@@ -27,7 +26,7 @@ interface MealInputDialogProps {
     imageUrl?: string;
     isEmotional?: boolean;
   }) => void;
-  onPhotoSubmitted?: () => void; // Callback para refetch após foto ser enviada
+  onPhotoSubmitted?: () => void;
 }
 
 type InputMethod = 'select' | 'camera' | 'manual';
@@ -38,7 +37,7 @@ export function MealInputDialog({
   onSubmit,
   onPhotoSubmitted,
 }: MealInputDialogProps) {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [method, setMethod] = useState<InputMethod>('select');
   const [description, setDescription] = useState('');
   const [calories, setCalories] = useState('');
@@ -47,24 +46,13 @@ export function MealInputDialog({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadStep, setUploadStep] = useState(0);
-  const [fitCoinBalance, setFitCoinBalance] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const FITCOIN_COST = 1;
 
   const uploadSteps = [
     'Comprimindo imagem...',
     'Enviando para a nuvem...',
-    'A Cari está analisando...',
-    'Calculando calorias...',
+    'Salvando registro...',
   ];
-
-  // Update FitCoin balance when profile changes
-  useEffect(() => {
-    if (profile?.token_balance !== undefined) {
-      setFitCoinBalance(profile.token_balance);
-    }
-  }, [profile]);
 
   // Cycle through upload steps
   useEffect(() => {
@@ -115,16 +103,6 @@ export function MealInputDialog({
       return;
     }
 
-    // Check FitCoin balance
-    if (fitCoinBalance < FITCOIN_COST) {
-      toast({
-        title: '💎 Saldo insuficiente',
-        description: `Você precisa de ${FITCOIN_COST} FitCoin para análise de IA. Saldo atual: ${fitCoinBalance}`,
-        variant: 'destructive',
-      });
-      return;
-    }
-
     setUploading(true);
     setUploadStep(0);
 
@@ -132,63 +110,41 @@ export function MealInputDialog({
       // Step 1: Compress image
       const compressedBlob = await compressImage(selectedImage);
 
-      // Step 2: Convert blob to base64
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve, reject) => {
-        reader.onloadend = () => {
-          const base64 = (reader.result as string).split(',')[1];
-          resolve(base64);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(compressedBlob);
-      });
-
-      const imageBase64 = await base64Promise;
+      // Step 2: Upload to storage
       const timestamp = Date.now();
       const fileName = `${user.id}/${timestamp}.jpg`;
 
-      // Step 3: Call edge function to consume FitCoin and upload
-      const { data, error: functionError } = await supabase.functions.invoke('consume-fitcoin-for-meal', {
-        body: {
-          imageBlob: imageBase64,
-          fileName,
-          isEmotional,
-        },
-      });
+      const { error: uploadError } = await supabase.storage
+        .from('meal_photos')
+        .upload(fileName, compressedBlob, { contentType: 'image/jpeg' });
 
-      if (functionError) {
-        console.error('Function error:', functionError);
-        throw new Error(functionError.message || 'Erro ao processar');
-      }
+      if (uploadError) throw uploadError;
 
-      if (!data) {
-        throw new Error('Nenhum dado retornado');
-      }
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('meal_photos')
+        .getPublicUrl(fileName);
 
-      // Check for insufficient balance error
-      if (data.error === 'insufficient_balance') {
-        toast({
-          title: '💎 Saldo insuficiente',
-          description: `Você precisa de ${FITCOIN_COST} FitCoin. Saldo atual: ${data.currentBalance || 0}`,
-          variant: 'destructive',
+      const publicUrl = urlData.publicUrl;
+
+      // Step 3: Create meal log entry
+      const { error: insertError } = await supabase
+        .from('meal_logs')
+        .insert({
+          user_id: user.id,
+          image_url: publicUrl,
+          is_emotional: isEmotional,
+          status: 'pending',
+          entry_type: 'meal',
         });
-        return;
-      }
 
-      const result = data;
+      if (insertError) throw insertError;
 
-      // Update local balance
-      setFitCoinBalance(result.newBalance);
-
-      // Success!
       toast({
-        title: result.isAdmin ? '👑 Análise Admin' : '✅ Análise iniciada!',
-        description: result.isAdmin 
-          ? 'FitCoins ilimitados para admins!' 
-          : `1 FitCoin consumido. Saldo: ${result.newBalance}`,
+        title: '✅ Foto enviada!',
+        description: 'Sua refeição foi registrada com sucesso.',
       });
 
-      // Trigger refetch in parent component
       if (onPhotoSubmitted) {
         onPhotoSubmitted();
       }
@@ -196,23 +152,9 @@ export function MealInputDialog({
       handleClose();
     } catch (error) {
       console.error('Error uploading image:', error);
-      
-      // Handle specific error types
-      let errorMessage = 'Não foi possível enviar a foto.';
-      
-      if (error instanceof Error) {
-        if (error.message.includes('401') || error.message.includes('unauthorized') || error.message.includes('autorizado')) {
-          errorMessage = 'Sessão expirada. Por favor, faça login novamente.';
-        } else if (error.message.includes('402') || error.message.includes('insufficient')) {
-          errorMessage = 'Saldo insuficiente de FitCoins';
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      
       toast({
         title: '❌ Erro no envio',
-        description: errorMessage,
+        description: 'Não foi possível enviar a foto.',
         variant: 'destructive',
       });
     } finally {
@@ -221,9 +163,38 @@ export function MealInputDialog({
     }
   };
 
-  const handleManualSubmit = () => {
+  const handleManualSubmit = async () => {
+    if (!user) return;
+    
     const numCalories = parseInt(calories) || 0;
-    if (description.trim() && numCalories > 0) {
+    if (!description.trim() || numCalories <= 0) {
+      toast({
+        title: '❌ Dados incompletos',
+        description: 'Preencha a descrição e as calorias',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('meal_logs')
+        .insert({
+          user_id: user.id,
+          food_name: description.trim(),
+          calories: numCalories,
+          is_emotional: isEmotional,
+          status: 'manual',
+          entry_type: 'meal',
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: '✅ Refeição registrada!',
+        description: `${description} - ${numCalories} kcal`,
+      });
+
       onSubmit({
         method: 'manual',
         description: description.trim(),
@@ -231,6 +202,13 @@ export function MealInputDialog({
         isEmotional,
       });
       handleClose();
+    } catch (error) {
+      console.error('Error saving meal:', error);
+      toast({
+        title: '❌ Erro ao salvar',
+        description: 'Não foi possível registrar a refeição',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -293,7 +271,7 @@ export function MealInputDialog({
           {/* Method Selection */}
           {method === 'select' && (
             <div className="space-y-3">
-              {/* AI Camera Option */}
+              {/* Camera Option */}
               <button
                 onClick={() => setMethod('camera')}
                 className={cn(
@@ -308,15 +286,9 @@ export function MealInputDialog({
                     <Camera className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1 text-left">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground">Tirar Foto</span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-400 text-xs font-medium">
-                        <Sparkles className="h-3 w-3" />
-                        IA
-                      </span>
-                    </div>
+                    <span className="font-semibold text-foreground">Tirar Foto</span>
                     <p className="text-sm text-muted-foreground mt-0.5">
-                      Análise automática de calorias
+                      Registre visualmente sua refeição
                     </p>
                   </div>
                 </div>
@@ -373,45 +345,11 @@ export function MealInputDialog({
                     <div className="text-center">
                       <p className="text-sm font-medium text-foreground">Toque para tirar foto</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        A IA analisará automaticamente
+                        Registre sua refeição
                       </p>
                     </div>
                   </>
                 )}
-              </div>
-
-              {/* FitCoin Balance & Cost Info */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-3 rounded-xl bg-teal-500/10 border border-teal-500/20">
-                  <div className="flex items-center gap-2">
-                    <FitCoinIcon size={16} />
-                    <span className="text-sm font-medium text-teal-300">Saldo</span>
-                  </div>
-                  <span className="text-sm font-bold text-teal-400">{fitCoinBalance} FitCoins</span>
-                </div>
-
-                <div className={cn(
-                  "flex items-center gap-2 p-3 rounded-xl border",
-                  fitCoinBalance >= FITCOIN_COST
-                    ? "bg-violet-500/10 border-violet-500/20"
-                    : "bg-rose-500/10 border-rose-500/20"
-                )}>
-                  {fitCoinBalance >= FITCOIN_COST ? (
-                    <>
-                      <Sparkles className="h-4 w-4 text-violet-400 flex-shrink-0" />
-                      <p className="text-xs text-violet-300">
-                        Custo: {FITCOIN_COST} FitCoin para análise de IA
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="h-4 w-4 text-rose-400 flex-shrink-0" />
-                      <p className="text-xs text-rose-300">
-                        Saldo insuficiente. Você precisa de {FITCOIN_COST} FitCoin
-                      </p>
-                    </>
-                  )}
-                </div>
               </div>
 
               <div className="flex gap-2">
@@ -420,11 +358,11 @@ export function MealInputDialog({
                 </Button>
                 <Button 
                   onClick={handleCameraSubmit} 
-                  disabled={!selectedImage || uploading || fitCoinBalance < FITCOIN_COST}
+                  disabled={!selectedImage || uploading}
                   className="flex-1 gradient-primary text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Camera className="h-4 w-4 mr-2" />
-                  {uploading ? 'Enviando...' : fitCoinBalance < FITCOIN_COST ? 'Saldo insuficiente' : 'Analisar'}
+                  {uploading ? 'Enviando...' : 'Registrar'}
                 </Button>
               </div>
             </div>
@@ -478,23 +416,20 @@ export function MealInputDialog({
                   {isEmotional ? (
                     <Heart className="h-5 w-5 text-rose-400 fill-rose-400 transition-colors" />
                   ) : (
-                    <Star className="h-5 w-5 text-secondary fill-secondary transition-colors" />
+                    <Star className="h-5 w-5 text-secondary transition-colors" />
                   )}
                 </div>
                 <div className="flex-1 text-left">
-                  <span className={cn(
-                    'font-medium transition-colors',
-                    isEmotional ? 'text-rose-400' : 'text-secondary'
-                  )}>
-                    {isEmotional ? 'Refeição emocional' : 'Refeição Planejada'}
-                  </span>
+                  <p className="font-medium text-foreground">
+                    {isEmotional ? 'Refeição Emocional' : 'Refeição Normal'}
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                    Marque se essa refeição não faz parte do plano de dieta
+                    {isEmotional ? 'Identificada como emocional' : 'Toque para marcar como emocional'}
                   </p>
                 </div>
               </button>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2">
                 <Button variant="ghost" onClick={handleBack} className="flex-1">
                   Voltar
                 </Button>
@@ -503,14 +438,14 @@ export function MealInputDialog({
                   disabled={!description.trim() || !calories}
                   className="flex-1 gradient-primary text-white"
                 >
-                  Adicionar
+                  Registrar
                 </Button>
               </div>
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -15,15 +15,10 @@ import { Play, Pause, RotateCcw, Flame, Zap, Sparkles, Target, MapPin, UtensilsC
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { useGamification } from '@/hooks/useGamification';
-import { useUserRole } from '@/hooks/useUserRole';
-import { useAchievementNotifications } from '@/hooks/useAchievementNotifications';
-import { FitCoinIcon } from '@/components/FitCoinIcon';
 import { toast } from '@/hooks/use-toast';
 
 export default function Dashboard() {
   const { user, profile, refreshProfile } = useAuth();
-  useAchievementNotifications(); // Enable achievement notifications
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProtocolOpen, setIsProtocolOpen] = useState(false);
@@ -54,8 +49,7 @@ export default function Dashboard() {
   const [caloriesConsumed, setCaloriesConsumed] = useState(0);
   const [lastCheckIn, setLastCheckIn] = useState<{ isEmotional: boolean; time: string } | null>(null);
   const [weeklyFasts, setWeeklyFasts] = useState(0);
-  const [gameCoins, setGameCoins] = useState(0);
-  const [currentStreak, setCurrentStreak] = useState(0);
+  const [totalFastingHours, setTotalFastingHours] = useState(0);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
@@ -115,7 +109,7 @@ export default function Dashboard() {
       // Fetch weekly fasting sessions (last 7 days, completed only)
       const { data: weeklyData, error: weeklyError } = await supabase
         .from('fasting_sessions')
-        .select('id')
+        .select('id, start_time, end_time')
         .eq('user_id', user.id)
         .not('end_time', 'is', null)
         .gte('start_time', sevenDaysAgo);
@@ -126,20 +120,14 @@ export default function Dashboard() {
       
       setWeeklyFasts(weeklyData?.length || 0);
       
-      // Fetch user stats (streak and coins from database)
-      const { data: statsData, error: statsError } = await supabase
-        .from('user_stats')
-        .select('current_streak, game_coins')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      if (statsError) {
-        console.error('Error fetching user stats:', statsError);
-      }
-      
-      if (statsData) {
-        setCurrentStreak(statsData.current_streak || 0);
-        setGameCoins(statsData.game_coins || 0);
+      // Calculate total fasting hours
+      if (weeklyData) {
+        const totalHours = weeklyData.reduce((acc, session) => {
+          const start = new Date(session.start_time);
+          const end = new Date(session.end_time!);
+          return acc + (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        }, 0);
+        setTotalFastingHours(Math.floor(totalHours));
       }
       } catch (error) {
         console.error('Unexpected error fetching dashboard data:', error);
@@ -155,25 +143,9 @@ export default function Dashboard() {
     
     fetchDashboardData();
     
-    // Realtime subscriptions for stats updates
-    const statsChannel = supabase
-      .channel('dashboard-stats-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'user_stats',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          console.log('User stats updated:', payload);
-          if (payload.new) {
-            setCurrentStreak(payload.new.current_streak || 0);
-            setGameCoins(payload.new.game_coins || 0);
-          }
-        }
-      )
+    // Realtime subscriptions for profile updates
+    const channel = supabase
+      .channel('dashboard-updates')
       .on(
         'postgres_changes',
         {
@@ -182,16 +154,14 @@ export default function Dashboard() {
           table: 'profiles',
           filter: `id=eq.${user.id}`,
         },
-        (payload) => {
-          console.log('Profile updated (FitCoins may have changed):', payload);
-          // Profile update will trigger AuthContext refresh automatically
+        () => {
           refreshProfile();
         }
       )
       .subscribe();
     
     return () => {
-      supabase.removeChannel(statsChannel);
+      supabase.removeChannel(channel);
     };
   }, [user, refreshProfile]);
 
@@ -209,7 +179,6 @@ export default function Dashboard() {
     if (error) {
       console.error('Error updating fasting protocol:', error);
     } else {
-      // Refresh profile context
       refreshProfile?.();
     }
   };
@@ -221,12 +190,10 @@ export default function Dashboard() {
     imageUrl?: string;
     isEmotional?: boolean;
   }) => {
-    // Não fazemos nada aqui, apenas para entrada manual
-    // A captura de foto já insere diretamente no banco
+    // Manual entry handling if needed
   };
 
   const handlePhotoSubmitted = () => {
-    // Após foto ser enviada, redireciona para /diary
     setIsModalOpen(false);
     navigate('/diary');
   };
@@ -434,12 +401,10 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+            className="grid grid-cols-2 gap-3"
           >
             {loading ? (
               <>
-                <Skeleton className="h-20 rounded-2xl" />
-                <Skeleton className="h-20 rounded-2xl" />
                 <Skeleton className="h-20 rounded-2xl" />
                 <Skeleton className="h-20 rounded-2xl" />
               </>
@@ -450,40 +415,16 @@ export default function Dashboard() {
                     {weeklyFasts}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Esta semana
+                    Jejuns esta semana
                   </p>
                 </div>
                 
                 <div className="p-4 rounded-2xl bg-card border border-border text-center">
                   <p className="text-2xl font-bold text-foreground tabular-nums">
-                    {currentStreak}
+                    {totalFastingHours}h
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Sequência
-                  </p>
-                </div>
-                
-                <div className="p-4 rounded-2xl bg-card border border-border text-center">
-                  <div className="flex items-center justify-center gap-1.5 mb-1">
-                    <FitCoinIcon size={20} />
-                    <p className="text-2xl font-bold text-foreground tabular-nums">
-                      {profile?.token_balance || 0}
-                    </p>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    FitCoins
-                  </p>
-                </div>
-                
-                <div className="p-4 rounded-2xl bg-card border border-border text-center">
-                  <div className="flex items-center justify-center gap-1.5 mb-1">
-                    <Zap className="h-5 w-5 text-amber-500" />
-                    <p className="text-2xl font-bold text-foreground tabular-nums">
-                      {gameCoins}
-                    </p>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Game Coins
+                    Horas de jejum
                   </p>
                 </div>
               </>
