@@ -361,38 +361,42 @@ export default function Fasting() {
           <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
 
           {/* Status Text */}
-          <div className="text-center px-4 mt-2">
-            <h2 className="text-xl text-white font-semibold">
+          <div className="text-center px-4 mt-4">
+            <h2 className="text-2xl text-white font-semibold">
               {isActive ? 'Jejum em andamento' : 'Pronto pra começar'}
             </h2>
-            <p className="text-green-200 text-sm">
+            <p className="text-green-300 text-sm mt-1">
               {isActive ? `Meta: ${targetHours}h de jejum` : 'Inicie seu jejum quando estiver pronto'}
             </p>
           </div>
 
           {/* Timer Section */}
-          <div className="flex flex-col items-center py-2 px-4">
-            <CircularProgress progress={isActive ? progress : 0} size={200} strokeWidth={10}>
+          <div className="flex flex-col items-center py-6 px-4">
+            <CircularProgress progress={isActive ? progress : 0} size={260} strokeWidth={14}>
               <div className="flex items-baseline justify-center">
-                <span className="text-4xl font-black tabular-nums text-white">
+                <span className="text-6xl font-black tabular-nums bg-gradient-to-r from-green-400 to-lime-300 bg-clip-text text-transparent drop-shadow-sm">
                   {time.hours}
                 </span>
-                <span className="text-2xl font-bold text-white mx-0.5">:</span>
-                <span className="text-4xl font-black tabular-nums text-white">
+                <span className="text-4xl font-bold text-green-400 mx-1">:</span>
+                <span className="text-6xl font-black tabular-nums bg-gradient-to-r from-green-400 to-lime-300 bg-clip-text text-transparent drop-shadow-sm">
                   {time.minutes}
                 </span>
-                <span className="text-lg font-semibold tabular-nums text-green-200 ml-0.5">
+                <span className="text-2xl font-semibold tabular-nums text-lime-300/70 ml-1">
                   :{time.seconds}
                 </span>
               </div>
             </CircularProgress>
 
             {/* Meta Badge */}
-            <div className="mt-3">
+            <motion.div 
+              className="mt-5"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               {isActive ? (
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 border border-white/25">
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-green-400/20 border border-green-400/40">
                   <Clock className="h-4 w-4 text-green-300" />
-                  <span className="text-sm font-semibold text-white">Meta: {targetHours}h</span>
+                  <span className="text-sm font-semibold text-green-200">Meta: {targetHours}h</span>
                 </div>
               ) : (
                 <ProtocolSelector
@@ -402,32 +406,30 @@ export default function Fasting() {
                   onOpenChange={setIsProtocolOpen}
                 />
               )}
-            </div>
-
-            {/* Action Button */}
-            <div className="w-full mt-4">
-              {!isActive ? (
-                <Button
-                  onClick={handleStartFasting}
-                  className="w-full h-12 rounded-2xl bg-green-500 hover:bg-green-600 text-white font-semibold shadow-lg"
-                >
-                  <Play className="mr-2 h-5 w-5" />
-                  Iniciar Jejum {selectedProtocol}h
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleStopFasting}
-                  variant="outline"
-                  className="w-full h-12 rounded-2xl font-semibold border-red-500/50 text-red-500 hover:bg-red-500/10"
-                >
-                  <Pause className="mr-2 h-5 w-5" />
-                  Encerrar Jejum
-                </Button>
-              )}
-            </div>
+            </motion.div>
           </div>
 
           <main className="px-4 space-y-4">
+            {/* Action Button */}
+            {!isActive ? (
+              <Button
+                onClick={handleStartFasting}
+                className="w-full h-14 rounded-2xl bg-gradient-to-r from-green-400 to-lime-400 hover:from-green-500 hover:to-lime-500 text-green-950 font-bold text-base shadow-lg"
+              >
+                <Play className="mr-2 h-5 w-5" />
+                Iniciar Jejum {selectedProtocol}h
+              </Button>
+            ) : (
+              <Button
+                onClick={handleStopFasting}
+                variant="outline"
+                className="w-full h-14 rounded-2xl font-semibold text-base border-red-400/50 text-red-400 hover:bg-red-400/10"
+              >
+                <Pause className="mr-2 h-5 w-5" />
+                Encerrar Jejum
+              </Button>
+            )}
+
             {/* Stats Cards */}
             <div className="grid grid-cols-3 gap-3">
               {isLoading ? (
