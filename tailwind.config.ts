@@ -60,17 +60,12 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Brand Colors
-        violet: {
-          DEFAULT: "hsl(var(--violet))",
-          glow: "hsl(var(--violet-glow))",
-        },
-        teal: {
-          DEFAULT: "hsl(var(--teal))",
-          glow: "hsl(var(--teal-glow))",
-        },
-        rose: {
-          DEFAULT: "hsl(var(--rose))",
+        // Brand Colors - Green Palette
+        green: {
+          DEFAULT: "hsl(var(--green))",
+          glow: "hsl(var(--green-glow))",
+          light: "hsl(var(--green-light))",
+          "light-glow": "hsl(var(--green-light-glow))",
         },
       },
       borderRadius: {
@@ -85,8 +80,8 @@ export default {
         'sm': 'var(--shadow-sm)',
         'md': 'var(--shadow-md)',
         'lg': 'var(--shadow-lg)',
-        'violet': 'var(--shadow-violet)',
-        'teal': 'var(--shadow-teal)',
+        'green': 'var(--shadow-green)',
+        'green-light': 'var(--shadow-green-light)',
         'glow': '0 0 40px -10px hsl(var(--primary) / 0.5)',
       },
       keyframes: {
