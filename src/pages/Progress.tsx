@@ -458,21 +458,25 @@ export default function Progress() {
               <TabsContent value="hoje" className="mt-4 space-y-4">
                 {/* Today Summary */}
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 rounded-2xl bg-card border border-border">
-                  <div className="flex items-center justify-between">
+                  <div className="grid grid-cols-4 gap-2 text-center">
                     <div>
                       <p className="text-xs text-muted-foreground">Calorias</p>
-                      <p className="text-2xl font-bold text-foreground tabular-nums">
+                      <p className="text-lg font-bold text-foreground tabular-nums">
                         {todayCalories.toLocaleString('pt-BR')}
-                        <span className="text-sm font-medium text-foreground/60">/{(profile?.daily_calories_target || 2000).toLocaleString('pt-BR')}</span>
+                        <span className="text-[10px] font-medium text-foreground/60">/{(profile?.daily_calories_target || 2000).toLocaleString('pt-BR')}</span>
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div>
                       <p className="text-xs text-muted-foreground">Refeições</p>
-                      <p className="text-2xl font-bold text-[#84cc16] tabular-nums">{todayMeals}</p>
+                      <p className="text-lg font-bold text-[#84cc16] tabular-nums">{todayMeals}</p>
                     </div>
-                    <div className="text-right">
+                    <div>
                       <p className="text-xs text-muted-foreground">Água</p>
-                      <p className="text-2xl font-bold text-sky-400 tabular-nums">{waterTotal}<span className="text-sm">ml</span></p>
+                      <p className="text-lg font-bold text-sky-400 tabular-nums">{waterTotal}<span className="text-[10px]">ml</span></p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Peso</p>
+                      <p className="text-lg font-bold text-emerald-400 tabular-nums">{lastWeight > 0 ? lastWeight : '--'}<span className="text-[10px]">kg</span></p>
                     </div>
                   </div>
                   <div className="mt-3 h-1.5 rounded-full bg-muted overflow-hidden">
