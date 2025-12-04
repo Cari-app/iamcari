@@ -16,7 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Flame, Trophy, Target, Pause, Clock } from 'lucide-react';
+import { Pause, Clock } from 'lucide-react';
 import logoImage from '@/assets/logo-cari.png';
 
 const MACRO_TARGETS = {
@@ -39,7 +39,6 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'dieta' | 'jejum'>('dieta');
   const [meals, setMeals] = useState<TimelineEntry[]>([]);
   const [fastingSessions, setFastingSessions] = useState<FastingSession[]>([]);
-  const [fastingStats, setFastingStats] = useState({ bestStreak: 0, currentStreak: 0, weeklyGoal: { completed: 0, target: 7 } });
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mealToDelete, setMealToDelete] = useState<TimelineEntry | null>(null);
@@ -136,7 +135,7 @@ export default function Dashboard() {
     };
   }, [user, selectedDate]);
 
-  // Fetch fasting sessions and stats
+  // Fetch fasting sessions
   useEffect(() => {
     if (!user) return;
     
@@ -147,7 +146,6 @@ export default function Dashboard() {
         const endOfDay = new Date(selectedDate);
         endOfDay.setHours(23, 59, 59, 999);
 
-        // Fetch sessions for selected date
         const { data: daySessions } = await supabase
           .from('fasting_sessions')
           .select('*')
@@ -158,78 +156,6 @@ export default function Dashboard() {
 
         if (daySessions) {
           setFastingSessions(daySessions);
-        }
-
-        // Fetch all sessions for stats
-        const { data: allSessions } = await supabase
-          .from('fasting_sessions')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('start_time', { ascending: false });
-
-        if (allSessions) {
-          // Calculate streaks
-          const completedSessions = allSessions.filter(s => s.status === 'completed');
-          const uniqueDays = new Set<string>();
-          completedSessions.forEach(session => {
-            const date = new Date(session.start_time);
-            uniqueDays.add(`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`);
-          });
-
-          const sortedDays = Array.from(uniqueDays)
-            .map(d => {
-              const [y, m, day] = d.split('-').map(Number);
-              return new Date(y, m, day);
-            })
-            .sort((a, b) => b.getTime() - a.getTime());
-
-          // Current streak
-          let currentStreakCount = 0;
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          
-          for (let i = 0; i < sortedDays.length; i++) {
-            const expectedDate = new Date(today);
-            expectedDate.setDate(today.getDate() - i);
-            expectedDate.setHours(0, 0, 0, 0);
-            
-            const sessionDate = new Date(sortedDays[i]);
-            sessionDate.setHours(0, 0, 0, 0);
-            
-            if (sessionDate.getTime() === expectedDate.getTime()) {
-              currentStreakCount++;
-            } else {
-              break;
-            }
-          }
-
-          // Best streak
-          let maxStreak = currentStreakCount;
-          let tempStreak = 1;
-          for (let i = 1; i < sortedDays.length; i++) {
-            const prevDate = sortedDays[i - 1];
-            const currDate = sortedDays[i];
-            const diffDays = Math.round((prevDate.getTime() - currDate.getTime()) / 86400000);
-            if (diffDays === 1) {
-              tempStreak++;
-              maxStreak = Math.max(maxStreak, tempStreak);
-            } else {
-              tempStreak = 1;
-            }
-          }
-
-          // Weekly goal
-          const sevenDaysAgo = new Date();
-          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-          const weeklyCompleted = allSessions.filter(s => 
-            s.status === 'completed' && new Date(s.start_time) >= sevenDaysAgo
-          ).length;
-
-          setFastingStats({
-            bestStreak: Math.max(maxStreak, currentStreakCount),
-            currentStreak: currentStreakCount,
-            weeklyGoal: { completed: weeklyCompleted, target: 7 }
-          });
         }
       } catch (error) {
         console.error('Error fetching fasting data:', error);
@@ -322,53 +248,10 @@ export default function Dashboard() {
           </header>
 
           <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
-          
-          {activeTab === 'dieta' && (
-            <CalorieHeader consumed={totalCalories} target={caloriesTarget} />
-          )}
+          <CalorieHeader consumed={totalCalories} target={caloriesTarget} />
 
           <main>
-            <AnimatePresence mode="wait">
-              {activeTab === 'dieta' ? (
-                <motion.div
-                  key="dieta-macros"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <MacroCards {...macroProps} className="mb-12" />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="jejum-stats"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.2 }}
-                  className="px-4 mt-6"
-                >
-                  {/* Fasting Stats Cards */}
-                  <div className="grid grid-cols-3 gap-3 mb-6">
-                    <div className="p-4 rounded-2xl bg-card border border-border text-center">
-                      <p className="text-xs text-muted-foreground mb-1">Melhor sequência</p>
-                      <p className="text-2xl font-bold text-foreground">{fastingStats.bestStreak} Dias</p>
-                      <Flame className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
-                    </div>
-                    <div className="p-4 rounded-2xl bg-card border border-border text-center">
-                      <p className="text-xs text-muted-foreground mb-1">Sequência atual</p>
-                      <p className="text-2xl font-bold text-foreground">{fastingStats.currentStreak} Dias</p>
-                      <Trophy className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
-                    </div>
-                    <div className="p-4 rounded-2xl bg-card border border-border text-center">
-                      <p className="text-xs text-muted-foreground mb-1">Meta Semanal</p>
-                      <p className="text-2xl font-bold text-foreground">{fastingStats.weeklyGoal.completed}/{fastingStats.weeklyGoal.target}</p>
-                      <Target className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <MacroCards {...macroProps} className="mb-12" />
 
             {/* Tab Navigation */}
             <div className="flex mx-4 mt-6">
