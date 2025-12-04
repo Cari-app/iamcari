@@ -21,7 +21,7 @@ export function MacroCards({ protein, carbs, fat }: MacroCardsProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
-          className="bg-white/95 rounded-2xl p-4 text-center shadow-sm border-2 border-green-800"
+          className="bg-white/95 rounded-2xl p-4 text-center shadow-sm border border-green-800"
         >
           <p className="text-green-800 text-sm font-medium">{macro.label}</p>
           <p className="text-2xl font-bold text-green-900 mt-1">
