@@ -342,16 +342,16 @@ export default function Fasting() {
     <div className="min-h-[100dvh] pb-32 bg-background">
       <div className="mx-auto max-w-lg relative">
         {/* Green Gradient Background */}
-        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-[#22c55e]/20 via-[#22c55e]/10 to-transparent dark:from-primary/15 dark:via-primary/5 dark:to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
         
         <div className="relative z-10">
           {/* Top Bar */}
           <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
             <img src={logoImage} alt="Cari" className="h-8" />
             <Link to="/profile">
-              <Avatar className="h-10 w-10 ring-2 ring-primary/20 dark:ring-primary/30">
+              <Avatar className="h-10 w-10">
                 <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback className="bg-primary/20 text-primary dark:bg-primary/10">
+                <AvatarFallback className="bg-white/20 text-white">
                   {profile?.full_name?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
