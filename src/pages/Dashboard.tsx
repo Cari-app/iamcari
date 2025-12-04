@@ -245,7 +245,7 @@ export default function Dashboard() {
       
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!mealToDelete} onOpenChange={(open) => !open && setMealToDelete(null)}>
-        <AlertDialogContent className="max-w-[calc(100%-2rem)] sm:max-w-sm mx-4 rounded-2xl">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Deletar refeição?</AlertDialogTitle>
             <AlertDialogDescription>
