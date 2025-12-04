@@ -136,7 +136,8 @@ export default function DietDetail() {
         <div className="relative z-10">
           {/* Top Bar */}
           <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
-            <div className="flex items-center gap-3">
+            <img src={logoImage} alt="Cari" className="h-8" />
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="icon"
@@ -145,16 +146,15 @@ export default function DietDetail() {
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
-              <img src={logoImage} alt="Cari" className="h-8" />
+              <Link to="/profile">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={profile?.avatar_url || ''} />
+                  <AvatarFallback className="bg-white/20 text-white">
+                    {profile?.full_name?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
             </div>
-            <Link to="/profile">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback className="bg-white/20 text-white">
-                  {profile?.full_name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
           </header>
 
           <main className="px-4 pt-6 space-y-4">
