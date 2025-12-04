@@ -17,18 +17,21 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
         ? Math.round((entry.calories || 0) / dailyTarget * 100) 
         : 0;
       
-      const analysis = typeof entry.ai_analysis === 'object' ? entry.ai_analysis : null;
+      const entryMacros = entry.macros && typeof entry.macros === 'object' ? entry.macros : null;
+      const analysis = entry.ai_analysis && typeof entry.ai_analysis === 'object' && !Array.isArray(entry.ai_analysis) 
+        ? entry.ai_analysis as unknown as Record<string, number> 
+        : null;
       
       return {
         reachPercentage: reach,
         macros: {
-          protein: analysis?.protein || 0,
-          carbs: analysis?.carbs || 0,
-          fat: analysis?.fat || 0,
+          protein: Number(entryMacros?.protein) || Number(analysis?.protein) || 0,
+          carbs: Number(entryMacros?.carbs) || Number(analysis?.carbs) || 0,
+          fat: Number(entryMacros?.fat) || Number(analysis?.fat) || 0,
         },
         isPending: entry.status === 'pending'
       };
-    }, [entry.calories, entry.ai_analysis, dailyTarget, entry.status]);
+    }, [entry.calories, entry.ai_analysis, entry.macros, dailyTarget, entry.status]);
 
     return (
       <div className="p-4 rounded-2xl bg-card border border-border group">
@@ -55,7 +58,9 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-muted-foreground">{entry.time}</p>
                 <h3 className="font-semibold text-foreground truncate">
-                  {isPending ? 'Aguardando análise de imagem...' : (entry.food_name || 'Refeição')}
+                  {entry.food_name && !entry.food_name.includes('Aguardando') 
+                    ? entry.food_name 
+                    : (entry.description || 'Refeição')}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {entry.calories || 0}kcal

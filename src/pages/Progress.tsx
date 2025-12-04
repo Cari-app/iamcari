@@ -261,16 +261,19 @@ export default function Progress() {
             };
 
             if (log.entry_type === 'meal') {
+              const mealMacros = log.macros && typeof log.macros === 'object' ? log.macros as { protein?: number; carbs?: number; fat?: number } : undefined;
               return {
                 ...baseEntry,
                 type: 'meal' as const,
                 entry_method: log.image_url ? 'ai' as const : 'manual' as const,
                 food_name: log.food_name || '',
+                description: log.description || '',
                 calories: log.calories || 0,
                 image_url: log.image_url,
                 is_emotional: log.is_emotional || false,
                 hunger_level: log.hunger_level,
                 ai_analysis: typeof log.ai_analysis === 'string' ? log.ai_analysis : log.ai_analysis as any,
+                macros: mealMacros,
                 status: log.status || 'manual',
               };
             } else if (log.entry_type === 'water') {
