@@ -102,6 +102,7 @@ export interface TimelineEntry {
   hunger_level?: number;
   entry_method?: 'ai' | 'manual';
   ai_analysis?: AIAnalysis | string;
+  macros?: { protein?: number; carbs?: number; fat?: number };
   status?: 'manual' | 'pending' | 'analyzed' | 'error';
   
   // Mood Props
