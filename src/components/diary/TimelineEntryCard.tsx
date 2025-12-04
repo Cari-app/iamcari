@@ -96,18 +96,14 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
   // Mood Entry Card
   if (entry.type === 'mood') {
     const emotionData = EMOTION_TAGS.find(e => e.value === entry.emotion_tag);
-    const isPositive = ['calmo', 'focado', 'feliz', 'energizado'].includes(entry.emotion_tag || '');
     
     return (
       <div className="p-3 bg-card border border-border rounded-2xl relative overflow-hidden">
-        <div className={cn(
-          'absolute left-0 top-0 bottom-0 w-1',
-          isPositive ? 'bg-emerald-500' : 'bg-rose-500'
-        )} />
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#84cc16]" />
         
         <div className="flex items-center gap-3 pl-2">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-violet-500/20 flex-shrink-0">
-            <BrainCircuit className="h-5 w-5 text-violet-400" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#84cc16]/20 flex-shrink-0">
+            <BrainCircuit className="h-5 w-5 text-[#84cc16]" />
           </div>
           
           <div className="flex-1 min-w-0">
@@ -116,10 +112,7 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
               <span className="text-sm font-medium text-foreground">
                 Sentindo-se
               </span>
-              <span className={cn(
-                'px-2 py-0.5 rounded-full text-xs font-medium',
-                emotionData?.color || 'bg-muted text-muted-foreground'
-              )}>
+              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[#84cc16]/20 text-[#84cc16]">
                 {emotionData?.label || entry.emotion_tag}
               </span>
             </div>
@@ -135,14 +128,14 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
   // Water Entry Card
   if (entry.type === 'water') {
     return (
-      <div className="px-4 py-3 bg-sky-500/10 border border-sky-500/20 rounded-2xl">
+      <div className="px-4 py-3 bg-[#84cc16]/10 border border-[#84cc16]/20 rounded-2xl">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-sky-500/20 flex items-center justify-center">
-            <Droplet className="h-5 w-5 text-sky-400" />
+          <div className="w-10 h-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
+            <Droplet className="h-5 w-5 text-[#84cc16]" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-sky-400/70">{entry.time}</p>
-            <p className="text-lg font-semibold text-sky-400">+{entry.value}ml</p>
+            <p className="text-xs text-[#84cc16]/70">{entry.time}</p>
+            <p className="text-lg font-semibold text-[#84cc16]">+{entry.value}ml</p>
           </div>
         </div>
       </div>
@@ -152,14 +145,14 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
   // Weight Entry Card
   if (entry.type === 'weight') {
     return (
-      <div className="px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+      <div className="px-4 py-3 bg-[#84cc16]/10 border border-[#84cc16]/20 rounded-2xl">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-            <Scale className="h-5 w-5 text-emerald-400" />
+          <div className="w-10 h-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
+            <Scale className="h-5 w-5 text-[#84cc16]" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-emerald-400/70">{entry.time}</p>
-            <p className="text-lg font-semibold text-emerald-400">{entry.value}kg</p>
+            <p className="text-xs text-[#84cc16]/70">{entry.time}</p>
+            <p className="text-lg font-semibold text-[#84cc16]">{entry.value}kg</p>
           </div>
         </div>
       </div>
