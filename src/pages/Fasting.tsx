@@ -117,7 +117,7 @@ export default function Fasting() {
     <div className="min-h-[100dvh] bg-background pb-24">
       <div className="mx-auto max-w-lg">
         {/* Green Gradient Header */}
-        <div className="bg-gradient-to-b from-primary via-primary/90 to-primary/80 pt-safe-top pb-8 rounded-b-3xl">
+        <div className="bg-gradient-to-b from-green-950 via-green-900 to-green-800 pt-safe-top pb-8 rounded-b-3xl">
           <div className="flex items-center justify-between px-4 pt-4 pb-4">
             <img src={logoImage} alt="Cari" className="h-8" />
             <Link to="/profile">
