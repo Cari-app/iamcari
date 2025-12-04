@@ -20,6 +20,9 @@ import {
   HelpCircle,
   Shield,
   ChevronRight,
+  Sparkles,
+  Utensils,
+  Timer,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -439,6 +442,46 @@ export default function Profile() {
                   </div>
                 </div>
               </div>
+            </div>
+          </motion.div>
+
+          {/* Quick Action Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.03 }}
+            className="px-4 pt-4"
+          >
+            <div className="grid grid-cols-3 gap-3">
+              <button
+                onClick={() => navigate('/nutrition-quiz')}
+                className="p-4 rounded-2xl bg-card border border-border flex flex-col items-center gap-2 press-effect hover:bg-muted/50 transition-colors"
+              >
+                <div className="h-10 w-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-[#84cc16]" />
+                </div>
+                <span className="text-xs font-medium text-foreground text-center">Mapeamento</span>
+              </button>
+              
+              <button
+                onClick={() => navigate('/diets')}
+                className="p-4 rounded-2xl bg-card border border-border flex flex-col items-center gap-2 press-effect hover:bg-muted/50 transition-colors"
+              >
+                <div className="h-10 w-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
+                  <Utensils className="h-5 w-5 text-[#84cc16]" />
+                </div>
+                <span className="text-xs font-medium text-foreground text-center">Dietas</span>
+              </button>
+              
+              <button
+                onClick={() => navigate('/fasting-quiz')}
+                className="p-4 rounded-2xl bg-card border border-border flex flex-col items-center gap-2 press-effect hover:bg-muted/50 transition-colors"
+              >
+                <div className="h-10 w-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
+                  <Timer className="h-5 w-5 text-[#84cc16]" />
+                </div>
+                <span className="text-xs font-medium text-foreground text-center">Quiz Jejum</span>
+              </button>
             </div>
           </motion.div>
 
