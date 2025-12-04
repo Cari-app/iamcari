@@ -10,16 +10,15 @@ import { MealInputDialog } from '@/components/diary/MealInputDialog';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -243,22 +242,24 @@ export default function Dashboard() {
       
       <MealInputDialog open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={() => {}} onPhotoSubmitted={handleCloseModal} />
       
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!mealToDelete} onOpenChange={(open) => !open && setMealToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Deletar refeição?</AlertDialogTitle>
-            <AlertDialogDescription>
+      {/* Delete Confirmation Drawer */}
+      <Drawer open={!!mealToDelete} onOpenChange={(open) => !open && setMealToDelete(null)}>
+        <DrawerContent>
+          <DrawerHeader className="text-center">
+            <DrawerTitle>Deletar refeição?</DrawerTitle>
+            <DrawerDescription>
               Você perderá todos os dados e macros desta refeição. Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteMeal} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            </DrawerDescription>
+          </DrawerHeader>
+          <DrawerFooter className="flex-row gap-3 pb-8">
+            <Button variant="outline" className="flex-1" onClick={() => setMealToDelete(null)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" className="flex-1" onClick={handleDeleteMeal}>
               Deletar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>;
 }
