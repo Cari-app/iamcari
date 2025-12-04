@@ -19,8 +19,6 @@ import { Flame, Target, Trophy, TrendingUp, Coffee, CalendarDays, ListTodo, Char
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry, EmotionTag } from '@/types';
 import logoImage from '@/assets/logo-cari.png';
