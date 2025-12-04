@@ -3,9 +3,10 @@ import logoLight from '@/assets/logo-light.png';
 import logoDark from '@/assets/logo-dark.png';
 import { cn } from '@/lib/utils';
 
-interface LogoProps {
+export interface LogoProps {
   className?: string;
   size?: 'xs' | 'sm' | 'md' | 'lg';
+  forceDark?: boolean;
 }
 
 // The logo is horizontally wide (aspect ratio ~4:1), so we use width-based sizing
@@ -16,11 +17,12 @@ const sizeClasses = {
   lg: 'h-14',
 };
 
-export function Logo({ className, size = 'md' }: LogoProps) {
+export function Logo({ className, size = 'md', forceDark = false }: LogoProps) {
   const { theme } = useTheme();
   
   // Use logo-light for light mode (black text), logo-dark for dark mode (white text)
-  const logo = theme === 'dark' ? logoDark : logoLight;
+  // forceDark forces the dark logo (white text) for use on colored backgrounds
+  const logo = forceDark || theme === 'dark' ? logoDark : logoLight;
   
   return (
     <img 

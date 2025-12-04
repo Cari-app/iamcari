@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Navbar } from '@/components/Navbar';
+import { Logo } from '@/components/Logo';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { BottomNav } from '@/components/BottomNav';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
@@ -12,7 +13,7 @@ import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { DeleteConfirmationDrawer } from '@/components/DeleteConfirmationDrawer';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar as CalendarIcon, Camera, Coffee } from 'lucide-react';
+import { Calendar as CalendarIcon, Coffee, User } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry, EmotionTag } from '@/types';
 import { supabase } from '@/integrations/supabase';
@@ -22,9 +23,13 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function Diary() {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [moodDrawerOpen, setMoodDrawerOpen] = useState(false);
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
   const [waterDialogOpen, setWaterDialogOpen] = useState(false);
@@ -532,15 +537,31 @@ export default function Diary() {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-24 safe-pt-20 relative overflow-hidden">
-      {/* Background gradient effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
+      {/* Green Gradient Background */}
+      <div className="absolute top-0 left-0 right-0 h-72 bg-gradient-to-b from-[#22c55e] to-[#16a34a] -z-10" />
+
+      {/* Header */}
+      <header 
+        className="px-4 flex items-center justify-between"
+        style={{ 
+          paddingTop: isMobile 
+            ? 'calc(1rem + env(safe-area-inset-top, 0px))' 
+            : '1rem' 
+        }}
+      >
+        <Logo size="xs" forceDark />
+        <button onClick={() => navigate('/profile')} className="press-effect">
+          <Avatar className="h-10 w-10 ring-2 ring-white/30">
+            <AvatarImage src={profile?.avatar_url || ''} alt="Avatar" />
+            <AvatarFallback className="bg-white/20">
+              <User className="h-5 w-5 text-white" />
+            </AvatarFallback>
+          </Avatar>
+        </button>
+      </header>
       
-      <Navbar />
-      
-      <main className="px-4 pt-11 pb-6">
+      <main className="px-4 pt-6 pb-6">
         <div className="mx-auto max-w-lg space-y-4">
           {/* Header */}
           <motion.div
@@ -549,16 +570,16 @@ export default function Diary() {
             className="flex items-center justify-between"
           >
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Diário</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-2xl font-bold text-white">Diário</h1>
+              <p className="text-white/80">
                 {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
                 {selectedDate.toDateString() === new Date().toDateString() && ' - Hoje'}
               </p>
             </div>
             <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
               <PopoverTrigger asChild>
-                <button className="h-10 w-10 rounded-xl bg-card border border-border flex items-center justify-center press-effect hover:bg-accent transition-colors">
-                  <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+                <button className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center press-effect hover:bg-white/30 transition-colors">
+                  <CalendarIcon className="h-5 w-5 text-white" />
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">

@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Sparkles } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
+import { Logo } from '@/components/Logo';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ChevronLeft, Sparkles, User } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
 interface Diet {
@@ -22,6 +24,7 @@ interface Diet {
 export default function ExploreDiets() {
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const isMobile = useIsMobile();
   const [diets, setDiets] = useState<Diet[]>([]);
   const [activeDiet, setActiveDiet] = useState<Diet | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,55 +69,57 @@ export default function ExploreDiets() {
     }
   };
 
-  const getColorClasses = (colorTheme: string) => {
-    const colors = {
-      violet: 'text-violet-500',
-      teal: 'text-teal-500',
-      blue: 'text-blue-500',
-      red: 'text-red-500',
-      orange: 'text-orange-500',
-      green: 'text-green-500',
-      emerald: 'text-emerald-500',
-    };
-
-    return colors[colorTheme as keyof typeof colors] || 'text-teal-500';
-  };
-
   const handleDietClick = (dietId: string) => {
     navigate(`/diet-detail?diet=${dietId}`);
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-24 safe-pt-navbar-sm relative overflow-hidden">
-      {/* Background gradient effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-[100dvh] bg-background pb-24 relative overflow-hidden">
+      {/* Green Gradient Background */}
+      <div className="absolute top-0 left-0 right-0 h-72 bg-gradient-to-b from-[#22c55e] to-[#16a34a] -z-10" />
+
+      {/* Header */}
+      <header 
+        className="px-4 flex items-center justify-between"
+        style={{ 
+          paddingTop: isMobile 
+            ? 'calc(1rem + env(safe-area-inset-top, 0px))' 
+            : '1rem' 
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="text-white hover:bg-white/20"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+          <Logo size="xs" forceDark />
+        </div>
+        <button onClick={() => navigate('/profile')} className="press-effect">
+          <Avatar className="h-10 w-10 ring-2 ring-white/30">
+            <AvatarImage src={profile?.avatar_url || ''} alt="Avatar" />
+            <AvatarFallback className="bg-white/20">
+              <User className="h-5 w-5 text-white" />
+            </AvatarFallback>
+          </Avatar>
+        </button>
+      </header>
       
-      <Navbar />
-      
-      <main className="px-4 py-6">
+      <main className="px-4 pt-6">
         <div className="mx-auto max-w-lg space-y-6">
-          {/* Header */}
+          {/* Header Text */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              className="mb-4 -ml-2"
-            >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Voltar
-            </Button>
-
-            <h1 className="text-2xl font-bold mb-2 text-foreground">
+            <h1 className="text-2xl font-bold mb-2 text-white">
               Explorar Dietas
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-white/80 text-sm">
               Descubra qual dieta se encaixa perfeitamente no seu estilo de vida
             </p>
           </motion.div>
@@ -125,35 +130,20 @@ export default function ExploreDiets() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className={cn(
-                "p-4 rounded-2xl border-2 bg-gradient-to-br",
-                activeDiet.color_theme === 'violet' && "from-violet-500/10 to-violet-500/5 border-violet-500/30",
-                activeDiet.color_theme === 'teal' && "from-teal-500/10 to-teal-500/5 border-teal-500/30",
-                activeDiet.color_theme === 'blue' && "from-blue-500/10 to-blue-500/5 border-blue-500/30",
-                activeDiet.color_theme === 'red' && "from-red-500/10 to-red-500/5 border-red-500/30",
-                activeDiet.color_theme === 'orange' && "from-orange-500/10 to-orange-500/5 border-orange-500/30",
-                activeDiet.color_theme === 'green' && "from-green-500/10 to-green-500/5 border-green-500/30",
-                activeDiet.color_theme === 'emerald' && "from-emerald-500/10 to-emerald-500/5 border-emerald-500/30",
-              )}
+              className="p-4 rounded-2xl border border-border bg-card"
             >
               <div className="flex items-center gap-3">
-                <div className={cn(
-                  "text-3xl",
-                  getColorClasses(activeDiet.color_theme)
-                )}>
+                <div className="text-3xl">
                   {activeDiet.icon}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <Sparkles className={cn("h-4 w-4", getColorClasses(activeDiet.color_theme))} />
+                    <Sparkles className="h-4 w-4 text-primary" />
                     <p className="text-xs font-medium text-muted-foreground">
                       Sua dieta ativa
                     </p>
                   </div>
-                  <h3 className={cn(
-                    "text-lg font-bold",
-                    getColorClasses(activeDiet.color_theme)
-                  )}>
+                  <h3 className="text-lg font-bold text-primary">
                     {activeDiet.name}
                   </h3>
                 </div>
@@ -161,7 +151,7 @@ export default function ExploreDiets() {
             </motion.div>
           )}
 
-          {/* Diets Grid - Mobile First */}
+          {/* Diets Grid */}
           {loading ? (
             <div className="grid grid-cols-2 gap-3">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -182,43 +172,30 @@ export default function ExploreDiets() {
               transition={{ delay: 0.2 }}
               className="grid grid-cols-2 gap-3"
             >
-              {diets.map((diet, index) => {
-                const colorClass = getColorClasses(diet.color_theme);
-                
-                return (
-                  <motion.button
-                    key={diet.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.05 }}
-                    onClick={() => handleDietClick(diet.id)}
-                    className="p-5 rounded-2xl bg-card border border-border hover:bg-accent/50 transition-all duration-200 press-effect text-center group"
-                  >
-                    {/* Icon */}
-                    <div className="flex justify-center mb-3">
-                      <div className={cn(
-                        "text-4xl transition-transform duration-200 group-hover:scale-110",
-                        colorClass
-                      )}>
-                        {diet.icon}
-                      </div>
+              {diets.map((diet, index) => (
+                <motion.button
+                  key={diet.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => handleDietClick(diet.id)}
+                  className="p-5 rounded-2xl bg-card border border-border hover:bg-accent/50 transition-all duration-200 press-effect text-center group"
+                >
+                  <div className="flex justify-center mb-3">
+                    <div className="text-4xl transition-transform duration-200 group-hover:scale-110">
+                      {diet.icon}
                     </div>
+                  </div>
 
-                    {/* Name */}
-                    <h3 className={cn(
-                      "text-sm font-semibold mb-2 leading-tight",
-                      colorClass
-                    )}>
-                      {diet.name}
-                    </h3>
+                  <h3 className="text-sm font-semibold mb-2 leading-tight text-primary">
+                    {diet.name}
+                  </h3>
 
-                    {/* Short Description */}
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                      {diet.short_description}
-                    </p>
-                  </motion.button>
-                );
-              })}
+                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                    {diet.short_description}
+                  </p>
+                </motion.button>
+              ))}
             </motion.div>
           )}
 

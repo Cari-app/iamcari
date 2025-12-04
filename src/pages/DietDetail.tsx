@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Navbar } from '@/components/Navbar';
+import { Logo } from '@/components/Logo';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { BottomNav } from '@/components/BottomNav';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -12,8 +13,10 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { motion } from 'framer-motion';
-import { Sparkles, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Sparkles, ChevronRight, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Diet {
   id: string;
@@ -33,6 +36,8 @@ interface Section {
 
 export default function DietDetail() {
   const navigate = useNavigate();
+  const { profile } = useAuth();
+  const isMobile = useIsMobile();
   const [searchParams] = useSearchParams();
   const dietId = searchParams.get('diet');
   
@@ -77,18 +82,14 @@ export default function DietDetail() {
     let contentBuffer: string[] = [];
 
     lines.forEach((line) => {
-      // Detect section headers: ## emoji number. Title
-      // Matches: ## 📌 1. Cabeçalho
       const headerMatch = line.match(/^##\s+(\S+)\s+(\d+)\.\s+(.+)$/);
       
       if (headerMatch) {
-        // Save previous section
         if (currentSection) {
           currentSection.content = contentBuffer.join('\n').trim();
           parsed.push(currentSection);
         }
         
-        // Start new section
         const emoji = headerMatch[1];
         const title = headerMatch[3];
         currentSection = {
@@ -103,7 +104,6 @@ export default function DietDetail() {
       }
     });
 
-    // Save last section
     if (currentSection) {
       currentSection.content = contentBuffer.join('\n').trim();
       parsed.push(currentSection);
@@ -112,42 +112,11 @@ export default function DietDetail() {
     setSections(parsed);
   };
 
-  const getColorClasses = (theme: string) => {
-    const colorMap: Record<string, string> = {
-      violet: 'text-violet-400',
-      teal: 'text-teal-400',
-      red: 'text-red-400',
-      orange: 'text-orange-400',
-      blue: 'text-blue-400',
-      green: 'text-green-400',
-      emerald: 'text-emerald-400',
-    };
-    return colorMap[theme] || 'text-violet-400';
-  };
-
-  const getBgClasses = (theme: string) => {
-    const colorMap: Record<string, string> = {
-      violet: 'from-violet-500/10 to-violet-500/5 border-violet-500/30',
-      teal: 'from-teal-500/10 to-teal-500/5 border-teal-500/30',
-      red: 'from-red-500/10 to-red-500/5 border-red-500/30',
-      orange: 'from-orange-500/10 to-orange-500/5 border-orange-500/30',
-      blue: 'from-blue-500/10 to-blue-500/5 border-blue-500/30',
-      green: 'from-green-500/10 to-green-500/5 border-green-500/30',
-      emerald: 'from-emerald-500/10 to-emerald-500/5 border-emerald-500/30',
-    };
-    return colorMap[theme] || 'from-violet-500/10 to-violet-500/5 border-violet-500/30';
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
-        {/* Background gradient effects */}
-        <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
-        
-        <Navbar />
-        <div className="safe-pt-24 pb-24 px-4 max-w-lg mx-auto space-y-4">
+        <div className="absolute top-0 left-0 right-0 h-72 bg-gradient-to-b from-[#22c55e] to-[#16a34a] -z-10" />
+        <div className="pt-24 pb-24 px-4 max-w-lg mx-auto space-y-4">
           <Skeleton className="h-32 w-full rounded-2xl" />
           <Skeleton className="h-64 w-full rounded-2xl" />
           <Skeleton className="h-48 w-full rounded-2xl" />
@@ -160,48 +129,68 @@ export default function DietDetail() {
   if (!diet) return null;
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background gradient effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
-      
-      <Navbar />
+    <div className="min-h-screen bg-background relative overflow-hidden pb-24">
+      {/* Green Gradient Background */}
+      <div className="absolute top-0 left-0 right-0 h-72 bg-gradient-to-b from-[#22c55e] to-[#16a34a] -z-10" />
 
-      <main className="safe-pt-28 pb-24 px-4 max-w-lg mx-auto">
+      {/* Header */}
+      <header 
+        className="px-4 flex items-center justify-between"
+        style={{ 
+          paddingTop: isMobile 
+            ? 'calc(1rem + env(safe-area-inset-top, 0px))' 
+            : '1rem' 
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="text-white hover:bg-white/20"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <Logo size="xs" forceDark />
+        </div>
+        <button onClick={() => navigate('/profile')} className="press-effect">
+          <Avatar className="h-10 w-10 ring-2 ring-white/30">
+            <AvatarImage src={profile?.avatar_url || ''} alt="Avatar" />
+            <AvatarFallback className="bg-white/20">
+              <User className="h-5 w-5 text-white" />
+            </AvatarFallback>
+          </Avatar>
+        </button>
+      </header>
+
+      <main className="pt-6 pb-8 px-4 max-w-lg mx-auto">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-6"
         >
-          {/* Diet Header */}
-          <div
-            className={cn(
-              'p-6 rounded-2xl border-2 bg-gradient-to-br mb-6',
-              getBgClasses(diet.color_theme)
-            )}
-          >
+          {/* Diet Header Card */}
+          <div className="p-6 rounded-2xl border border-border bg-card mb-6">
             <div className="flex items-center gap-4 mb-3">
               <div className="text-5xl">{diet.icon}</div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <Sparkles className={cn('h-4 w-4', getColorClasses(diet.color_theme))} />
+                  <Sparkles className="h-4 w-4 text-primary" />
                   <p className="text-xs font-medium text-muted-foreground">
                     Sua Dieta
                   </p>
                 </div>
-                <h1 className={cn('text-2xl font-bold', getColorClasses(diet.color_theme))}>
+                <h1 className="text-2xl font-bold text-primary">
                   {diet.name}
                 </h1>
               </div>
             </div>
-            <p className="text-sm text-foreground/80 leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {diet.short_description}
             </p>
           </div>
 
-          {/* Subtitle */}
           <p className="text-center text-sm text-muted-foreground mb-6">
             Um guia completo para você entender e seguir no dia a dia
           </p>
@@ -215,11 +204,11 @@ export default function DietDetail() {
             transition={{ delay: 0.2 }}
           >
             <Accordion type="single" collapsible className="space-y-3">
-              {sections.map((section, index) => (
+              {sections.map((section) => (
                 <AccordionItem
                   key={section.id}
                   value={section.id}
-                  className="border border-border rounded-2xl overflow-hidden bg-card/30 backdrop-blur-sm"
+                  className="border border-border rounded-2xl overflow-hidden bg-card"
                 >
                   <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-accent/50 transition-colors [&[data-state=open]]:bg-accent/30">
                     <div className="flex items-center gap-3 text-left">
@@ -235,25 +224,15 @@ export default function DietDetail() {
                         className="text-muted-foreground leading-relaxed text-sm"
                         dangerouslySetInnerHTML={{
                           __html: section.content
-                            // Remove markdown italics
                             .replace(/\*([^\*\n]+)\*/g, '$1')
-                            // Bold text
                             .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>')
-                            // Replace literal \n with actual breaks
                             .replace(/\\n/g, '\n')
-                            // Remove --- separators
                             .replace(/^---+$/gm, '')
-                            // Remove blockquote markers
                             .replace(/^>\s*/gm, '')
-                            // Process bullet points starting with *
-                            .replace(/^\* (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-teal-400 shrink-0">•</span><span>$1</span></div>')
-                            // Process bullet points starting with -
-                            .replace(/^- (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-teal-400 shrink-0">•</span><span>$1</span></div>')
-                            // Process numbered lists
-                            .replace(/^(\d+)\. (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-violet-400 font-semibold shrink-0">$1.</span><span>$2</span></div>')
-                            // Checkmarks
-                            .replace(/✔️/g, '<span class="text-teal-400">✔️</span>')
-                            // Convert newlines to <br> for remaining text
+                            .replace(/^\* (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-primary shrink-0">•</span><span>$1</span></div>')
+                            .replace(/^- (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-primary shrink-0">•</span><span>$1</span></div>')
+                            .replace(/^(\d+)\. (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-primary font-semibold shrink-0">$1.</span><span>$2</span></div>')
+                            .replace(/✔️/g, '<span class="text-primary">✔️</span>')
                             .split('\n')
                             .map(line => line.trim())
                             .filter(line => line.length > 0)
@@ -267,12 +246,11 @@ export default function DietDetail() {
             </Accordion>
           </motion.div>
         ) : (
-          // Fallback se não houver seções
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="rounded-2xl border border-border bg-card/30 backdrop-blur-sm p-6"
+            className="rounded-2xl border border-border bg-card p-6"
           >
             <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">
               {diet.full_description}

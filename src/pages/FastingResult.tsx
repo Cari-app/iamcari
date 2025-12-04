@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Clock, AlertTriangle, CheckCircle2, TrendingUp, Flame, Zap, Target, Calendar } from 'lucide-react';
+import { ArrowLeft, Clock, AlertTriangle, CheckCircle2, TrendingUp, Flame, Zap, Target, Calendar, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Navbar } from '@/components/Navbar';
+import { Logo } from '@/components/Logo';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { BottomNav } from '@/components/BottomNav';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProtocolInfo {
   id: string;
@@ -94,8 +96,8 @@ const protocolsMap: Record<string, ProtocolInfo> = {
     subtitle: 'Protocolo mais popular',
     description: 'Parabéns! Seu perfil é excelente para o jejum 16/8, o protocolo mais estudado e eficaz para perda de peso, clareza mental e saúde metabólica.',
     icon: Flame,
-    color: 'text-violet-500',
-    bgColor: 'bg-violet-500/10',
+    color: 'text-primary',
+    bgColor: 'bg-primary/10',
     readinessLevel: 'high',
     tips: [
       'Janela alimentar: 12h às 20h (ou 13h às 21h)',
@@ -124,7 +126,8 @@ const protocolsMap: Record<string, ProtocolInfo> = {
 
 export default function FastingResult() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const isMobile = useIsMobile();
   const [loading, setLoading] = useState(true);
   const [protocol, setProtocol] = useState<ProtocolInfo | null>(null);
   const [readinessScore, setReadinessScore] = useState(0);
@@ -175,11 +178,11 @@ export default function FastingResult() {
 
   if (loading) {
     return (
-      <div className="min-h-[100dvh] bg-background pb-24 safe-pt-navbar">
-        <Navbar />
-        <main className="px-4 py-6">
+      <div className="min-h-[100dvh] bg-background pb-24">
+        <div className="absolute top-0 left-0 right-0 h-72 bg-gradient-to-b from-[#22c55e] to-[#16a34a] -z-10" />
+        <main className="px-4 pt-24">
           <div className="mx-auto max-w-lg space-y-6">
-            <Skeleton className="h-40 rounded-3xl" />
+            <Skeleton className="h-40 rounded-2xl" />
             <Skeleton className="h-32 rounded-2xl" />
             <Skeleton className="h-48 rounded-2xl" />
           </div>
@@ -189,39 +192,52 @@ export default function FastingResult() {
     );
   }
 
-  if (!protocol) {
-    return null;
-  }
+  if (!protocol) return null;
 
   const ProtocolIcon = protocol.icon;
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-24 safe-pt-navbar relative overflow-hidden">
-      {/* Background gradient effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
-      
-      <Navbar />
+    <div className="min-h-[100dvh] bg-background pb-24 relative overflow-hidden">
+      {/* Green Gradient Background */}
+      <div className="absolute top-0 left-0 right-0 h-72 bg-gradient-to-b from-[#22c55e] to-[#16a34a] -z-10" />
 
-      <main className="px-4 py-6">
-        <div className="mx-auto max-w-lg space-y-6">
-          {/* Header Button */}
+      {/* Header */}
+      <header 
+        className="px-4 flex items-center justify-between"
+        style={{ 
+          paddingTop: isMobile 
+            ? 'calc(1rem + env(safe-area-inset-top, 0px))' 
+            : '1rem' 
+        }}
+      >
+        <div className="flex items-center gap-3">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={() => navigate('/dashboard')}
-            className="press-effect"
+            className="text-white hover:bg-white/20"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar
+            <ArrowLeft className="w-5 h-5" />
           </Button>
+          <Logo size="xs" forceDark />
+        </div>
+        <button onClick={() => navigate('/profile')} className="press-effect">
+          <Avatar className="h-10 w-10 ring-2 ring-white/30">
+            <AvatarImage src={profile?.avatar_url || ''} alt="Avatar" />
+            <AvatarFallback className="bg-white/20">
+              <User className="h-5 w-5 text-white" />
+            </AvatarFallback>
+          </Avatar>
+        </button>
+      </header>
 
+      <main className="px-4 pt-6">
+        <div className="mx-auto max-w-lg space-y-6">
           {/* Protocol Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`p-6 rounded-3xl border-2 ${protocol.bgColor} border-border/50`}
+            className="p-6 rounded-2xl border border-border bg-card"
           >
             <div className="flex items-start gap-4 mb-4">
               <div className={`h-16 w-16 rounded-2xl ${protocol.bgColor} flex items-center justify-center shrink-0`}>
@@ -273,7 +289,7 @@ export default function FastingResult() {
             className="p-6 rounded-2xl bg-card border border-border"
           >
             <div className="flex items-center gap-3 mb-4">
-              <Target className="h-6 w-6 text-teal-500" />
+              <Target className="h-6 w-6 text-primary" />
               <h2 className="text-lg font-semibold text-foreground">
                 {protocol.readinessLevel === 'low' ? 'Próximos Passos' : 'Como Começar'}
               </h2>
@@ -287,7 +303,7 @@ export default function FastingResult() {
                   transition={{ delay: 0.3 + index * 0.1 }}
                   className="flex items-start gap-3"
                 >
-                  <CheckCircle2 className="h-5 w-5 text-teal-500 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <span className="text-sm text-muted-foreground leading-relaxed">
                     {tip}
                   </span>
@@ -304,7 +320,7 @@ export default function FastingResult() {
           >
             <Button
               onClick={() => navigate('/dashboard')}
-              className="w-full h-14 rounded-2xl gradient-primary text-white font-semibold text-base press-effect shadow-violet"
+              className="w-full h-14 rounded-2xl font-semibold text-base press-effect"
             >
               {protocol.readinessLevel === 'low' ? 'Entendido, Voltar' : 'Iniciar Meu Jejum'}
             </Button>
