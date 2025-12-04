@@ -98,6 +98,7 @@ export interface TimelineEntry {
   image_url?: string;
   calories?: number;
   food_name?: string;
+  description?: string;
   is_emotional?: boolean;
   hunger_level?: number;
   entry_method?: 'ai' | 'manual';

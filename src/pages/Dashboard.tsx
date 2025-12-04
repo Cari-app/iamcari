@@ -115,6 +115,7 @@ export default function Dashboard() {
             created_at: log.created_at,
             entry_method: log.image_url ? 'ai' as const : 'manual' as const,
             food_name: log.food_name || '',
+            description: log.description || '',
             calories: log.calories || 0,
             image_url: log.image_url,
             is_emotional: log.is_emotional || false,

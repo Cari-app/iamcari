@@ -61,7 +61,9 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">{meal.time}</p>
               <h3 className="font-semibold text-foreground truncate">
-                {isPending ? 'Aguardando análise de imagem...' : (meal.food_name || 'Refeição')}
+                {meal.food_name && !meal.food_name.includes('Aguardando') 
+                  ? meal.food_name 
+                  : (meal.description || 'Refeição')}
               </h3>
               <p className="text-sm text-muted-foreground">
                 {meal.calories || 0}kcal
