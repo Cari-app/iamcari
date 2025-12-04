@@ -146,12 +146,12 @@ export default function Dashboard() {
         const endOfDay = new Date(selectedDate);
         endOfDay.setHours(23, 59, 59, 999);
 
+        // Fetch sessions that started OR ended on selected date
         const { data: daySessions } = await supabase
           .from('fasting_sessions')
           .select('*')
           .eq('user_id', user.id)
-          .gte('start_time', startOfDay.toISOString())
-          .lte('start_time', endOfDay.toISOString())
+          .or(`start_time.gte.${startOfDay.toISOString()}.start_time.lte.${endOfDay.toISOString()},end_time.gte.${startOfDay.toISOString()}.end_time.lte.${endOfDay.toISOString()}`)
           .order('start_time', { ascending: false });
 
         if (daySessions) {
