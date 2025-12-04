@@ -1,19 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { CircularProgress } from '@/components/CircularProgress';
-import { ProtocolSelector } from '@/components/dashboard/ProtocolSelector';
 import { useFastingTimer } from '@/hooks/useFastingTimer';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Play, Pause, Clock, Flame, Target, Trophy } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import logoImage from '@/assets/logo-cari.png';
+import { toast } from '@/hooks/use-toast';
 
 interface PausedSession {
   id: string;
@@ -24,11 +23,18 @@ interface PausedSession {
   progress: number;
 }
 
+interface FastingSession {
+  id: string;
+  start_time: string;
+  end_time: string | null;
+  target_hours: number | null;
+  status: string | null;
+}
+
 export default function Fasting() {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const [isProtocolOpen, setIsProtocolOpen] = useState(false);
   const [selectedProtocol, setSelectedProtocol] = useState(16);
   const [isCustomProtocol, setIsCustomProtocol] = useState(false);
   const [bestStreak, setBestStreak] = useState(0);
@@ -37,10 +43,14 @@ export default function Fasting() {
   const [pausedSession, setPausedSession] = useState<PausedSession | null>(null);
   const [loading, setLoading] = useState(true);
   
+  // Load protocol from profile
   useEffect(() => {
     if (profile?.fasting_protocol) {
-      const hours = parseInt(profile.fasting_protocol.replace('h', ''));
-      setSelectedProtocol(hours);
+      const protocolStr = profile.fasting_protocol.replace('h', '').replace(':', '');
+      const hours = parseInt(protocolStr.split('_')[0] || protocolStr);
+      if (!isNaN(hours) && hours > 0) {
+        setSelectedProtocol(hours);
+      }
     }
   }, [profile]);
   
@@ -52,98 +62,191 @@ export default function Fasting() {
     stopFasting,
     formatTime,
     targetHours,
+    loading: timerLoading,
   } = useFastingTimer();
 
-  useEffect(() => {
+  // Calculate streaks from sessions
+  const calculateStreaks = useCallback((sessions: FastingSession[]) => {
+    if (!sessions || sessions.length === 0) {
+      setBestStreak(0);
+      setCurrentStreak(0);
+      return;
+    }
+
+    // Filter completed sessions and sort by date
+    const completedSessions = sessions
+      .filter(s => s.status === 'completed')
+      .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime());
+
+    if (completedSessions.length === 0) {
+      setBestStreak(0);
+      setCurrentStreak(0);
+      return;
+    }
+
+    // Get unique days with completed fasts
+    const uniqueDays = new Set<string>();
+    completedSessions.forEach(session => {
+      const date = new Date(session.start_time);
+      uniqueDays.add(`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`);
+    });
+
+    const sortedDays = Array.from(uniqueDays)
+      .map(d => {
+        const [y, m, day] = d.split('-').map(Number);
+        return new Date(y, m, day);
+      })
+      .sort((a, b) => b.getTime() - a.getTime());
+
+    // Calculate current streak
+    let currentStreakCount = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    for (let i = 0; i < sortedDays.length; i++) {
+      const expectedDate = new Date(today);
+      expectedDate.setDate(today.getDate() - i);
+      expectedDate.setHours(0, 0, 0, 0);
+      
+      const sessionDate = new Date(sortedDays[i]);
+      sessionDate.setHours(0, 0, 0, 0);
+      
+      if (sessionDate.getTime() === expectedDate.getTime()) {
+        currentStreakCount++;
+      } else if (i === 0 && sessionDate.getTime() === expectedDate.getTime() - 86400000) {
+        // Allow for yesterday if no fast today
+        const yesterdayExpected = new Date(expectedDate);
+        yesterdayExpected.setDate(yesterdayExpected.getDate() - 1);
+        if (sessionDate.getTime() === yesterdayExpected.getTime()) {
+          currentStreakCount++;
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+    
+    setCurrentStreak(currentStreakCount);
+
+    // Calculate best streak (historical)
+    let maxStreak = currentStreakCount;
+    let tempStreak = 1;
+    
+    for (let i = 1; i < sortedDays.length; i++) {
+      const prevDate = sortedDays[i - 1];
+      const currDate = sortedDays[i];
+      const diffDays = Math.round((prevDate.getTime() - currDate.getTime()) / 86400000);
+      
+      if (diffDays === 1) {
+        tempStreak++;
+        maxStreak = Math.max(maxStreak, tempStreak);
+      } else {
+        tempStreak = 1;
+      }
+    }
+    
+    setBestStreak(Math.max(maxStreak, currentStreakCount));
+  }, []);
+
+  // Fetch all fasting data
+  const fetchFastingData = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
     }
     
-    const fetchFastingData = async () => {
-      try {
-        setLoading(true);
+    try {
+      setLoading(true);
+      
+      // Fetch all sessions for this user
+      const { data: sessions, error: sessionsError } = await supabase
+        .from('fasting_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('start_time', { ascending: false });
+      
+      if (sessionsError) {
+        console.error('Error fetching sessions:', sessionsError);
+        toast({
+          title: 'Erro ao carregar dados',
+          description: 'Não foi possível carregar seu histórico de jejum.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (sessions) {
+        // Calculate streaks
+        calculateStreaks(sessions as FastingSession[]);
         
-        // Fetch completed sessions for streaks
-        const { data: sessions } = await supabase
-          .from('fasting_sessions')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('status', 'completed')
-          .order('start_time', { ascending: false });
+        // Weekly goal - completed sessions in last 7 days
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        sevenDaysAgo.setHours(0, 0, 0, 0);
         
-        if (sessions && sessions.length > 0) {
-          // Calculate current streak
-          let streak = 0;
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          
-          for (let i = 0; i < sessions.length; i++) {
-            const sessionDate = new Date(sessions[i].start_time);
-            sessionDate.setHours(0, 0, 0, 0);
-            
-            const expectedDate = new Date(today);
-            expectedDate.setDate(today.getDate() - i);
-            
-            if (sessionDate.getTime() === expectedDate.getTime()) {
-              streak++;
-            } else {
-              break;
-            }
-          }
-          setCurrentStreak(streak);
-          
-          // Best streak (simplified - just use current for now or calculate)
-          setBestStreak(Math.max(streak, 3));
-        }
+        const weeklyCompleted = sessions.filter(s => 
+          s.status === 'completed' && 
+          new Date(s.start_time) >= sevenDaysAgo
+        ).length;
         
-        // Weekly goal
-        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-        const { data: weeklyData } = await supabase
-          .from('fasting_sessions')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('status', 'completed')
-          .gte('start_time', sevenDaysAgo);
+        setWeeklyGoal({ completed: weeklyCompleted, target: 7 });
         
-        setWeeklyGoal({ completed: weeklyData?.length || 0, target: 7 });
+        // Find last paused session
+        const lastPaused = sessions.find(s => s.status === 'paused');
         
-        // Fetch last paused session
-        const { data: pausedData } = await supabase
-          .from('fasting_sessions')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('status', 'paused')
-          .order('end_time', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        
-        if (pausedData) {
-          const start = new Date(pausedData.start_time);
-          const end = new Date(pausedData.end_time!);
+        if (lastPaused && lastPaused.end_time) {
+          const start = new Date(lastPaused.start_time);
+          const end = new Date(lastPaused.end_time);
           const elapsedMs = end.getTime() - start.getTime();
           const elapsedMins = Math.floor(elapsedMs / (1000 * 60));
-          const targetMins = (pausedData.target_hours || 16) * 60;
+          const targetMins = (lastPaused.target_hours || 16) * 60;
           
           setPausedSession({
-            id: pausedData.id,
-            start_time: pausedData.start_time,
-            end_time: pausedData.end_time!,
-            target_hours: pausedData.target_hours || 16,
+            id: lastPaused.id,
+            start_time: lastPaused.start_time,
+            end_time: lastPaused.end_time,
+            target_hours: lastPaused.target_hours || 16,
             elapsed_minutes: elapsedMins,
             progress: Math.round((elapsedMins / targetMins) * 100),
           });
+        } else {
+          setPausedSession(null);
         }
-      } catch (error) {
-        console.error('Error fetching fasting data:', error);
-      } finally {
-        setLoading(false);
       }
-    };
-    
-    fetchFastingData();
-  }, [user]);
+    } catch (error) {
+      console.error('Error fetching fasting data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, calculateStreaks]);
 
+  // Initial fetch and real-time subscription
+  useEffect(() => {
+    fetchFastingData();
+    
+    if (!user) return;
+
+    // Subscribe to real-time changes
+    const channel = supabase
+      .channel('fasting-sessions-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'fasting_sessions',
+        filter: `user_id=eq.${user.id}`,
+      }, () => {
+        // Refetch data when any change happens
+        fetchFastingData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchFastingData]);
+
+  // Handle protocol selection and save to profile
   const handleProtocolSelect = async (hours: number, isCustom: boolean = false) => {
     setSelectedProtocol(hours);
     setIsCustomProtocol(isCustom);
@@ -155,9 +258,31 @@ export default function Fasting() {
       .update({ fasting_protocol: `${hours}h` })
       .eq('id', user.id);
     
-    if (!error) {
+    if (error) {
+      console.error('Error updating protocol:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível salvar o protocolo.',
+        variant: 'destructive',
+      });
+    } else {
       refreshProfile?.();
     }
+  };
+
+  // Handle start fasting
+  const handleStartFasting = async () => {
+    await startFasting(selectedProtocol, isCustomProtocol ? 'custom' : 'standard');
+    toast({
+      title: 'Jejum iniciado!',
+      description: `Meta de ${selectedProtocol} horas de jejum.`,
+    });
+  };
+
+  // Handle stop fasting
+  const handleStopFasting = async () => {
+    await stopFasting();
+    // Data will be refreshed via real-time subscription
   };
 
   const time = formatTime(elapsedSeconds);
@@ -169,6 +294,8 @@ export default function Fasting() {
     if (mins === 0) return `${hours}h`;
     return `${hours}h${mins}min`;
   };
+
+  const isLoading = loading || timerLoading;
 
   return (
     <div className="min-h-[100dvh] pb-32 bg-background">
@@ -241,7 +368,7 @@ export default function Fasting() {
             {/* Action Button */}
             {!isActive ? (
               <Button
-                onClick={() => startFasting(selectedProtocol, isCustomProtocol ? 'custom' : 'standard')}
+                onClick={handleStartFasting}
                 className="w-full h-14 rounded-2xl bg-gradient-to-r from-green-900 to-green-500 text-white font-semibold text-base shadow-lg press-effect"
               >
                 <Play className="mr-2 h-5 w-5" />
@@ -249,7 +376,7 @@ export default function Fasting() {
               </Button>
             ) : (
               <Button
-                onClick={stopFasting}
+                onClick={handleStopFasting}
                 variant="outline"
                 className="w-full h-14 rounded-2xl font-semibold text-base border-destructive/30 text-destructive hover:bg-destructive/10"
               >
@@ -260,7 +387,7 @@ export default function Fasting() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-3 gap-3">
-              {loading ? (
+              {isLoading ? (
                 <>
                   <Skeleton className="h-24 rounded-2xl" />
                   <Skeleton className="h-24 rounded-2xl" />
