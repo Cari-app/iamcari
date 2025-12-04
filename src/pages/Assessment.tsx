@@ -537,47 +537,45 @@ const Assessment = () => {
               </div>
             </motion.div>
           )}
-        </AnimatePresence>
-      </div>
-
-      {/* Footer Actions */}
-      {step < 4 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border">
-          <div className="max-w-2xl mx-auto px-4 py-4">
-            {step < 3 ? (
-            <Button
-              size="lg"
-              onClick={handleNext}
-              disabled={
-                (step === 1 && !canProceedStep1) ||
-                (step === 2 && !canProceedStep2)
-              }
-              className="w-full h-14 text-base font-semibold"
-            >
-              Continuar
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          ) : (
-              <Button
-                size="lg"
-                onClick={handleComplete}
-                disabled={!canProceedStep3 || loading}
-                className="w-full h-14 text-base font-semibold"
-              >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                    A I.A. está calculando...
-                  </span>
-                ) : (
-                  'Calcular Plano'
-                )}
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
             </AnimatePresence>
+
+            {/* Footer Actions */}
+            {step < 4 && (
+              <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border">
+                <div className="max-w-2xl mx-auto px-4 py-4">
+                  {step < 3 ? (
+                    <Button
+                      size="lg"
+                      onClick={handleNext}
+                      disabled={
+                        (step === 1 && !canProceedStep1) ||
+                        (step === 2 && !canProceedStep2)
+                      }
+                      className="w-full h-14 text-base font-semibold"
+                    >
+                      Continuar
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  ) : (
+                    <Button
+                      size="lg"
+                      onClick={handleComplete}
+                      disabled={!canProceedStep3 || loading}
+                      className="w-full h-14 text-base font-semibold"
+                    >
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="h-4 w-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                          A I.A. está calculando...
+                        </span>
+                      ) : (
+                        'Calcular Plano'
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </main>
         </div>
       </div>
