@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase';
 import { Button } from '@/components/ui/button';
-import { Logo } from '@/components/Logo';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { BottomNav } from '@/components/BottomNav';
-import { ArrowLeft, Sparkles, User } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
+import logoImage from '@/assets/logo-cari.png';
 
 interface DietType {
   id: string;
@@ -23,7 +22,6 @@ interface DietType {
 export default function DietResult() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const [diet, setDiet] = useState<DietType | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -98,130 +96,126 @@ export default function DietResult() {
   if (!diet) return null;
 
   return (
-    <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
-      {/* Green Gradient Background */}
-      <div className="absolute top-0 left-0 right-0 h-72 bg-gradient-to-b from-[#22c55e] to-[#16a34a] -z-10" />
-
-      {/* Header */}
-      <header 
-        className="px-4 flex items-center justify-between"
-        style={{ 
-          paddingTop: isMobile 
-            ? 'calc(1rem + env(safe-area-inset-top, 0px))' 
-            : '1rem' 
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate('/dashboard')}
-            className="text-white hover:bg-white/20"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <Logo size="xs" forceDark />
-        </div>
-        <button onClick={() => navigate('/profile')} className="press-effect">
-          <Avatar className="h-10 w-10 ring-2 ring-white/30">
-            <AvatarImage src={profile?.avatar_url || ''} alt="Avatar" />
-            <AvatarFallback className="bg-white/20">
-              <User className="h-5 w-5 text-white" />
-            </AvatarFallback>
-          </Avatar>
-        </button>
-      </header>
-
-      {/* Main Content */}
-      <main className="px-4 pt-6 max-w-lg mx-auto">
-        {/* Reveal Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-8"
-        >
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-white" />
-            <p className="text-sm text-white/80 uppercase tracking-wider">
-              Análise Concluída
-            </p>
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Sua Estratégia Ideal é...
-          </h2>
-        </motion.div>
-
-        {/* Hero Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="relative rounded-2xl border border-border bg-card p-8 mb-6 shadow-lg"
-        >
-          <div className="flex justify-center mb-4">
-            <div className="w-20 h-20 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-              <span className="text-5xl">{diet.icon}</span>
+    <div className="min-h-[100dvh] pb-32 bg-background">
+      <div className="mx-auto max-w-lg relative">
+        {/* Green Gradient Background */}
+        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+        
+        <div className="relative z-10">
+          {/* Top Bar */}
+          <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/dashboard')}
+                className="text-white hover:bg-white/20"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <img src={logoImage} alt="Cari" className="h-8" />
             </div>
-          </div>
+            <Link to="/profile">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={profile?.avatar_url || ''} />
+                <AvatarFallback className="bg-white/20 text-white">
+                  {profile?.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          </header>
 
-          <h3 className="text-3xl font-bold text-center mb-2 text-primary">
-            {diet.name}
-          </h3>
-
-          <p className="text-muted-foreground text-center leading-relaxed mb-4">
-            {diet.full_description?.split('\n')[0]?.replace(/^##\s*/, '') || 'Sua dieta personalizada'}
-          </p>
-
-          <Button
-            onClick={() => navigate(`/diet-detail?diet=${diet.id}`)}
-            variant="outline"
-            size="sm"
-            className="w-full"
+          {/* Status Text */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center px-4 mt-4"
           >
-            Ver Guia Completo
-          </Button>
-        </motion.div>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Sparkles className="w-5 h-5 text-white" />
+              <p className="text-sm text-white/80 uppercase tracking-wider">
+                Análise Concluída
+              </p>
+            </div>
+            <h2 className="text-2xl text-white font-semibold">
+              Sua Estratégia Ideal é...
+            </h2>
+          </motion.div>
 
-        {/* Why This Diet */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="rounded-2xl border border-border bg-card p-6 mb-6"
-        >
-          <h4 className="text-lg font-semibold text-foreground mb-2">
-            Por que esta dieta?
-          </h4>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Baseado na sua disciplina, preferências e objetivos, esta dieta vai otimizar seus resultados de forma sustentável e eficaz.
-          </p>
-        </motion.div>
+          <main className="px-4 pt-6 space-y-4">
+            {/* Hero Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative rounded-2xl border border-border bg-card p-8"
+            >
+              <div className="flex justify-center mb-4">
+                <div className="w-20 h-20 rounded-full bg-[#84cc16]/10 border border-[#84cc16]/20 flex items-center justify-center">
+                  <span className="text-5xl">{diet.icon}</span>
+                </div>
+              </div>
 
-        {/* Action Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          className="space-y-3"
-        >
-          <Button
-            onClick={() => navigate('/dashboard')}
-            className="w-full h-12"
-            size="lg"
-          >
-            Ir para o Dashboard
-          </Button>
-          <Button
-            onClick={() => navigate('/diets')}
-            variant="outline"
-            className="w-full h-12"
-            size="lg"
-          >
-            Explorar Outras Dietas
-          </Button>
-        </motion.div>
-      </main>
+              <h3 className="text-3xl font-bold text-center mb-2 text-[#84cc16]">
+                {diet.name}
+              </h3>
+
+              <p className="text-muted-foreground text-center leading-relaxed mb-4">
+                {diet.full_description?.split('\n')[0]?.replace(/^##\s*/, '') || 'Sua dieta personalizada'}
+              </p>
+
+              <Button
+                onClick={() => navigate(`/diet-detail?diet=${diet.id}`)}
+                variant="outline"
+                size="sm"
+                className="w-full"
+              >
+                Ver Guia Completo
+              </Button>
+            </motion.div>
+
+            {/* Why This Diet */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="rounded-2xl border border-border bg-card p-6"
+            >
+              <h4 className="text-lg font-semibold text-foreground mb-2">
+                Por que esta dieta?
+              </h4>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Baseado na sua disciplina, preferências e objetivos, esta dieta vai otimizar seus resultados de forma sustentável e eficaz.
+              </p>
+            </motion.div>
+
+            {/* Action Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="space-y-3"
+            >
+              <Button
+                onClick={() => navigate('/dashboard')}
+                className="w-full h-12"
+                size="lg"
+              >
+                Ir para o Dashboard
+              </Button>
+              <Button
+                onClick={() => navigate('/diets')}
+                variant="outline"
+                className="w-full h-12"
+                size="lg"
+              >
+                Explorar Outras Dietas
+              </Button>
+            </motion.div>
+          </main>
+        </div>
+      </div>
 
       <BottomNav />
     </div>

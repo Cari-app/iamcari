@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Logo } from '@/components/Logo';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { BottomNav } from '@/components/BottomNav';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
@@ -13,7 +12,8 @@ import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { DeleteConfirmationDrawer } from '@/components/DeleteConfirmationDrawer';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar as CalendarIcon, Coffee, User } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Calendar as CalendarIcon, Coffee } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry, EmotionTag } from '@/types';
 import { supabase } from '@/integrations/supabase';
@@ -23,13 +23,10 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
-import { useIsMobile } from '@/hooks/use-mobile';
+import logoImage from '@/assets/logo-cari.png';
 
 export default function Diary() {
   const { user, profile } = useAuth();
-  const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const [moodDrawerOpen, setMoodDrawerOpen] = useState(false);
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
   const [waterDialogOpen, setWaterDialogOpen] = useState(false);
@@ -52,7 +49,6 @@ export default function Diary() {
 
     const fetchLogsForDate = async () => {
       try {
-        // Get start and end of selected date
         const startOfDay = new Date(selectedDate);
         startOfDay.setHours(0, 0, 0, 0);
         
@@ -89,7 +85,6 @@ export default function Diary() {
             created_at: log.created_at,
           };
 
-          // Map based on entry_type
           if (log.entry_type === 'meal') {
               return {
                 ...baseEntry,
@@ -143,7 +138,6 @@ export default function Diary() {
 
     fetchLogsForDate();
 
-    // Set up realtime subscription for automatic updates
     const channel = supabase
       .channel('meal-logs-changes')
       .on(
@@ -157,10 +151,8 @@ export default function Diary() {
         (payload) => {
           const updatedLog = payload.new;
           
-          // Update the specific item in timeline
           setTimeline(prev => prev.map(entry => {
             if (entry.id === updatedLog.id) {
-              // Map the updated log to timeline entry format
               if (updatedLog.entry_type === 'meal') {
                 const updatedEntry = {
                   ...entry,
@@ -175,7 +167,6 @@ export default function Diary() {
                   status: updatedLog.status || 'manual',
                 };
                 
-                // Show toast when AI analysis is complete
                 if (updatedLog.status === 'analyzed' && updatedLog.image_url) {
                   toast({
                     title: '✅ Análise concluída!',
@@ -199,7 +190,6 @@ export default function Diary() {
           filter: `user_id=eq.${user.id}`,
         },
         () => {
-          // Refetch for new entries
           fetchLogsForDate();
         }
       )
@@ -212,7 +202,6 @@ export default function Diary() {
           filter: `user_id=eq.${user.id}`,
         },
         () => {
-          // Refetch for deletions
           fetchLogsForDate();
         }
       )
@@ -223,7 +212,6 @@ export default function Diary() {
     };
   }, [user, refetchTrigger, selectedDate]);
 
-  // Calculate totals from timeline
   const todayCalories = timeline
     .filter(e => e.type === 'meal' && e.calories)
     .reduce((sum, e) => sum + (e.calories || 0), 0);
@@ -332,7 +320,6 @@ export default function Diary() {
   const handleWeightSubmit = async (weight: number) => {
     if (!user) return;
 
-    // Insert weight log
     const { data: logData, error: logError } = await supabase
       .from('meal_logs')
       .insert({
@@ -353,7 +340,6 @@ export default function Diary() {
       return;
     }
 
-    // Update profile weight
     const { error: profileError } = await supabase
       .from('profiles')
       .update({ weight })
@@ -393,7 +379,6 @@ export default function Diary() {
   }) => {
     if (!user) return;
 
-    // Para entrada manual, insere no banco
     const { data: logData, error } = await supabase
       .from('meal_logs')
       .insert({
@@ -444,7 +429,6 @@ export default function Diary() {
   };
 
   const handlePhotoSubmitted = () => {
-    // Refetch timeline após foto ser enviada
     setRefetchTrigger(prev => prev + 1);
   };
 
@@ -454,7 +438,6 @@ export default function Diary() {
     const entryId = entryToDelete.id;
     setEntryToDelete(null);
 
-    // Optimistic update
     setTimeline(prev => prev.filter(e => e.id !== entryId));
 
     const { error } = await supabase
@@ -469,7 +452,6 @@ export default function Diary() {
         description: 'Não foi possível remover o registro',
         variant: 'destructive',
       });
-      // Refetch on error
       setRefetchTrigger(prev => prev + 1);
       return;
     }
@@ -511,7 +493,6 @@ export default function Diary() {
       return;
     }
 
-    // Update timeline
     setTimeline(prev => prev.map(entry => 
       entry.id === editingMeal.id 
         ? {
@@ -529,7 +510,6 @@ export default function Diary() {
     });
   };
 
-  // Sort timeline by time (most recent first for display purposes)
   const sortedTimeline = [...timeline].sort((a, b) => {
     const timeA = a.time.split(':').map(Number);
     const timeB = b.time.split(':').map(Number);
@@ -537,176 +517,167 @@ export default function Diary() {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
-      {/* Green Gradient Background */}
-      <div className="absolute top-0 left-0 right-0 h-72 bg-gradient-to-b from-[#22c55e] to-[#16a34a] -z-10" />
+    <div className="min-h-[100dvh] pb-32 bg-background">
+      <div className="mx-auto max-w-lg relative">
+        {/* Green Gradient Background */}
+        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+        
+        <div className="relative z-10">
+          {/* Top Bar */}
+          <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
+            <img src={logoImage} alt="Cari" className="h-8" />
+            <Link to="/profile">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={profile?.avatar_url || ''} />
+                <AvatarFallback className="bg-white/20 text-white">
+                  {profile?.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          </header>
 
-      {/* Header */}
-      <header 
-        className="px-4 flex items-center justify-between"
-        style={{ 
-          paddingTop: isMobile 
-            ? 'calc(1rem + env(safe-area-inset-top, 0px))' 
-            : '1rem' 
-        }}
-      >
-        <Logo size="xs" forceDark />
-        <button onClick={() => navigate('/profile')} className="press-effect">
-          <Avatar className="h-10 w-10 ring-2 ring-white/30">
-            <AvatarImage src={profile?.avatar_url || ''} alt="Avatar" />
-            <AvatarFallback className="bg-white/20">
-              <User className="h-5 w-5 text-white" />
-            </AvatarFallback>
-          </Avatar>
-        </button>
-      </header>
-      
-      <main className="px-4 pt-6 pb-6">
-        <div className="mx-auto max-w-lg space-y-4">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between"
-          >
-            <div>
-              <h1 className="text-2xl font-bold text-white">Diário</h1>
-              <p className="text-white/80">
-                {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
-                {selectedDate.toDateString() === new Date().toDateString() && ' - Hoje'}
-              </p>
-            </div>
-            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-              <PopoverTrigger asChild>
-                <button className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center press-effect hover:bg-white/30 transition-colors">
-                  <CalendarIcon className="h-5 w-5 text-white" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => {
-                    if (date) {
-                      setSelectedDate(date);
-                      setCalendarOpen(false);
-                      toast({
-                        title: '📅 Data selecionada',
-                        description: format(date, "d 'de' MMMM 'de' yyyy", { locale: ptBR }),
-                      });
-                    }
-                  }}
-                  disabled={(date) => date > new Date()}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-          </motion.div>
-
-          {/* Today's Summary */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="p-4 rounded-2xl bg-card border border-border"
-          >
+          {/* Status Text */}
+          <div className="px-4 mt-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Calorias hoje</p>
-                <p className="text-3xl font-bold text-foreground tabular-nums">
-                  {todayCalories.toLocaleString('pt-BR')}
-                  <span className="text-lg font-medium text-foreground/60">
-                    /{(profile?.daily_calories_target || 2000).toLocaleString('pt-BR')}
-                  </span>
+                <h2 className="text-2xl text-white font-semibold">Diário</h2>
+                <p className="text-white/60 text-sm mt-1">
+                  {format(selectedDate, "d 'de' MMMM", { locale: ptBR })}
+                  {selectedDate.toDateString() === new Date().toDateString() && ' - Hoje'}
                 </p>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Refeições</p>
-                <p className="text-3xl font-bold text-secondary tabular-nums">{todayMeals}</p>
-              </div>
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <button className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center press-effect hover:bg-white/30 transition-colors">
+                    <CalendarIcon className="h-5 w-5 text-white" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      if (date) {
+                        setSelectedDate(date);
+                        setCalendarOpen(false);
+                        toast({
+                          title: '📅 Data selecionada',
+                          description: format(date, "d 'de' MMMM 'de' yyyy", { locale: ptBR }),
+                        });
+                      }
+                    }}
+                    disabled={(date) => date > new Date()}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
-            
-            {/* Progress bar */}
-            <div className="mt-4 h-2 rounded-full bg-muted overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ 
-                  width: `${Math.min((todayCalories / (profile?.daily_calories_target || 2000)) * 100, 100)}%` 
-                }}
-                transition={{ delay: 0.3, duration: 0.8, ease: 'easeOut' }}
-                className="h-full rounded-full gradient-primary"
-              />
-            </div>
+          </div>
 
-            {/* Water indicator */}
-            <div className="mt-3 flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">💧 Hidratação</span>
-              <span className="text-sky-400 font-medium tabular-nums">{waterTotal}ml</span>
-            </div>
-          </motion.div>
-
-          {/* Quick Assessment Bar */}
-          <QuickAssessmentBar
-            onMoodClick={() => setMoodDrawerOpen(true)}
-            onWaterClick={() => setWaterDialogOpen(true)}
-            onWeightClick={() => setWeightDialogOpen(true)}
-            onMealClick={() => setMealDialogOpen(true)}
-          />
-
-          {/* Timeline */}
-          <div className="space-y-3">
-            <motion.h2
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.25 }}
-              className="text-sm font-medium text-muted-foreground"
+          <main className="px-4 pt-6 space-y-4">
+            {/* Today's Summary */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="p-4 rounded-2xl bg-card border border-border"
             >
-              Linha do tempo
-            </motion.h2>
-            
-            {loading ? (
-              <>
-                <Skeleton className="h-24 rounded-2xl" />
-                <Skeleton className="h-24 rounded-2xl" />
-                <Skeleton className="h-24 rounded-2xl" />
-              </>
-            ) : sortedTimeline.length > 0 ? (
-              sortedTimeline.map((entry, index) => (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Calorias hoje</p>
+                  <p className="text-3xl font-bold text-foreground tabular-nums">
+                    {todayCalories.toLocaleString('pt-BR')}
+                    <span className="text-lg font-medium text-foreground/60">
+                      /{(profile?.daily_calories_target || 2000).toLocaleString('pt-BR')}
+                    </span>
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Refeições</p>
+                  <p className="text-3xl font-bold text-[#84cc16] tabular-nums">{todayMeals}</p>
+                </div>
+              </div>
+              
+              <div className="mt-4 h-2 rounded-full bg-muted overflow-hidden">
                 <motion.div
-                  key={entry.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 + index * 0.05 }}
-                >
-                  <SwipeableRow onDelete={() => setEntryToDelete(entry)}>
-                    <TimelineEntryCard 
-                      entry={entry} 
-                      onEdit={entry.type === 'meal' ? () => handleEditMeal(entry) : undefined}
-                    />
-                  </SwipeableRow>
-                </motion.div>
-              ))
-            ) : (
-              <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ 
+                    width: `${Math.min((todayCalories / (profile?.daily_calories_target || 2000)) * 100, 100)}%` 
+                  }}
+                  transition={{ delay: 0.3, duration: 0.8, ease: 'easeOut' }}
+                  className="h-full rounded-full bg-[#84cc16]"
+                />
+              </div>
+
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">💧 Hidratação</span>
+                <span className="text-sky-400 font-medium tabular-nums">{waterTotal}ml</span>
+              </div>
+            </motion.div>
+
+            {/* Quick Assessment Bar */}
+            <QuickAssessmentBar
+              onMoodClick={() => setMoodDrawerOpen(true)}
+              onWaterClick={() => setWaterDialogOpen(true)}
+              onWeightClick={() => setWeightDialogOpen(true)}
+              onMealClick={() => setMealDialogOpen(true)}
+            />
+
+            {/* Timeline */}
+            <div className="space-y-3">
+              <motion.h2
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-center py-12 rounded-2xl bg-card border border-border"
+                transition={{ delay: 0.25 }}
+                className="text-sm font-medium text-muted-foreground"
               >
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                  <Coffee className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <p className="text-foreground font-medium mb-1">
-                  Nenhum registro hoje
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Use os botões acima para começar seu diário
-                </p>
-              </motion.div>
-            )}
-          </div>
+                Linha do tempo
+              </motion.h2>
+              
+              {loading ? (
+                <>
+                  <Skeleton className="h-24 rounded-2xl" />
+                  <Skeleton className="h-24 rounded-2xl" />
+                  <Skeleton className="h-24 rounded-2xl" />
+                </>
+              ) : sortedTimeline.length > 0 ? (
+                sortedTimeline.map((entry, index) => (
+                  <motion.div
+                    key={entry.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 + index * 0.05 }}
+                  >
+                    <SwipeableRow onDelete={() => setEntryToDelete(entry)}>
+                      <TimelineEntryCard 
+                        entry={entry} 
+                        onEdit={entry.type === 'meal' ? () => handleEditMeal(entry) : undefined}
+                      />
+                    </SwipeableRow>
+                  </motion.div>
+                ))
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-12 rounded-2xl bg-card border border-border"
+                >
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                    <Coffee className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-foreground font-medium mb-1">
+                    Nenhum registro hoje
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Use os botões acima para começar seu diário
+                  </p>
+                </motion.div>
+              )}
+            </div>
+          </main>
         </div>
-      </main>
+      </div>
 
       {/* Modals */}
       <MoodCheckInDrawer

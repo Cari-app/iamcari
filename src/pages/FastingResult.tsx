@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Clock, AlertTriangle, CheckCircle2, TrendingUp, Flame, Zap, Target, Calendar, User } from 'lucide-react';
+import { ArrowLeft, Clock, AlertTriangle, CheckCircle2, TrendingUp, Flame, Zap, Target, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Logo } from '@/components/Logo';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { BottomNav } from '@/components/BottomNav';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useIsMobile } from '@/hooks/use-mobile';
+import logoImage from '@/assets/logo-cari.png';
 
 interface ProtocolInfo {
   id: string;
@@ -96,8 +95,8 @@ const protocolsMap: Record<string, ProtocolInfo> = {
     subtitle: 'Protocolo mais popular',
     description: 'Parabéns! Seu perfil é excelente para o jejum 16/8, o protocolo mais estudado e eficaz para perda de peso, clareza mental e saúde metabólica.',
     icon: Flame,
-    color: 'text-primary',
-    bgColor: 'bg-primary/10',
+    color: 'text-[#84cc16]',
+    bgColor: 'bg-[#84cc16]/10',
     readinessLevel: 'high',
     tips: [
       'Janela alimentar: 12h às 20h (ou 13h às 21h)',
@@ -127,7 +126,6 @@ const protocolsMap: Record<string, ProtocolInfo> = {
 export default function FastingResult() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const isMobile = useIsMobile();
   const [loading, setLoading] = useState(true);
   const [protocol, setProtocol] = useState<ProtocolInfo | null>(null);
   const [readinessScore, setReadinessScore] = useState(0);
@@ -178,15 +176,15 @@ export default function FastingResult() {
 
   if (loading) {
     return (
-      <div className="min-h-[100dvh] bg-background pb-24">
-        <div className="absolute top-0 left-0 right-0 h-72 bg-gradient-to-b from-[#22c55e] to-[#16a34a] -z-10" />
-        <main className="px-4 pt-24">
-          <div className="mx-auto max-w-lg space-y-6">
+      <div className="min-h-[100dvh] pb-32 bg-background">
+        <div className="mx-auto max-w-lg relative">
+          <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+          <div className="relative z-10 pt-20 px-4 space-y-4">
             <Skeleton className="h-40 rounded-2xl" />
             <Skeleton className="h-32 rounded-2xl" />
             <Skeleton className="h-48 rounded-2xl" />
           </div>
-        </main>
+        </div>
         <BottomNav />
       </div>
     );
@@ -197,136 +195,131 @@ export default function FastingResult() {
   const ProtocolIcon = protocol.icon;
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-24 relative overflow-hidden">
-      {/* Green Gradient Background */}
-      <div className="absolute top-0 left-0 right-0 h-72 bg-gradient-to-b from-[#22c55e] to-[#16a34a] -z-10" />
-
-      {/* Header */}
-      <header 
-        className="px-4 flex items-center justify-between"
-        style={{ 
-          paddingTop: isMobile 
-            ? 'calc(1rem + env(safe-area-inset-top, 0px))' 
-            : '1rem' 
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate('/dashboard')}
-            className="text-white hover:bg-white/20"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <Logo size="xs" forceDark />
-        </div>
-        <button onClick={() => navigate('/profile')} className="press-effect">
-          <Avatar className="h-10 w-10 ring-2 ring-white/30">
-            <AvatarImage src={profile?.avatar_url || ''} alt="Avatar" />
-            <AvatarFallback className="bg-white/20">
-              <User className="h-5 w-5 text-white" />
-            </AvatarFallback>
-          </Avatar>
-        </button>
-      </header>
-
-      <main className="px-4 pt-6">
-        <div className="mx-auto max-w-lg space-y-6">
-          {/* Protocol Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-2xl border border-border bg-card"
-          >
-            <div className="flex items-start gap-4 mb-4">
-              <div className={`h-16 w-16 rounded-2xl ${protocol.bgColor} flex items-center justify-center shrink-0`}>
-                <ProtocolIcon className={`h-8 w-8 ${protocol.color}`} />
-              </div>
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold text-foreground mb-1">
-                  {protocol.name}
-                </h1>
-                <p className={`text-sm font-medium ${protocol.color}`}>
-                  {protocol.subtitle}
-                </p>
-              </div>
+    <div className="min-h-[100dvh] pb-32 bg-background">
+      <div className="mx-auto max-w-lg relative">
+        {/* Green Gradient Background */}
+        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+        
+        <div className="relative z-10">
+          {/* Top Bar */}
+          <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/dashboard')}
+                className="text-white hover:bg-white/20"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <img src={logoImage} alt="Cari" className="h-8" />
             </div>
+            <Link to="/profile">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={profile?.avatar_url || ''} />
+                <AvatarFallback className="bg-white/20 text-white">
+                  {profile?.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          </header>
 
-            <p className="text-base text-muted-foreground leading-relaxed">
-              {protocol.description}
-            </p>
-          </motion.div>
-
-          {/* Readiness Score */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="p-6 rounded-2xl bg-card border border-border"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-foreground">
-                Nível de Prontidão
-              </h2>
-              <span className="text-2xl font-bold text-primary tabular-nums">
-                {readinessScore}%
-              </span>
-            </div>
-            <Progress value={readinessScore} className="h-3" />
-            <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-              <span>Preparação</span>
-              <span>Intermediário</span>
-              <span>Avançado</span>
-            </div>
-          </motion.div>
-
-          {/* Tips Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="p-6 rounded-2xl bg-card border border-border"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <Target className="h-6 w-6 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">
-                {protocol.readinessLevel === 'low' ? 'Próximos Passos' : 'Como Começar'}
-              </h2>
-            </div>
-            <ul className="space-y-3">
-              {protocol.tips.map((tip, index) => (
-                <motion.li
-                  key={index}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
-                  className="flex items-start gap-3"
-                >
-                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-sm text-muted-foreground leading-relaxed">
-                    {tip}
-                  </span>
-                </motion.li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* CTA Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Button
-              onClick={() => navigate('/dashboard')}
-              className="w-full h-14 rounded-2xl font-semibold text-base press-effect"
+          <main className="px-4 pt-6 space-y-4">
+            {/* Protocol Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-6 rounded-2xl border border-border bg-card"
             >
-              {protocol.readinessLevel === 'low' ? 'Entendido, Voltar' : 'Iniciar Meu Jejum'}
-            </Button>
-          </motion.div>
+              <div className="flex items-start gap-4 mb-4">
+                <div className={`h-16 w-16 rounded-2xl ${protocol.bgColor} flex items-center justify-center shrink-0`}>
+                  <ProtocolIcon className={`h-8 w-8 ${protocol.color}`} />
+                </div>
+                <div className="flex-1">
+                  <h1 className="text-2xl font-bold text-foreground mb-1">
+                    {protocol.name}
+                  </h1>
+                  <p className={`text-sm font-medium ${protocol.color}`}>
+                    {protocol.subtitle}
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-base text-muted-foreground leading-relaxed">
+                {protocol.description}
+              </p>
+            </motion.div>
+
+            {/* Readiness Score */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="p-6 rounded-2xl bg-card border border-border"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Nível de Prontidão
+                </h2>
+                <span className="text-2xl font-bold text-[#84cc16] tabular-nums">
+                  {readinessScore}%
+                </span>
+              </div>
+              <Progress value={readinessScore} className="h-3" />
+              <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                <span>Preparação</span>
+                <span>Intermediário</span>
+                <span>Avançado</span>
+              </div>
+            </motion.div>
+
+            {/* Tips Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="p-6 rounded-2xl bg-card border border-border"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <Target className="h-6 w-6 text-[#84cc16]" />
+                <h2 className="text-lg font-semibold text-foreground">
+                  {protocol.readinessLevel === 'low' ? 'Próximos Passos' : 'Como Começar'}
+                </h2>
+              </div>
+              <ul className="space-y-3">
+                {protocol.tips.map((tip, index) => (
+                  <motion.li
+                    key={index}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 + index * 0.1 }}
+                    className="flex items-start gap-3"
+                  >
+                    <CheckCircle2 className="h-5 w-5 text-[#84cc16] shrink-0 mt-0.5" />
+                    <span className="text-sm text-muted-foreground leading-relaxed">
+                      {tip}
+                    </span>
+                  </motion.li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* CTA Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Button
+                onClick={() => navigate('/dashboard')}
+                className="w-full h-14 rounded-2xl font-semibold text-base press-effect"
+              >
+                {protocol.readinessLevel === 'low' ? 'Entendido, Voltar' : 'Iniciar Meu Jejum'}
+              </Button>
+            </motion.div>
+          </main>
         </div>
-      </main>
+      </div>
 
       <BottomNav />
     </div>
