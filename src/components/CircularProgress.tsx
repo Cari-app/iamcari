@@ -12,7 +12,7 @@ interface CircularProgressProps {
 export function CircularProgress({ 
   progress, 
   size = 280, 
-  strokeWidth = 20,
+  strokeWidth = 16,
   children,
   className 
 }: CircularProgressProps) {
@@ -21,37 +21,41 @@ export function CircularProgress({
   const offset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className={cn('relative inline-flex items-center justify-center overflow-visible p-4', className)}>
+    <div className={cn('relative inline-flex items-center justify-center', className)}>
+      {/* Background blur circle */}
+      <div 
+        className="absolute rounded-full bg-white/5 backdrop-blur-sm"
+        style={{ 
+          width: size - 20, 
+          height: size - 20,
+        }}
+      />
+      
       <svg
         width={size}
         height={size}
-        className="transform -rotate-90 overflow-visible"
+        className="transform -rotate-90"
         style={{ overflow: 'visible' }}
       >
-        {/* Gradient definition - Green palette */}
         <defs>
-          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(142 76% 36%)" />
-            <stop offset="100%" stopColor="hsl(158 64% 52%)" />
+          {/* Modern gradient - dark green to lime */}
+          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#14532d" />
+            <stop offset="50%" stopColor="#166534" />
+            <stop offset="100%" stopColor="#84cc16" />
           </linearGradient>
           
-          {/* Stronger glow filter */}
+          {/* Glow effect */}
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
             <feMerge>
               <feMergeNode in="coloredBlur"/>
               <feMergeNode in="SourceGraphic"/>
             </feMerge>
           </filter>
-          
-          {/* Outer glow for the ring */}
-          <filter id="outerGlow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="8" result="blur"/>
-            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-          </filter>
         </defs>
 
-        {/* Background circle - thicker and more visible */}
+        {/* Background track */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -59,10 +63,10 @@ export function CircularProgress({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-muted/20"
+          className="text-white/10"
         />
         
-        {/* Progress circle with gradient and glow */}
+        {/* Progress arc with gradient */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}
@@ -75,26 +79,26 @@ export function CircularProgress({
           strokeDashoffset={offset}
           filter="url(#glow)"
           style={{ 
-            filter: 'drop-shadow(0 0 12px hsl(142 76% 36% / 0.5)) drop-shadow(0 0 24px hsl(158 64% 52% / 0.3))'
+            filter: 'drop-shadow(0 0 8px rgba(132, 204, 22, 0.4))'
           }}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
         />
         
-        {/* Progress head glow - enhanced */}
+        {/* Glowing dot at progress end */}
         {progress > 0 && (
           <motion.circle
             cx={size / 2 + radius * Math.sin((progress / 100) * 2 * Math.PI)}
             cy={size / 2 - radius * Math.cos((progress / 100) * 2 * Math.PI)}
-            r={strokeWidth / 2 + 6}
-            fill="hsl(158 64% 52%)"
-            className="opacity-60"
+            r={strokeWidth / 2 + 4}
+            fill="#84cc16"
             style={{ 
-              filter: 'drop-shadow(0 0 8px hsl(158 64% 52% / 0.8))'
+              filter: 'drop-shadow(0 0 10px rgba(132, 204, 22, 0.8))'
             }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.7 }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.3 }}
           />
         )}
       </svg>
