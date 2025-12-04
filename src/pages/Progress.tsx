@@ -439,18 +439,18 @@ export default function Progress() {
 
             {/* Tabs */}
             <Tabs defaultValue="hoje" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-card border border-border rounded-xl h-11">
-                <TabsTrigger value="hoje" className="rounded-lg data-[state=active]:bg-[#84cc16] data-[state=active]:text-white gap-1.5">
+              <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-card p-1.5 rounded-full h-14 border border-border">
+                <TabsTrigger value="hoje" className="rounded-full data-[state=active]:bg-[#84cc16] data-[state=active]:text-white data-[state=active]:shadow-md gap-2 h-full text-muted-foreground">
                   <ListTodo className="h-4 w-4" />
-                  <span className="text-xs">Hoje</span>
+                  <span className="text-sm font-medium">Hoje</span>
                 </TabsTrigger>
-                <TabsTrigger value="progresso" className="rounded-lg data-[state=active]:bg-[#84cc16] data-[state=active]:text-white gap-1.5">
+                <TabsTrigger value="progresso" className="rounded-full data-[state=active]:bg-[#84cc16] data-[state=active]:text-white data-[state=active]:shadow-md gap-2 h-full text-muted-foreground">
                   <ChartBar className="h-4 w-4" />
-                  <span className="text-xs">90 dias</span>
+                  <span className="text-sm font-medium">90 dias</span>
                 </TabsTrigger>
-                <TabsTrigger value="conquistas" className="rounded-lg data-[state=active]:bg-[#84cc16] data-[state=active]:text-white gap-1.5">
+                <TabsTrigger value="conquistas" className="rounded-full data-[state=active]:bg-[#84cc16] data-[state=active]:text-white data-[state=active]:shadow-md gap-2 h-full text-muted-foreground">
                   <Trophy className="h-4 w-4" />
-                  <span className="text-xs">Jejuns</span>
+                  <span className="text-sm font-medium">Jejuns</span>
                 </TabsTrigger>
               </TabsList>
 
