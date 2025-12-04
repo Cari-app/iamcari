@@ -5,47 +5,28 @@ import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useGamification } from '@/hooks/useGamification';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useAchievementNotifications } from '@/hooks/useAchievementNotifications';
 import { supabase } from '@/integrations/supabase';
 import { toast } from '@/hooks/use-toast';
 import { 
   User, 
   Camera,
   Loader2,
-  Flame,
-  Trophy,
   Clock,
-  Lock,
   LogOut,
   Moon,
   Sun,
   Scale,
-  Crown,
   Bell,
   HelpCircle,
   Shield,
   ChevronRight,
-  Gem,
-  Zap,
-  Swords,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerClose,
-} from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
-import { FitCoinIcon } from '@/components/FitCoinIcon';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -56,28 +37,11 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-
-interface Achievement {
-  id: number;
-  code: string;
-  name: string;
-  description: string | null;
-  icon: string | null;
-  xp_reward: number | null;
-}
-
-interface UserAchievement {
-  achievement_code: string;
-  unlocked_at: string;
-}
 
 export default function Profile() {
   const { theme, toggleTheme } = useTheme();
   const { user, signOut, profile } = useAuth();
-  const { stats, loading: statsLoading } = useGamification();
   const { isAdmin } = useUserRole();
-  useAchievementNotifications(); // Enable achievement notifications
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -86,12 +50,6 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  // Achievements data
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [userAchievements, setUserAchievements] = useState<UserAchievement[]>([]);
-  const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
-  const [achievementDrawerOpen, setAchievementDrawerOpen] = useState(false);
   
   // Stats
   const [totalFastingHours, setTotalFastingHours] = useState(0);
@@ -120,7 +78,7 @@ export default function Profile() {
   // Notifications preference
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     const saved = localStorage.getItem('notifications_enabled');
-    return saved !== 'false'; // Default to true
+    return saved !== 'false';
   });
 
   const handleNotificationsToggle = (checked: boolean) => {
@@ -128,7 +86,7 @@ export default function Profile() {
     localStorage.setItem('notifications_enabled', String(checked));
   };
 
-  // Fetch essential profile data (fast)
+  // Fetch essential profile data
   useEffect(() => {
     if (!user) {
       setLoading(false);
@@ -136,7 +94,6 @@ export default function Profile() {
     }
 
     const fetchEssentialData = async () => {
-      // Run essential queries in parallel
       const [profileResult, fastingResult] = await Promise.all([
         supabase
           .from('profiles')
@@ -152,13 +109,12 @@ export default function Profile() {
 
       const profileData = profileResult.data;
       if (profileData) {
-        setFullName(profileData.full_name || user.email?.split('@')[0] || 'Jogador');
+        setFullName(profileData.full_name || user.email?.split('@')[0] || 'Usuário');
         setNickname(profileData.nickname || '');
         setAvatarUrl(profileData.avatar_url);
         setBodyWeight(profileData.weight || 0);
         setBodyHeight(profileData.height || 0);
         
-        // Fetch diet in background (non-blocking)
         if (profileData.active_diet) {
           supabase
             .from('diet_types')
@@ -171,7 +127,6 @@ export default function Profile() {
         }
       }
 
-      // Calculate fasting hours
       const fastingData = fastingResult.data;
       if (fastingData) {
         const totalHours = fastingData.reduce((acc, session) => {
@@ -187,29 +142,6 @@ export default function Profile() {
 
     fetchEssentialData();
   }, [user]);
-
-  // Fetch achievements data (lazy - after main content loads)
-  useEffect(() => {
-    if (!user || loading) return;
-
-    const fetchAchievements = async () => {
-      const [achievementsResult, userAchievementsResult] = await Promise.all([
-        supabase
-          .from('achievements')
-          .select('*')
-          .order('id', { ascending: true }),
-        supabase
-          .from('user_achievements')
-          .select('achievement_code, unlocked_at')
-          .eq('user_id', user.id)
-      ]);
-
-      if (achievementsResult.data) setAchievements(achievementsResult.data);
-      if (userAchievementsResult.data) setUserAchievements(userAchievementsResult.data);
-    };
-
-    fetchAchievements();
-  }, [user, loading]);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -285,30 +217,6 @@ export default function Profile() {
     navigate('/login');
   };
 
-  const isAchievementUnlocked = (code: string) => {
-    return userAchievements.some(ua => ua.achievement_code === code);
-  };
-
-  const getUnlockedDate = (code: string) => {
-    const achievement = userAchievements.find(ua => ua.achievement_code === code);
-    if (!achievement) return null;
-    return new Date(achievement.unlocked_at).toLocaleDateString('pt-BR');
-  };
-
-  const handleAchievementClick = (achievement: Achievement) => {
-    setSelectedAchievement(achievement);
-    setAchievementDrawerOpen(true);
-  };
-
-  const getPlayerTitle = () => {
-    const level = stats?.current_level || 1;
-    if (level >= 20) return 'Mestre do Jejum';
-    if (level >= 15) return 'Guerreiro Épico';
-    if (level >= 10) return 'Veterano';
-    if (level >= 5) return 'Explorador';
-    return 'Iniciante';
-  };
-
   const handleEditBodyStats = () => {
     setIsBodyStatsOpen(true);
   };
@@ -322,7 +230,6 @@ export default function Profile() {
   const handleSavePersonalData = async () => {
     if (!user) return;
 
-    // Validate nickname format
     if (editNickname.trim() && !/^[a-zA-Z0-9_]{3,20}$/.test(editNickname.trim())) {
       toast({
         title: '❌ Apelido inválido',
@@ -344,7 +251,6 @@ export default function Profile() {
         .eq('id', user.id);
 
       if (error) {
-        // Check if it's a unique constraint error
         if (error.code === '23505') {
           toast({
             title: '❌ Apelido já existe',
@@ -382,7 +288,6 @@ export default function Profile() {
     setSavingBodyStats(true);
 
     try {
-      // Update profile basic info
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
@@ -393,7 +298,6 @@ export default function Profile() {
 
       if (profileError) throw profileError;
 
-      // Create new assessment to recalculate BMR/TDEE via DB trigger
       const { data: latestAssessment } = await supabase
         .from('assessments')
         .select('gender, age, activity_level, goal_type, goal_speed, target_weight_kg')
@@ -436,23 +340,13 @@ export default function Profile() {
     }
   };
 
-  if (loading || statsLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background pb-24 safe-pt-20 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
-
-  const currentLevel = stats?.current_level || 1;
-  const currentXP = stats?.current_cycle_xp || 0;
-  const xpProgress = (currentXP / 1000) * 100;
-
-  // Get recent/next achievements (prioritize unlocked, then locked)
-  const recentAchievements = [
-    ...achievements.filter(a => isAchievementUnlocked(a.code)),
-    ...achievements.filter(a => !isAchievementUnlocked(a.code)),
-  ].slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background pb-24 safe-pt-20 relative overflow-hidden">
@@ -465,16 +359,16 @@ export default function Profile() {
       
       <main className="px-4 py-6">
         <div className="mx-auto max-w-lg space-y-6">
-          {/* Section A: The Player Card (Compact - Max 35% height) */}
+          {/* Profile Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
             <Card className="glass border-primary/30 overflow-hidden">
               <CardContent className="p-5 space-y-4">
-                {/* Top Row: Avatar + Info */}
+                {/* Avatar + Info */}
                 <div className="flex items-start gap-4">
-                  {/* Avatar with Level Badge */}
+                  {/* Avatar */}
                   <div className="relative flex-shrink-0">
                     <input
                       ref={fileInputRef}
@@ -509,16 +403,9 @@ export default function Profile() {
                         )}
                       </button>
                     </div>
-
-                    {/* Level Badge (Corner) */}
-                    <div className="absolute -bottom-1 -right-1">
-                      <Badge className="px-2 py-0.5 gradient-primary text-white font-bold text-xs">
-                        Lvl {currentLevel}
-                      </Badge>
-                    </div>
                   </div>
 
-                  {/* Name, Title & XP */}
+                  {/* Name & Info */}
                   <div className="flex-1 min-w-0 space-y-2">
                     <div>
                       <div className="flex items-center gap-2">
@@ -532,45 +419,18 @@ export default function Profile() {
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {getPlayerTitle()}
-                      </p>
+                      {nickname && (
+                        <p className="text-sm text-muted-foreground">
+                          @{nickname}
+                        </p>
+                      )}
                     </div>
                     
-                    {/* XP Progress */}
-                    <div className="space-y-1">
-                      <Progress value={xpProgress} className="h-2" />
-                      <p className="text-xs text-muted-foreground">
-                        {currentXP} / 1000 XP
-                      </p>
+                    {/* Stats */}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Clock className="h-4 w-4 text-teal" />
+                      <span>{totalFastingHours}h de jejum total</span>
                     </div>
-                  </div>
-                </div>
-
-                {/* Stats Row */}
-                <div className="grid grid-cols-3 gap-3 pt-2 border-t border-border/50">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-1">
-                      <Flame className="h-5 w-5 text-rose" />
-                    </div>
-                    <p className="text-lg font-bold text-foreground">{stats?.current_streak || 0}</p>
-                    <p className="text-xs text-muted-foreground">Dias</p>
-                  </div>
-
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-1">
-                      <Zap className="h-5 w-5 text-amber-500" />
-                    </div>
-                    <p className="text-lg font-bold text-foreground">{stats?.game_coins || 0}</p>
-                    <p className="text-xs text-muted-foreground">Game Coins</p>
-                  </div>
-
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-1">
-                      <Clock className="h-5 w-5 text-teal" />
-                    </div>
-                    <p className="text-lg font-bold text-foreground">{totalFastingHours}</p>
-                    <p className="text-xs text-muted-foreground">Horas</p>
                   </div>
                 </div>
               </CardContent>
@@ -639,69 +499,11 @@ export default function Profile() {
             </motion.div>
           )}
 
-          {/* Section B: Recent Achievements (Horizontal Carousel) */}
+          {/* Settings Menu */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="space-y-3"
-          >
-            <div className="flex items-center justify-between px-1">
-              <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-primary" />
-                Conquistas Recentes
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-4 gap-2">
-              {recentAchievements.map((achievement) => {
-                const unlocked = isAchievementUnlocked(achievement.code);
-                
-                return (
-                  <button
-                    key={achievement.id}
-                    onClick={() => handleAchievementClick(achievement)}
-                    className={cn(
-                      "relative h-28 p-2 rounded-xl border transition-all",
-                      "flex flex-col items-center justify-center gap-1",
-                      unlocked
-                        ? "bg-gradient-to-br from-teal-500/20 to-violet-500/20 border-primary/50 shadow-lg shadow-primary/10 hover:shadow-primary/20"
-                        : "bg-white/5 border-white/10 hover:border-white/20"
-                    )}
-                  >
-                    {/* Lock icon overlay for locked achievements */}
-                    {!unlocked && (
-                      <div className="absolute top-2 right-2">
-                        <Lock className="h-3.5 w-3.5 text-muted-foreground/50" />
-                      </div>
-                    )}
-
-                    {/* Icon */}
-                    <div className={cn(
-                      "text-2xl transition-all",
-                      !unlocked && "grayscale opacity-50"
-                    )}>
-                      {achievement.icon || '🏆'}
-                    </div>
-
-                    {/* Name */}
-                    <p className={cn(
-                      "text-[10px] font-medium text-center line-clamp-2 leading-tight w-full",
-                      unlocked ? "text-foreground" : "text-muted-foreground"
-                    )}>
-                      {achievement.name}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          </motion.div>
-
-          {/* Section C: The Control Menu */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
             className="space-y-6"
           >
             {/* Group 1: Biometria */}
@@ -743,47 +545,6 @@ export default function Profile() {
               </p>
               <Card>
                 <CardContent className="p-0">
-                  <button
-                    onClick={() => navigate('/plans')}
-                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Crown className="h-5 w-5 text-primary" />
-                      <span className="font-medium text-foreground">Planos & FitCoins</span>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </button>
-
-                  <button
-                    onClick={() => navigate('/fitcoin-history')}
-                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <FitCoinIcon size={20} />
-                      <div className="text-left">
-                        <span className="font-medium text-foreground">Histórico de FitCoins</span>
-                        <p className="text-xs text-muted-foreground">{profile?.token_balance || 0} disponíveis</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </button>
-
-                  {/* TODO: Arena feature coming soon - Remove this button or create Arena page */}
-                  <button
-                    onClick={() => toast({
-                      title: '🚧 Em breve',
-                      description: 'A Arena está em desenvolvimento. Aguarde novidades!',
-                    })}
-                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Swords className="h-5 w-5 text-violet-500" />
-                      <span className="font-medium text-foreground">Arena</span>
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Em breve</Badge>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </button>
-
                   <div
                     className="w-full flex items-center justify-between p-4 border-b border-border"
                   >
@@ -905,10 +666,11 @@ export default function Profile() {
             </Button>
             <Button
               onClick={handleSaveBodyStats}
-              disabled={savingBodyStats || !bodyWeight || !bodyHeight}
-              className="gradient-primary text-white"
+              disabled={savingBodyStats}
             >
-              {savingBodyStats && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {savingBodyStats ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
               Salvar
             </Button>
           </DialogFooter>
@@ -919,36 +681,33 @@ export default function Profile() {
       <Dialog open={isPersonalDataOpen} onOpenChange={setIsPersonalDataOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Atualizar Meus Dados</DialogTitle>
+            <DialogTitle>Editar Meus Dados</DialogTitle>
             <DialogDescription>
-              Edite seu nome e apelido (nick) usado na comunidade
+              Atualize suas informações pessoais
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-fullname">Nome Completo</Label>
+              <Label htmlFor="fullName">Nome Completo</Label>
               <Input
-                id="edit-fullname"
-                type="text"
+                id="fullName"
                 value={editFullName}
                 onChange={(e) => setEditFullName(e.target.value)}
-                placeholder="Seu nome completo"
+                placeholder="Seu nome"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-nickname">Apelido (Nick)</Label>
+              <Label htmlFor="nickname">Apelido (opcional)</Label>
               <Input
-                id="edit-nickname"
-                type="text"
+                id="nickname"
                 value={editNickname}
-                onChange={(e) => setEditNickname(e.target.value.toLowerCase())}
-                placeholder="seu_nick"
-                maxLength={20}
+                onChange={(e) => setEditNickname(e.target.value)}
+                placeholder="Ex: joaosilva"
               />
               <p className="text-xs text-muted-foreground">
-                Usado em posts e comunidade. Use apenas letras, números e underscore (3-20 caracteres).
+                Use apenas letras, números e underscore. Entre 3-20 caracteres.
               </p>
             </div>
           </div>
@@ -962,61 +721,16 @@ export default function Profile() {
             </Button>
             <Button
               onClick={handleSavePersonalData}
-              disabled={savingPersonalData || !editFullName.trim()}
-              className="gradient-primary text-white"
+              disabled={savingPersonalData}
             >
-              {savingPersonalData && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {savingPersonalData ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
               Salvar
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Achievement Details Drawer */}
-      <Drawer open={achievementDrawerOpen} onOpenChange={setAchievementDrawerOpen}>
-        <DrawerContent className="max-w-[600px] mx-auto">
-          <DrawerHeader className="text-left px-6">
-            <DrawerTitle className="flex items-center gap-3 text-2xl">
-              <span className="text-4xl">{selectedAchievement?.icon || '🏆'}</span>
-              {selectedAchievement?.name}
-            </DrawerTitle>
-            <DrawerDescription className="mt-4 space-y-4">
-              <div>
-                <p className="text-base text-foreground">
-                  {selectedAchievement?.description}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <Badge className="gradient-primary text-white">
-                  +{selectedAchievement?.xp_reward || 0} XP
-                </Badge>
-                
-                {selectedAchievement && isAchievementUnlocked(selectedAchievement.code) && (
-                  <Badge variant="secondary">
-                    Desbloqueado em {getUnlockedDate(selectedAchievement.code)}
-                  </Badge>
-                )}
-              </div>
-
-              {selectedAchievement && !isAchievementUnlocked(selectedAchievement.code) && (
-                <div className="p-4 rounded-lg bg-muted/50 border border-border">
-                  <p className="text-sm text-muted-foreground">
-                    <strong>Como desbloquear:</strong> {selectedAchievement.description}
-                  </p>
-                </div>
-              )}
-            </DrawerDescription>
-          </DrawerHeader>
-          <div className="px-6 pb-6">
-            <DrawerClose asChild>
-              <Button variant="outline" className="w-full">
-                Fechar
-              </Button>
-            </DrawerClose>
-          </div>
-        </DrawerContent>
-      </Drawer>
     </div>
   );
 }
