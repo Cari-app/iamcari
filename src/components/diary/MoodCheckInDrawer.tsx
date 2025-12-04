@@ -47,11 +47,7 @@ export function MoodCheckInDrawer({
   };
 
   const getEnergyColor = (level: number) => {
-    if (level <= 2) return 'text-rose-400';
-    if (level <= 4) return 'text-orange-400';
-    if (level <= 6) return 'text-amber-400';
-    if (level <= 8) return 'text-emerald-400';
-    return 'text-violet-400';
+    return 'text-[#84cc16]';
   };
 
   return (
@@ -60,8 +56,8 @@ export function MoodCheckInDrawer({
         <div className="mx-auto w-full max-w-lg bg-card border border-border rounded-t-3xl">
           <DrawerHeader className="text-left">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-violet-500/20 flex items-center justify-center">
-                <BrainCircuit className="h-5 w-5 text-violet-400" />
+              <div className="h-10 w-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
+                <BrainCircuit className="h-5 w-5 text-[#84cc16]" />
               </div>
               <div>
                 <DrawerTitle className="text-foreground">Check-in Mental</DrawerTitle>
@@ -75,7 +71,7 @@ export function MoodCheckInDrawer({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-amber-400" />
+                  <Zap className="h-4 w-4 text-[#84cc16]" />
                   <span className="text-sm font-medium text-foreground">
                     Nível de Energia
                   </span>
@@ -108,7 +104,7 @@ export function MoodCheckInDrawer({
                     className={cn(
                       'px-3 py-1.5 rounded-full text-sm font-medium border transition-all',
                       selectedEmotion === emotion.value
-                        ? emotion.color
+                        ? 'bg-[#84cc16]/20 text-[#84cc16] border-[#84cc16]/30'
                         : 'bg-muted/50 text-muted-foreground border-transparent hover:bg-muted'
                     )}
                   >
@@ -123,7 +119,7 @@ export function MoodCheckInDrawer({
             <Button
               onClick={handleSubmit}
               disabled={!selectedEmotion}
-              className="w-full gradient-primary text-white"
+              className="w-full bg-[#84cc16] hover:bg-[#84cc16]/90 text-white"
             >
               Registrar Check-in
             </Button>
