@@ -51,8 +51,8 @@ export function WeightInputDialog({
       <DialogContent className="max-w-[340px] bg-card border-border">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-              <Scale className="h-5 w-5 text-emerald-400" />
+            <div className="h-10 w-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
+              <Scale className="h-5 w-5 text-[#84cc16]" />
             </div>
             <div>
               <DialogTitle className="text-foreground">Registrar Peso</DialogTitle>
@@ -102,7 +102,7 @@ export function WeightInputDialog({
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} className="gradient-primary text-white">
+          <Button onClick={handleSubmit} className="bg-[#84cc16] hover:bg-[#84cc16]/90 text-white">
             Salvar
           </Button>
         </DialogFooter>

@@ -253,8 +253,8 @@ export function MealInputDialog({
         {/* Header */}
         <DialogHeader className="p-4 pb-0">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-rose-500/20 flex items-center justify-center">
-              <Utensils className="h-5 w-5 text-rose-400" />
+            <div className="h-10 w-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
+              <Utensils className="h-5 w-5 text-[#84cc16]" />
             </div>
             <div>
               <DialogTitle className="text-foreground">Adicionar Refeição</DialogTitle>
@@ -276,13 +276,13 @@ export function MealInputDialog({
                 onClick={() => setMethod('camera')}
                 className={cn(
                   'w-full p-4 rounded-2xl border-2 border-dashed transition-all',
-                  'border-violet-500/30 bg-violet-500/5',
-                  'hover:border-violet-500/50 hover:bg-violet-500/10',
+                  'border-[#84cc16]/30 bg-[#84cc16]/5',
+                  'hover:border-[#84cc16]/50 hover:bg-[#84cc16]/10',
                   'active:scale-[0.98]'
                 )}
               >
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center">
+                  <div className="h-12 w-12 rounded-xl bg-[#84cc16] flex items-center justify-center">
                     <Camera className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1 text-left">
@@ -333,14 +333,14 @@ export function MealInputDialog({
               
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="aspect-[4/3] rounded-2xl bg-muted/50 border-2 border-dashed border-border flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-violet-500/50 transition-colors overflow-hidden"
+                className="aspect-[4/3] rounded-2xl bg-muted/50 border-2 border-dashed border-border flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-[#84cc16]/50 transition-colors overflow-hidden"
               >
                 {imagePreview ? (
                   <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded-2xl" />
                 ) : (
                   <>
-                    <div className="h-16 w-16 rounded-full bg-violet-500/20 flex items-center justify-center">
-                      <Camera className="h-8 w-8 text-violet-400" />
+                    <div className="h-16 w-16 rounded-full bg-[#84cc16]/20 flex items-center justify-center">
+                      <Camera className="h-8 w-8 text-[#84cc16]" />
                     </div>
                     <div className="text-center">
                       <p className="text-sm font-medium text-foreground">Toque para tirar foto</p>
@@ -359,7 +359,7 @@ export function MealInputDialog({
                 <Button 
                   onClick={handleCameraSubmit} 
                   disabled={!selectedImage || uploading}
-                  className="flex-1 gradient-primary text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-[#84cc16] hover:bg-[#84cc16]/90 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Camera className="h-4 w-4 mr-2" />
                   {uploading ? 'Enviando...' : 'Registrar'}
@@ -405,16 +405,16 @@ export function MealInputDialog({
                 className={cn(
                   'w-full p-3 rounded-xl border-2 transition-all flex items-center gap-3',
                   isEmotional
-                    ? 'border-rose-500/50 bg-rose-500/10'
+                    ? 'border-[#84cc16]/50 bg-[#84cc16]/10'
                     : 'border-secondary/50 bg-secondary/10'
                 )}
               >
                 <div className={cn(
                   'h-10 w-10 rounded-lg flex items-center justify-center transition-colors',
-                  isEmotional ? 'bg-rose-500/20' : 'bg-secondary/20'
+                  isEmotional ? 'bg-[#84cc16]/20' : 'bg-secondary/20'
                 )}>
                   {isEmotional ? (
-                    <Heart className="h-5 w-5 text-rose-400 fill-rose-400 transition-colors" />
+                    <Heart className="h-5 w-5 text-[#84cc16] fill-[#84cc16] transition-colors" />
                   ) : (
                     <Star className="h-5 w-5 text-secondary transition-colors" />
                   )}
@@ -436,7 +436,7 @@ export function MealInputDialog({
                 <Button 
                   onClick={handleManualSubmit} 
                   disabled={!description.trim() || !calories}
-                  className="flex-1 gradient-primary text-white"
+                  className="flex-1 bg-[#84cc16] hover:bg-[#84cc16]/90 text-white"
                 >
                   Registrar
                 </Button>

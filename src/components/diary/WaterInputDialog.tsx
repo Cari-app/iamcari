@@ -67,8 +67,8 @@ export function WaterInputDialog({
       <DialogContent className="max-w-[340px] bg-card border-border p-0 overflow-hidden">
         <DialogHeader className="p-4 pb-0">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-sky-500/20 flex items-center justify-center">
-              <Droplet className="h-5 w-5 text-sky-400" />
+            <div className="h-10 w-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
+              <Droplet className="h-5 w-5 text-[#84cc16]" />
             </div>
             <div>
               <DialogTitle className="text-foreground">Registrar Água</DialogTitle>
@@ -88,8 +88,8 @@ export function WaterInputDialog({
                   'py-3 rounded-xl text-sm font-semibold transition-all',
                   'border-2',
                   selectedAmount === option.value && !isCustom
-                    ? 'border-sky-500 bg-sky-500/20 text-sky-400'
-                    : 'border-border bg-muted/30 text-foreground hover:border-sky-500/50'
+                    ? 'border-[#84cc16] bg-[#84cc16]/20 text-[#84cc16]'
+                    : 'border-border bg-muted/30 text-foreground hover:border-[#84cc16]/50'
                 )}
               >
                 {option.label}
@@ -111,7 +111,7 @@ export function WaterInputDialog({
                 className={cn(
                   'pr-12 bg-muted/50 border-2 rounded-xl text-center text-lg font-semibold tabular-nums transition-colors',
                   isCustom && customAmount
-                    ? 'border-sky-500 bg-sky-500/10'
+                    ? 'border-[#84cc16] bg-[#84cc16]/10'
                     : 'border-border'
                 )}
                 min="1"
@@ -125,8 +125,8 @@ export function WaterInputDialog({
 
           {/* Selected Display */}
           {(selectedAmount || (isCustom && customAmount)) && (
-            <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-center">
-              <span className="text-sky-400 font-semibold">
+            <div className="p-3 rounded-xl bg-[#84cc16]/10 border border-[#84cc16]/20 text-center">
+              <span className="text-[#84cc16] font-semibold">
                 {isCustom ? customAmount : selectedAmount}ml será adicionado
               </span>
             </div>
@@ -140,7 +140,7 @@ export function WaterInputDialog({
           <Button 
             onClick={handleSubmit} 
             disabled={!isValid}
-            className="gradient-primary text-white"
+            className="bg-[#84cc16] hover:bg-[#84cc16]/90 text-white"
           >
             <Droplet className="h-4 w-4 mr-2" />
             Adicionar
