@@ -61,13 +61,13 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-800">
+            <span className="text-xs px-2.5 py-1 rounded-full bg-[#ecfccb] text-green-800">
               Prot: <span className="font-semibold">{macros.protein}g</span>
             </span>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-800">
+            <span className="text-xs px-2.5 py-1 rounded-full bg-[#ecfccb] text-green-800">
               Carb: <span className="font-semibold">{macros.carbs}g</span>
             </span>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-800">
+            <span className="text-xs px-2.5 py-1 rounded-full bg-[#ecfccb] text-green-800">
               Fat: <span className="font-semibold">{macros.fat}g</span>
             </span>
           </div>
