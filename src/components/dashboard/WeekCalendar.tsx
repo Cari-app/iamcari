@@ -156,7 +156,9 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
             <span 
               className={cn(
                 'font-semibold tracking-wider transition-all duration-200 ease-out',
-                isSelected ? 'text-[13px] mb-1 text-[#84cc16]' : 'text-[10px] mb-0.5 text-white/35'
+                isSelected 
+                  ? 'text-[13px] mb-1 text-primary dark:drop-shadow-[0_0_8px_rgba(132,204,22,0.5)]' 
+                  : 'text-[10px] mb-0.5 text-muted-foreground/50'
               )}
             >
               {day.dayName}
@@ -164,7 +166,9 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
             <span 
               className={cn(
                 'font-bold transition-all duration-200 ease-out',
-                isSelected ? 'text-[28px] text-[#84cc16]' : 'text-lg text-white/50'
+                isSelected 
+                  ? 'text-[28px] text-primary dark:drop-shadow-[0_0_10px_rgba(132,204,22,0.4)]' 
+                  : 'text-lg text-muted-foreground/60'
               )}
             >
               {day.dayNumber}

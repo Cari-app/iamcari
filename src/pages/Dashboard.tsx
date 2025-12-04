@@ -238,15 +238,15 @@ export default function Dashboard() {
   return (
     <div className="min-h-[100dvh] pb-24 bg-background">
       <div className="mx-auto max-w-lg relative">
-        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-primary/20 via-primary/10 to-transparent dark:from-primary/15 dark:via-primary/5" />
         
         <div className="relative z-10">
           <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
             <img src={logoImage} alt="Cari" className="h-8" />
             <Link to="/profile">
-              <Avatar className="h-10 w-10">
+              <Avatar className="h-10 w-10 ring-2 ring-primary/20 dark:ring-primary/30">
                 <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback className="bg-white/20 text-white">
+                <AvatarFallback className="bg-primary/20 text-primary dark:bg-primary/10 dark:text-primary">
                   {profile?.full_name?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
@@ -263,17 +263,17 @@ export default function Dashboard() {
             <div className="flex mx-4 mt-6">
               <button 
                 onClick={() => setActiveTab('dieta')}
-                className={`flex-1 pb-3 text-center font-medium relative transition-colors ${activeTab === 'dieta' ? 'text-green-900' : 'text-green-800/60'}`}
+                className={`flex-1 pb-3 text-center font-medium relative transition-colors ${activeTab === 'dieta' ? 'text-foreground' : 'text-muted-foreground'}`}
               >
                 Dieta
-                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'dieta' ? 'bg-[#84cc16]' : 'bg-green-800/30'}`} />
+                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'dieta' ? 'bg-primary dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]' : 'bg-muted'}`} />
               </button>
               <button 
                 onClick={() => setActiveTab('jejum')}
-                className={`flex-1 pb-3 text-center font-medium relative transition-colors ${activeTab === 'jejum' ? 'text-green-900' : 'text-green-800/60'}`}
+                className={`flex-1 pb-3 text-center font-medium relative transition-colors ${activeTab === 'jejum' ? 'text-foreground' : 'text-muted-foreground'}`}
               >
                 Jejum
-                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'jejum' ? 'bg-[#84cc16]' : 'bg-green-800/30'}`} />
+                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'jejum' ? 'bg-primary dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]' : 'bg-muted'}`} />
               </button>
             </div>
 
@@ -319,11 +319,11 @@ export default function Dashboard() {
                     {fastingSessions.length > 0 ? (
                       fastingSessions.map(session => (
                         <SwipeableRow key={session.id} onDelete={() => setSessionToDelete(session.id)}>
-                          <div className="p-4 rounded-2xl bg-card border border-border">
+                          <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 dark:hover:border-primary/20 transition-colors">
                             <div className="flex items-start gap-3">
-                              <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-[#84cc16]/20' : 'bg-orange-500/20'}`}>
+                              <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-primary/20 dark:bg-primary/15' : 'bg-orange-500/20'}`}>
                                 {session.status === 'completed' ? (
-                                  <Clock className="h-5 w-5 text-[#84cc16]" />
+                                  <Clock className="h-5 w-5 text-primary" />
                                 ) : (
                                   <Pause className="h-5 w-5 text-orange-500" />
                                 )}
