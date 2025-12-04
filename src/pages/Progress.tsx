@@ -42,7 +42,7 @@ export default function Progress() {
   const [bestStreak, setBestStreak] = useState(0);
   const [successRate, setSuccessRate] = useState('--');
   const [heatmapData, setHeatmapData] = useState<DayActivity[]>([]);
-  const [achievements, setAchievements] = useState<Array<{ id: string; emoji: string; title: string; description: string }>>([]);
+  const [achievements, setAchievements] = useState<Array<{ id: string; iconType: 'completed' | 'paused'; title: string; description: string }>>([]);
   const [achievementToDelete, setAchievementToDelete] = useState<string | null>(null);
 
   // Diary states
@@ -181,7 +181,7 @@ export default function Progress() {
 
         // Generate achievements
         const finishedFasts = fastingSessions?.filter(s => s.end_time !== null) || [];
-        const achievementsList: Array<{ id: string; emoji: string; title: string; description: string }> = [];
+        const achievementsList: Array<{ id: string; iconType: 'completed' | 'paused'; title: string; description: string }> = [];
 
         if (finishedFasts.length > 0) {
           finishedFasts.slice(-5).reverse().forEach(fast => {
@@ -204,7 +204,7 @@ export default function Progress() {
             
             achievementsList.push({
               id: fast.id,
-              emoji: wasCompleted ? '🔥' : '⏸️',
+              iconType: wasCompleted ? 'completed' : 'paused',
               title: wasCompleted 
                 ? `Jejum de ${timeText} concluído`
                 : `Jejum de ${timeText} pausado`,
@@ -601,7 +601,15 @@ export default function Progress() {
                         <motion.div key={achievement.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
                           <SwipeableRow onDelete={() => setAchievementToDelete(achievement.id)}>
                             <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                              <span className="text-xl">{achievement.emoji}</span>
+                              <div className={cn(
+                                "h-8 w-8 rounded-lg flex items-center justify-center",
+                                achievement.iconType === 'completed' ? "bg-[#84cc16]/20" : "bg-muted"
+                              )}>
+                                <Flame className={cn(
+                                  "h-4 w-4",
+                                  achievement.iconType === 'completed' ? "text-[#84cc16]" : "text-muted-foreground"
+                                )} />
+                              </div>
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium text-foreground text-sm truncate">{achievement.title}</p>
                                 <p className="text-xs text-muted-foreground">{achievement.description}</p>
