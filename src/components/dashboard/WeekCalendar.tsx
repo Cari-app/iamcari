@@ -129,21 +129,19 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
   };
 
   return (
-    <div className="relative">
-      {/* Gradient fade left */}
-      <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-green-950 to-transparent z-10 pointer-events-none" />
-      {/* Gradient fade right */}
-      <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-green-950 to-transparent z-10 pointer-events-none" />
-      
-      <div 
-        ref={scrollRef}
-        className="flex items-end gap-0 overflow-x-auto scrollbar-hide py-4 px-12 cursor-grab active:cursor-grabbing select-none touch-pan-x"
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-      >
+    <div 
+      ref={scrollRef}
+      className="flex items-end gap-0 overflow-x-auto scrollbar-hide py-4 px-12 cursor-grab active:cursor-grabbing select-none touch-pan-x"
+      style={{
+        maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
+      }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+    >
       {days.map((day, index) => {
         const isSelected = isSameDay(day.date, selectedDate);
         
@@ -174,7 +172,6 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
           </div>
         );
       })}
-      </div>
     </div>
   );
 }
