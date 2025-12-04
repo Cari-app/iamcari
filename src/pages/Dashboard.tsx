@@ -133,53 +133,54 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-[100dvh] pb-24 bg-background relative">
-      {/* Green Gradient Background - stops at middle of cards */}
-      <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
-      
-      <div className="mx-auto max-w-lg relative z-10">
-        {/* Top Bar */}
-        <div className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
-          <img src={logoImage} alt="Cari" className="h-8" />
-          <Link to="/profile">
-            <Avatar className="h-10 w-10 border-2 border-white/30">
-              <AvatarImage src={profile?.avatar_url || ''} />
-              <AvatarFallback className="bg-white/20 text-white">
-                {profile?.full_name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
-          </Link>
-        </div>
+    <div className="min-h-[100dvh] pb-24 bg-background">
+      <div className="mx-auto max-w-lg relative">
+        {/* Green Gradient Background - stops at middle of cards */}
+        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+        
+        <div className="relative z-10">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
+            <img src={logoImage} alt="Cari" className="h-8" />
+            <Link to="/profile">
+              <Avatar className="h-10 w-10 border-2 border-white/30">
+                <AvatarImage src={profile?.avatar_url || ''} />
+                <AvatarFallback className="bg-white/20 text-white">
+                  {profile?.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          </div>
 
-        {/* Week Calendar */}
-        <WeekCalendar 
-          selectedDate={selectedDate} 
-          onDateSelect={setSelectedDate} 
-        />
-
-        {/* Calorie Header */}
-        <CalorieHeader 
-          consumed={totalCalories} 
-          target={caloriesTarget} 
-        />
-
-        {/* Main Content */}
-        <main>
-          {/* Macro Cards */}
-          <MacroCards
-            protein={{ 
-              value: totalMacros.protein, 
-              percentage: Math.round((totalMacros.protein / macroTargets.protein) * 100) 
-            }}
-            carbs={{ 
-              value: totalMacros.carbs, 
-              percentage: Math.round((totalMacros.carbs / macroTargets.carbs) * 100) 
-            }}
-            fat={{ 
-              value: totalMacros.fat, 
-              percentage: Math.round((totalMacros.fat / macroTargets.fat) * 100) 
-            }}
+          {/* Week Calendar */}
+          <WeekCalendar 
+            selectedDate={selectedDate} 
+            onDateSelect={setSelectedDate} 
           />
+
+          {/* Calorie Header */}
+          <CalorieHeader 
+            consumed={totalCalories} 
+            target={caloriesTarget} 
+          />
+
+          {/* Main Content */}
+          <main>
+            {/* Macro Cards */}
+            <MacroCards
+              protein={{ 
+                value: totalMacros.protein, 
+                percentage: Math.round((totalMacros.protein / macroTargets.protein) * 100) 
+              }}
+              carbs={{ 
+                value: totalMacros.carbs, 
+                percentage: Math.round((totalMacros.carbs / macroTargets.carbs) * 100) 
+              }}
+              fat={{ 
+                value: totalMacros.fat, 
+                percentage: Math.round((totalMacros.fat / macroTargets.fat) * 100) 
+              }}
+            />
 
         {/* Pagination Dots */}
         <div className="flex justify-center gap-1.5 my-4">
@@ -237,8 +238,9 @@ export default function Dashboard() {
               </button>
             </motion.div>
           )}
+          </div>
+          </main>
         </div>
-        </main>
       </div>
 
       {/* FAB */}
