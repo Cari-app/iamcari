@@ -1,151 +1,187 @@
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/contexts/AuthContext";
+import { BottomNav } from "@/components/BottomNav";
+import { motion } from "framer-motion";
+import logoImage from "@/assets/logo-cari.png";
 
 const Terms = () => {
   const navigate = useNavigate();
+  const { profile } = useAuth();
 
   return (
-    <div className="min-h-[100dvh] bg-slate-950 text-slate-300">
-      <div className="container max-w-3xl mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="text-slate-400 hover:text-slate-50"
+    <div className="min-h-[100dvh] pb-32 bg-background">
+      <div className="mx-auto max-w-lg relative">
+        {/* Green Gradient Background */}
+        <div className="absolute inset-x-0 top-0 h-[320px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+        
+        <div className="relative z-10">
+          {/* Top Bar */}
+          <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
+            <img src={logoImage} alt="Cari" className="h-8" />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="text-white hover:bg-white/20"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <Link to="/profile">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={profile?.avatar_url || ''} />
+                  <AvatarFallback className="bg-white/20 text-white">
+                    {profile?.full_name?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            </div>
+          </header>
+
+          {/* Title */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center px-4 mt-4"
           >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold text-slate-50">Termos de Uso</h1>
+            <h1 className="text-2xl text-white font-semibold">Termos de Uso</h1>
+            <p className="text-white/60 text-sm mt-1">Última atualização: 28 de novembro de 2025</p>
+          </motion.div>
+
+          {/* Content */}
+          <main className="px-4 pt-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="rounded-2xl bg-card border border-border p-4"
+            >
+              <ScrollArea className="h-[calc(100dvh-320px)]">
+                <div className="space-y-6 pr-4 text-sm leading-relaxed text-muted-foreground">
+                  <section>
+                    <h2 className="text-base font-semibold text-foreground mb-2">
+                      1. Aceitação dos Termos
+                    </h2>
+                    <p>
+                      Ao acessar e usar este aplicativo, você concorda em cumprir
+                      estes Termos de Uso. Se você não concordar com qualquer parte
+                      destes termos, não utilize o aplicativo.
+                    </p>
+                  </section>
+
+                  <section>
+                    <h2 className="text-base font-semibold text-foreground mb-2">
+                      2. Descrição do Serviço
+                    </h2>
+                    <p>
+                      O aplicativo fornece ferramentas para rastreamento de jejum
+                      intermitente, registro de refeições e monitoramento de
+                      métricas de saúde. O serviço é fornecido "como está" e não
+                      constitui aconselhamento médico.
+                    </p>
+                  </section>
+
+                  <section>
+                    <h2 className="text-base font-semibold text-foreground mb-2">
+                      3. Responsabilidade do Usuário
+                    </h2>
+                    <p className="mb-2">Você concorda em:</p>
+                    <ul className="list-disc list-inside space-y-1 ml-2">
+                      <li>Fornecer informações precisas e atualizadas</li>
+                      <li>Manter a confidencialidade de sua conta</li>
+                      <li>Não usar o serviço para fins ilegais ou não autorizados</li>
+                      <li>Consultar profissionais de saúde antes de mudanças dietéticas significativas</li>
+                    </ul>
+                  </section>
+
+                  <section>
+                    <h2 className="text-base font-semibold text-foreground mb-2">
+                      4. Isenção de Responsabilidade Médica
+                    </h2>
+                    <p>
+                      Este aplicativo não substitui orientação médica profissional.
+                      Consulte sempre um profissional de saúde qualificado antes de
+                      iniciar qualquer programa de jejum ou mudança dietética.
+                    </p>
+                  </section>
+
+                  <section>
+                    <h2 className="text-base font-semibold text-foreground mb-2">
+                      5. Propriedade Intelectual
+                    </h2>
+                    <p>
+                      Todo o conteúdo, design e funcionalidades do aplicativo são de
+                      propriedade exclusiva ou licenciados para uso. Você não pode
+                      copiar, modificar ou distribuir qualquer parte sem autorização
+                      expressa.
+                    </p>
+                  </section>
+
+                  <section>
+                    <h2 className="text-base font-semibold text-foreground mb-2">
+                      6. Limitação de Responsabilidade
+                    </h2>
+                    <p>
+                      Não nos responsabilizamos por danos diretos, indiretos,
+                      incidentais ou consequenciais decorrentes do uso ou
+                      incapacidade de usar o aplicativo.
+                    </p>
+                  </section>
+
+                  <section>
+                    <h2 className="text-base font-semibold text-foreground mb-2">
+                      7. Modificações do Serviço
+                    </h2>
+                    <p>
+                      Reservamos o direito de modificar ou descontinuar o serviço a
+                      qualquer momento, com ou sem aviso prévio. Não seremos
+                      responsáveis por qualquer modificação, suspensão ou
+                      descontinuação do serviço.
+                    </p>
+                  </section>
+
+                  <section>
+                    <h2 className="text-base font-semibold text-foreground mb-2">
+                      8. Rescisão
+                    </h2>
+                    <p>
+                      Podemos encerrar ou suspender sua conta imediatamente, sem
+                      aviso prévio, por violação destes Termos de Uso.
+                    </p>
+                  </section>
+
+                  <section>
+                    <h2 className="text-base font-semibold text-foreground mb-2">
+                      9. Lei Aplicável
+                    </h2>
+                    <p>
+                      Estes termos são regidos pelas leis do Brasil. Quaisquer
+                      disputas serão resolvidas nos tribunais brasileiros
+                      competentes.
+                    </p>
+                  </section>
+
+                  <section>
+                    <h2 className="text-base font-semibold text-foreground mb-2">
+                      10. Contato
+                    </h2>
+                    <p>
+                      Para dúvidas sobre estes Termos de Uso, entre em contato
+                      através do e-mail: contato@cari.com.br
+                    </p>
+                  </section>
+                </div>
+              </ScrollArea>
+            </motion.div>
+          </main>
         </div>
-
-        {/* Content */}
-        <ScrollArea className="h-[calc(100dvh-8rem)]">
-          <div className="space-y-6 pr-4 text-base leading-relaxed">
-            <p className="text-slate-400 text-sm">
-              Última atualização: 28 de novembro de 2025
-            </p>
-
-            <section>
-              <h2 className="text-xl font-semibold text-slate-50 mb-3">
-                1. Aceitação dos Termos
-              </h2>
-              <p>
-                Ao acessar e usar este aplicativo, você concorda em cumprir
-                estes Termos de Uso. Se você não concordar com qualquer parte
-                destes termos, não utilize o aplicativo.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-slate-50 mb-3">
-                2. Descrição do Serviço
-              </h2>
-              <p>
-                O aplicativo fornece ferramentas para rastreamento de jejum
-                intermitente, registro de refeições e monitoramento de
-                métricas de saúde. O serviço é fornecido "como está" e não
-                constitui aconselhamento médico.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-slate-50 mb-3">
-                3. Responsabilidade do Usuário
-              </h2>
-              <p className="mb-2">Você concorda em:</p>
-              <ul className="list-disc list-inside space-y-1 ml-4">
-                <li>Fornecer informações precisas e atualizadas</li>
-                <li>Manter a confidencialidade de sua conta</li>
-                <li>
-                  Não usar o serviço para fins ilegais ou não autorizados
-                </li>
-                <li>Consultar profissionais de saúde antes de mudanças dietéticas significativas</li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-slate-50 mb-3">
-                4. Isenção de Responsabilidade Médica
-              </h2>
-              <p>
-                Este aplicativo não substitui orientação médica profissional.
-                Consulte sempre um profissional de saúde qualificado antes de
-                iniciar qualquer programa de jejum ou mudança dietética.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-slate-50 mb-3">
-                5. Propriedade Intelectual
-              </h2>
-              <p>
-                Todo o conteúdo, design e funcionalidades do aplicativo são de
-                propriedade exclusiva ou licenciados para uso. Você não pode
-                copiar, modificar ou distribuir qualquer parte sem autorização
-                expressa.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-slate-50 mb-3">
-                6. Limitação de Responsabilidade
-              </h2>
-              <p>
-                Não nos responsabilizamos por danos diretos, indiretos,
-                incidentais ou consequenciais decorrentes do uso ou
-                incapacidade de usar o aplicativo.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-slate-50 mb-3">
-                7. Modificações do Serviço
-              </h2>
-              <p>
-                Reservamos o direito de modificar ou descontinuar o serviço a
-                qualquer momento, com ou sem aviso prévio. Não seremos
-                responsáveis por qualquer modificação, suspensão ou
-                descontinuação do serviço.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-slate-50 mb-3">
-                8. Rescisão
-              </h2>
-              <p>
-                Podemos encerrar ou suspender sua conta imediatamente, sem
-                aviso prévio, por violação destes Termos de Uso.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-slate-50 mb-3">
-                9. Lei Aplicável
-              </h2>
-              <p>
-                Estes termos são regidos pelas leis do Brasil. Quaisquer
-                disputas serão resolvidas nos tribunais brasileiros
-                competentes.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-slate-50 mb-3">
-                10. Contato
-              </h2>
-              <p>
-                Para dúvidas sobre estes Termos de Uso, entre em contato
-                através do e-mail: [seu email de contato]
-              </p>
-            </section>
-          </div>
-        </ScrollArea>
       </div>
+
+      <BottomNav />
     </div>
   );
 };
