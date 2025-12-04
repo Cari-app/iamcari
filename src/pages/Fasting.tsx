@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import logoImage from '@/assets/logo-cari.png';
 
 export default function Fasting() {
   const { user, profile, refreshProfile } = useAuth();
@@ -118,7 +119,7 @@ export default function Fasting() {
         {/* Green Gradient Header */}
         <div className="bg-gradient-to-b from-primary via-primary/90 to-primary/80 pt-safe-top pb-8 rounded-b-3xl">
           <div className="flex items-center justify-between px-4 pt-4 pb-4">
-            <h1 className="text-2xl font-bold text-white">Cari</h1>
+            <img src={logoImage} alt="Cari" className="h-8" />
             <Link to="/profile">
               <Avatar className="h-10 w-10 border-2 border-white/30">
                 <AvatarImage src={profile?.avatar_url || ''} />
