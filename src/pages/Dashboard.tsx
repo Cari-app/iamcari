@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { CalorieHeader } from '@/components/dashboard/CalorieHeader';
@@ -16,42 +16,48 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Flame, Trophy, Target, Pause, Clock } from 'lucide-react';
 import logoImage from '@/assets/logo-cari.png';
+
 const MACRO_TARGETS = {
   protein: 150,
   carbs: 250,
   fat: 70
 };
+
+interface FastingSession {
+  id: string;
+  start_time: string;
+  end_time: string | null;
+  target_hours: number;
+  status: string;
+}
+
 export default function Dashboard() {
-  const {
-    user,
-    profile
-  } = useAuth();
-  const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const [activeTab, setActiveTab] = useState<'dieta' | 'jejum'>('dieta');
   const [meals, setMeals] = useState<TimelineEntry[]>([]);
+  const [fastingSessions, setFastingSessions] = useState<FastingSession[]>([]);
+  const [fastingStats, setFastingStats] = useState({ bestStreak: 0, currentStreak: 0, weeklyGoal: { completed: 0, target: 7 } });
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mealToDelete, setMealToDelete] = useState<TimelineEntry | null>(null);
+  const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const caloriesTarget = profile?.daily_calories_target || 2000;
 
-  // Memoized calculations
+  // Memoized calculations for meals
   const totalCalories = useMemo(() => meals.reduce((sum, m) => sum + (m.calories || 0), 0), [meals]);
   const totalMacros = useMemo(() => meals.reduce((acc, meal) => {
-    // Try ai_analysis first, then fallback to macros field
     const analysis = typeof meal.ai_analysis === 'object' ? meal.ai_analysis : null;
     const macros = typeof meal.macros === 'object' ? meal.macros : null;
-    
     return {
       protein: acc.protein + (analysis?.protein || macros?.protein || 0),
       carbs: acc.carbs + (analysis?.carbs || macros?.carbs || 0),
       fat: acc.fat + (analysis?.fat || macros?.fat || 0)
     };
-  }, {
-    protein: 0,
-    carbs: 0,
-    fat: 0
-  }), [meals]);
+  }, { protein: 0, carbs: 0, fat: 0 }), [meals]);
+
   const macroProps = useMemo(() => ({
     protein: {
       value: totalMacros.protein,
@@ -80,12 +86,15 @@ export default function Dashboard() {
         startOfDay.setHours(0, 0, 0, 0);
         const endOfDay = new Date(selectedDate);
         endOfDay.setHours(23, 59, 59, 999);
-        const {
-          data,
-          error
-        } = await supabase.from('meal_logs').select('*').eq('user_id', user.id).eq('entry_type', 'meal').gte('created_at', startOfDay.toISOString()).lte('created_at', endOfDay.toISOString()).order('created_at', {
-          ascending: false
-        });
+        const { data, error } = await supabase
+          .from('meal_logs')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('entry_type', 'meal')
+          .gte('created_at', startOfDay.toISOString())
+          .lte('created_at', endOfDay.toISOString())
+          .order('created_at', { ascending: false });
+        
         if (error) {
           toast({
             title: '❌ Erro ao carregar',
@@ -98,10 +107,7 @@ export default function Dashboard() {
           setMeals(data.map(log => ({
             id: log.id,
             type: 'meal' as const,
-            time: new Date(log.created_at).toLocaleTimeString('pt-BR', {
-              hour: '2-digit',
-              minute: '2-digit'
-            }),
+            time: new Date(log.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
             created_at: log.created_at,
             entry_method: log.image_url ? 'ai' as const : 'manual' as const,
             food_name: log.food_name || '',
@@ -129,17 +135,128 @@ export default function Dashboard() {
       supabase.removeChannel(channel);
     };
   }, [user, selectedDate]);
+
+  // Fetch fasting sessions and stats
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchFastingData = async () => {
+      try {
+        const startOfDay = new Date(selectedDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(selectedDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        // Fetch sessions for selected date
+        const { data: daySessions } = await supabase
+          .from('fasting_sessions')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('start_time', startOfDay.toISOString())
+          .lte('start_time', endOfDay.toISOString())
+          .order('start_time', { ascending: false });
+
+        if (daySessions) {
+          setFastingSessions(daySessions);
+        }
+
+        // Fetch all sessions for stats
+        const { data: allSessions } = await supabase
+          .from('fasting_sessions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('start_time', { ascending: false });
+
+        if (allSessions) {
+          // Calculate streaks
+          const completedSessions = allSessions.filter(s => s.status === 'completed');
+          const uniqueDays = new Set<string>();
+          completedSessions.forEach(session => {
+            const date = new Date(session.start_time);
+            uniqueDays.add(`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`);
+          });
+
+          const sortedDays = Array.from(uniqueDays)
+            .map(d => {
+              const [y, m, day] = d.split('-').map(Number);
+              return new Date(y, m, day);
+            })
+            .sort((a, b) => b.getTime() - a.getTime());
+
+          // Current streak
+          let currentStreakCount = 0;
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          for (let i = 0; i < sortedDays.length; i++) {
+            const expectedDate = new Date(today);
+            expectedDate.setDate(today.getDate() - i);
+            expectedDate.setHours(0, 0, 0, 0);
+            
+            const sessionDate = new Date(sortedDays[i]);
+            sessionDate.setHours(0, 0, 0, 0);
+            
+            if (sessionDate.getTime() === expectedDate.getTime()) {
+              currentStreakCount++;
+            } else {
+              break;
+            }
+          }
+
+          // Best streak
+          let maxStreak = currentStreakCount;
+          let tempStreak = 1;
+          for (let i = 1; i < sortedDays.length; i++) {
+            const prevDate = sortedDays[i - 1];
+            const currDate = sortedDays[i];
+            const diffDays = Math.round((prevDate.getTime() - currDate.getTime()) / 86400000);
+            if (diffDays === 1) {
+              tempStreak++;
+              maxStreak = Math.max(maxStreak, tempStreak);
+            } else {
+              tempStreak = 1;
+            }
+          }
+
+          // Weekly goal
+          const sevenDaysAgo = new Date();
+          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+          const weeklyCompleted = allSessions.filter(s => 
+            s.status === 'completed' && new Date(s.start_time) >= sevenDaysAgo
+          ).length;
+
+          setFastingStats({
+            bestStreak: Math.max(maxStreak, currentStreakCount),
+            currentStreak: currentStreakCount,
+            weeklyGoal: { completed: weeklyCompleted, target: 7 }
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching fasting data:', error);
+      }
+    };
+
+    fetchFastingData();
+    
+    const channel = supabase.channel('dashboard-fasting').on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'fasting_sessions',
+      filter: `user_id=eq.${user.id}`
+    }, fetchFastingData).subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, selectedDate]);
+
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
   const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
   
-  // Handle delete meal with confirmation
   const handleDeleteMeal = async () => {
     if (!user || !mealToDelete) return;
-    
     const mealId = mealToDelete.id;
     setMealToDelete(null);
-    
-    // Optimistic UI update
     setMeals(prev => prev.filter(m => m.id !== mealId));
     
     const { error } = await supabase
@@ -149,26 +266,49 @@ export default function Dashboard() {
       .eq('user_id', user.id);
     
     if (error) {
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível deletar a refeição.',
-        variant: 'destructive',
-      });
-      // Refetch on error
+      toast({ title: 'Erro', description: 'Não foi possível deletar a refeição.', variant: 'destructive' });
     } else {
-      toast({
-        title: 'Refeição deletada',
-        description: 'O registro e macros foram removidos.',
-      });
+      toast({ title: 'Refeição deletada', description: 'O registro e macros foram removidos.' });
     }
   };
-  return <div className="min-h-[100dvh] pb-24 bg-background">
+
+  const handleDeleteSession = async () => {
+    if (!user || !sessionToDelete) return;
+    const sessionId = sessionToDelete;
+    setSessionToDelete(null);
+    setFastingSessions(prev => prev.filter(s => s.id !== sessionId));
+    
+    const { error } = await supabase
+      .from('fasting_sessions')
+      .delete()
+      .eq('id', sessionId)
+      .eq('user_id', user.id);
+    
+    if (error) {
+      toast({ title: 'Erro', description: 'Não foi possível deletar o jejum.', variant: 'destructive' });
+    } else {
+      toast({ title: 'Jejum deletado', description: 'O registro foi removido.' });
+    }
+  };
+
+  const formatPausedTime = (session: FastingSession) => {
+    if (!session.end_time) return '';
+    const start = new Date(session.start_time);
+    const end = new Date(session.end_time);
+    const elapsedMs = end.getTime() - start.getTime();
+    const minutes = Math.floor(elapsedMs / (1000 * 60));
+    if (minutes < 60) return `${minutes} minutos`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins === 0 ? `${hours}h` : `${hours}h${mins}min`;
+  };
+
+  return (
+    <div className="min-h-[100dvh] pb-24 bg-background">
       <div className="mx-auto max-w-lg relative">
-        {/* Green Gradient Background */}
         <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
         
         <div className="relative z-10">
-          {/* Top Bar */}
           <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
             <img src={logoImage} alt="Cari" className="h-8" />
             <Link to="/profile">
@@ -182,58 +322,158 @@ export default function Dashboard() {
           </header>
 
           <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
-          <CalorieHeader consumed={totalCalories} target={caloriesTarget} />
+          
+          {activeTab === 'dieta' && (
+            <CalorieHeader consumed={totalCalories} target={caloriesTarget} />
+          )}
 
           <main>
-            <MacroCards {...macroProps} className="mb-12" />
-
+            <AnimatePresence mode="wait">
+              {activeTab === 'dieta' ? (
+                <motion.div
+                  key="dieta-macros"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <MacroCards {...macroProps} className="mb-12" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="jejum-stats"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.2 }}
+                  className="px-4 mt-6"
+                >
+                  {/* Fasting Stats Cards */}
+                  <div className="grid grid-cols-3 gap-3 mb-6">
+                    <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                      <p className="text-xs text-muted-foreground mb-1">Melhor sequência</p>
+                      <p className="text-2xl font-bold text-foreground">{fastingStats.bestStreak} Dias</p>
+                      <Flame className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
+                    </div>
+                    <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                      <p className="text-xs text-muted-foreground mb-1">Sequência atual</p>
+                      <p className="text-2xl font-bold text-foreground">{fastingStats.currentStreak} Dias</p>
+                      <Trophy className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
+                    </div>
+                    <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                      <p className="text-xs text-muted-foreground mb-1">Meta Semanal</p>
+                      <p className="text-2xl font-bold text-foreground">{fastingStats.weeklyGoal.completed}/{fastingStats.weeklyGoal.target}</p>
+                      <Target className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Tab Navigation */}
             <div className="flex mx-4 mt-6">
-              <button className="flex-1 pb-3 text-center text-green-900 font-medium relative">
+              <button 
+                onClick={() => setActiveTab('dieta')}
+                className={`flex-1 pb-3 text-center font-medium relative transition-colors ${activeTab === 'dieta' ? 'text-green-900' : 'text-green-800/60'}`}
+              >
                 Dieta
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#84cc16] rounded-full" />
+                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'dieta' ? 'bg-[#84cc16]' : 'bg-green-800/30'}`} />
               </button>
-              <button onClick={() => navigate('/fasting')} className="flex-1 pb-3 text-center text-green-800 font-medium relative">
+              <button 
+                onClick={() => setActiveTab('jejum')}
+                className={`flex-1 pb-3 text-center font-medium relative transition-colors ${activeTab === 'jejum' ? 'text-green-900' : 'text-green-800/60'}`}
+              >
                 Jejum
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-800 rounded-full" />
+                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'jejum' ? 'bg-[#84cc16]' : 'bg-green-800/30'}`} />
               </button>
             </div>
 
-            {/* Meal List */}
+            {/* Content List */}
             <div className="px-4 py-4 space-y-3">
-              {loading ? (
-                <>
-                  <Skeleton className="h-32 rounded-2xl" />
-                  <Skeleton className="h-32 rounded-2xl" />
-                </>
-              ) : meals.length > 0 ? (
-                meals.map(meal => (
-                  <SwipeableRow
-                    key={meal.id}
-                    onDelete={() => setMealToDelete(meal)}
+              <AnimatePresence mode="wait">
+                {activeTab === 'dieta' ? (
+                  <motion.div
+                    key="dieta-list"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-3"
                   >
-                    <MealCard meal={meal} dailyTarget={caloriesTarget} />
-                  </SwipeableRow>
-                ))
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center py-12"
-                >
-                  <p className="text-muted-foreground">Nenhuma refeição registrada hoje</p>
-                  <button onClick={handleOpenModal} className="mt-4 text-primary font-medium">
-                    Adicionar primeira refeição
-                  </button>
-                </motion.div>
-              )}
+                    {loading ? (
+                      <>
+                        <Skeleton className="h-32 rounded-2xl" />
+                        <Skeleton className="h-32 rounded-2xl" />
+                      </>
+                    ) : meals.length > 0 ? (
+                      meals.map(meal => (
+                        <SwipeableRow key={meal.id} onDelete={() => setMealToDelete(meal)}>
+                          <MealCard meal={meal} dailyTarget={caloriesTarget} />
+                        </SwipeableRow>
+                      ))
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground">Nenhuma refeição registrada hoje</p>
+                        <button onClick={handleOpenModal} className="mt-4 text-primary font-medium">
+                          Adicionar primeira refeição
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="jejum-list"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-3"
+                  >
+                    {fastingSessions.length > 0 ? (
+                      fastingSessions.map(session => (
+                        <SwipeableRow key={session.id} onDelete={() => setSessionToDelete(session.id)}>
+                          <div className="p-4 rounded-2xl bg-card border border-border">
+                            <div className="flex items-start gap-3">
+                              <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-[#84cc16]/20' : 'bg-orange-500/20'}`}>
+                                {session.status === 'completed' ? (
+                                  <Clock className="h-5 w-5 text-[#84cc16]" />
+                                ) : (
+                                  <Pause className="h-5 w-5 text-orange-500" />
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                  <h3 className="font-semibold text-foreground">
+                                    {session.status === 'completed' 
+                                      ? `Jejum de ${session.target_hours}h concluído`
+                                      : `Jejum de ${formatPausedTime(session)} pausado`
+                                    }
+                                  </h3>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  {new Date(session.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                  {session.end_time && ` - ${new Date(session.end_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </SwipeableRow>
+                      ))
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground">Nenhum jejum registrado hoje</p>
+                        <Link to="/fasting" className="mt-4 text-primary font-medium block">
+                          Iniciar jejum
+                        </Link>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </main>
         </div>
       </div>
 
-      <FloatingActionButton onClick={handleOpenModal} />
+      {activeTab === 'dieta' && <FloatingActionButton onClick={handleOpenModal} />}
       <BottomNav />
       
       <MealInputDialog open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={() => {}} onPhotoSubmitted={handleCloseModal} />
@@ -243,7 +483,16 @@ export default function Dashboard() {
         onOpenChange={(open) => !open && setMealToDelete(null)}
         onConfirm={handleDeleteMeal}
         title="Deletar refeição?"
-        description="Você perderá todos os dados e macros desta refeição. Esta ação não pode ser desfeita."
+        description="Você perderá todos os dados e macros desta refeição."
       />
-    </div>;
+      
+      <DeleteConfirmationDrawer
+        open={!!sessionToDelete}
+        onOpenChange={(open) => !open && setSessionToDelete(null)}
+        onConfirm={handleDeleteSession}
+        title="Deletar jejum?"
+        description="Você perderá o registro deste jejum."
+      />
+    </div>
+  );
 }
