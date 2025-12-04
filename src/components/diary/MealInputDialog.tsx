@@ -55,7 +55,7 @@ export function MealInputDialog({
   const uploadSteps = [
     'Comprimindo imagem...',
     'Enviando para a nuvem...',
-    'A Dona está analisando...',
+    'A Cari está analisando...',
     'Calculando calorias...',
   ];
 

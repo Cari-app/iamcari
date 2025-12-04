@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* LeveStay Light Mode - Pure White Base */
+    /* Cari Light Mode - Pure White Base */
     --background: 0 0% 100%;
     --foreground: 215 28% 10%;
 
@@ -75,7 +75,7 @@
   }
 
   .dark {
-    /* LeveStay Dark Mode - Near Black Base */
+    /* Cari Dark Mode - Near Black Base */
     --background: 222 47% 4%;
     --foreground: 210 20% 98%;
 

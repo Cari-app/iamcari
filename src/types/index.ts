@@ -1,4 +1,4 @@
-// LeveStay Type Definitions
+// Cari Type Definitions
 
 export interface Profile {
   id: string;

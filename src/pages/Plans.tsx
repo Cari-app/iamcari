@@ -20,7 +20,7 @@ const Plans = () => {
     subtitle: "O Começo",
     price: "27,00",
     fitcoins: 30,
-    features: ["Diário Inteligente", "Acesso Básico à Dona", "Análise de Jejum", "Suporte via Email"],
+    features: ["Diário Inteligente", "Acesso Básico à Cari", "Análise de Jejum", "Suporte via Email"],
     checkoutUrl: "", // TODO: INSERT STRIPE CHECKOUT LINK FOR TRIAL PLAN
     highlighted: false,
     tier: "trial"
@@ -31,7 +31,7 @@ const Plans = () => {
     subtitle: "O Destaque",
     price: "67,00",
     fitcoins: 80,
-    features: ["Diário Inteligente", "Acesso à Dona (WhatsApp)", "Análise de Jejum Avançada", "Suporte Prioritário", "Acesso Antecipado a Features"],
+    features: ["Diário Inteligente", "Acesso à Cari (WhatsApp)", "Análise de Jejum Avançada", "Suporte Prioritário", "Acesso Antecipado a Features"],
     checkoutUrl: "", // TODO: INSERT STRIPE CHECKOUT LINK FOR VIP PLAN
     highlighted: true,
     tier: "vip"
@@ -42,7 +42,7 @@ const Plans = () => {
     subtitle: "O Poderoso",
     price: "97,00",
     fitcoins: 190,
-    features: ["Diário Inteligente", "Acesso à Dona (WhatsApp)", "Análise de Jejum Avançada", "Suporte Prioritário", "Acesso Ilimitado a Novas Features", "Consultoria Mensal"],
+    features: ["Diário Inteligente", "Acesso à Cari (WhatsApp)", "Análise de Jejum Avançada", "Suporte Prioritário", "Acesso Ilimitado a Novas Features", "Consultoria Mensal"],
     checkoutUrl: "", // TODO: INSERT STRIPE CHECKOUT LINK FOR PREMIUM PLAN
     highlighted: false,
     tier: "premium"
@@ -90,7 +90,7 @@ const Plans = () => {
           </h1>
           
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Tenha a inteligência da Dona e a visão computacional trabalhando por você 24h por dia.
+            Tenha a inteligência da Cari e a visão computacional trabalhando por você 24h por dia.
           </p>
         </motion.div>
 
