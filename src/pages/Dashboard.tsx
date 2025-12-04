@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import logoImage from '@/assets/logo-cari.png';
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
@@ -138,7 +139,7 @@ export default function Dashboard() {
         <div className="bg-gradient-to-b from-primary via-primary/90 to-primary/80 pt-safe-top rounded-b-3xl">
           {/* Top Bar */}
           <div className="flex items-center justify-between px-4 pt-4 pb-2">
-            <h1 className="text-2xl font-bold text-white">Cari</h1>
+            <img src={logoImage} alt="Cari" className="h-8" />
             <Link to="/profile">
               <Avatar className="h-10 w-10 border-2 border-white/30">
                 <AvatarImage src={profile?.avatar_url || ''} />
