@@ -379,14 +379,14 @@ export default function Fasting() {
             <CircularProgress progress={isActive ? progress : 0} size={300} strokeWidth={16}>
               <div className="text-center">
                 <div className="flex items-baseline justify-center">
-                  <span className="text-7xl font-black tabular-nums tracking-tight text-foreground">
+                  <span className="text-7xl font-black tabular-nums tracking-tight bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent">
                     {time.hours}
                   </span>
-                  <span className="text-5xl font-bold text-foreground/60 mx-1">:</span>
-                  <span className="text-7xl font-black tabular-nums tracking-tight text-foreground">
+                  <span className="text-5xl font-bold bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent mx-1">:</span>
+                  <span className="text-7xl font-black tabular-nums tracking-tight bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent">
                     {time.minutes}
                   </span>
-                  <span className="text-3xl font-semibold tabular-nums text-muted-foreground ml-1">
+                  <span className="text-3xl font-semibold tabular-nums text-green-700/60 ml-1">
                     :{time.seconds}
                   </span>
                 </div>
