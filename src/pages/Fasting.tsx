@@ -206,25 +206,33 @@ export default function Fasting() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="flex justify-center py-6"
+            className="flex justify-center py-8"
           >
-            <CircularProgress progress={isActive ? progress : 0} size={280} strokeWidth={20}>
+            <CircularProgress progress={isActive ? progress : 0} size={300} strokeWidth={16}>
               <div className="text-center">
                 <div className="flex items-baseline justify-center">
-                  <span className="text-6xl font-bold tabular-nums text-foreground">
-                    {time.hours}:{time.minutes}
+                  <span className="text-7xl font-black tabular-nums tracking-tight text-foreground">
+                    {time.hours}
                   </span>
-                  <span className="text-2xl font-medium tabular-nums text-muted-foreground ml-1">
+                  <span className="text-5xl font-bold text-foreground/60 mx-1">:</span>
+                  <span className="text-7xl font-black tabular-nums tracking-tight text-foreground">
+                    {time.minutes}
+                  </span>
+                  <span className="text-3xl font-semibold tabular-nums text-muted-foreground ml-1">
                     :{time.seconds}
                   </span>
                 </div>
                 
-                <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">
+                <motion.div 
+                  className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Clock className="h-4 w-4 text-[#84cc16]" />
+                  <span className="text-sm font-semibold text-foreground">
                     Meta: {isActive ? targetHours : selectedProtocol}h
                   </span>
-                </div>
+                </motion.div>
               </div>
             </CircularProgress>
           </motion.div>
