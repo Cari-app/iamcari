@@ -32,7 +32,7 @@ export const BottomNav = memo(function BottomNav() {
                   className={({ isActive }) =>
                     cn(
                       'flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200 press-effect min-w-[64px]',
-                      isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                      isActive ? 'text-[#84cc16]' : 'text-muted-foreground hover:text-foreground'
                     )
                   }
                 >
