@@ -5,6 +5,7 @@ import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { CircularProgress } from '@/components/CircularProgress';
 import { ProtocolSelector } from '@/components/dashboard/ProtocolSelector';
+import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { useFastingTimer } from '@/hooks/useFastingTimer';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -291,6 +292,31 @@ export default function Fasting() {
     // Data will be refreshed via real-time subscription
   };
 
+  // Handle delete session
+  const handleDeleteSession = async (sessionId: string) => {
+    if (!user) return;
+    
+    const { error } = await supabase
+      .from('fasting_sessions')
+      .delete()
+      .eq('id', sessionId)
+      .eq('user_id', user.id);
+    
+    if (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível deletar o jejum.',
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Jejum deletado',
+        description: 'O registro foi removido.',
+      });
+      // Data will be refreshed via real-time subscription
+    }
+  };
+
   const time = formatTime(elapsedSeconds);
 
   const formatPausedTime = (minutes: number) => {
@@ -439,34 +465,34 @@ export default function Fasting() {
             {historyList.length > 0 && !isActive && (
               <div className="space-y-3">
                 {historyList.map((session) => (
-                  <motion.div
+                  <SwipeableRow
                     key={session.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-4 rounded-2xl bg-card border border-border"
+                    onDelete={() => handleDeleteSession(session.id)}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-[#84cc16]/20' : 'bg-orange-500/20'}`}>
-                        <Pause className={`h-5 w-5 ${session.status === 'completed' ? 'text-[#84cc16]' : 'text-orange-500'}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-muted-foreground">
-                          Início {new Date(session.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                        <p className="font-semibold text-foreground truncate">
-                          Jejum de {formatPausedTime(session.elapsed_minutes)} {session.status === 'completed' ? 'completo' : 'pausado'}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(session.end_time).toLocaleDateString('pt-BR')}
-                        </p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <p className={`text-sm font-medium ${session.progress >= 100 ? 'text-[#84cc16]' : 'text-orange-500'}`}>
-                          {session.progress}% reach
-                        </p>
+                    <div className="p-4 rounded-2xl bg-card border border-border">
+                      <div className="flex items-start gap-3">
+                        <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-[#84cc16]/20' : 'bg-orange-500/20'}`}>
+                          <Pause className={`h-5 w-5 ${session.status === 'completed' ? 'text-[#84cc16]' : 'text-orange-500'}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-muted-foreground">
+                            Início {new Date(session.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                          <p className="font-semibold text-foreground truncate">
+                            Jejum de {formatPausedTime(session.elapsed_minutes)} {session.status === 'completed' ? 'completo' : 'pausado'}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(session.end_time).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className={`text-sm font-medium ${session.progress >= 100 ? 'text-[#84cc16]' : 'text-orange-500'}`}>
+                            {session.progress}% reach
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </motion.div>
+                  </SwipeableRow>
                 ))}
               </div>
             )}
