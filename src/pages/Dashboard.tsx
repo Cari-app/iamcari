@@ -9,16 +9,8 @@ import { MealCard } from '@/components/dashboard/MealCard';
 import { MealInputDialog } from '@/components/diary/MealInputDialog';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
+import { DeleteConfirmationDrawer } from '@/components/DeleteConfirmationDrawer';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -242,24 +234,12 @@ export default function Dashboard() {
       
       <MealInputDialog open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={() => {}} onPhotoSubmitted={handleCloseModal} />
       
-      {/* Delete Confirmation Drawer */}
-      <Drawer open={!!mealToDelete} onOpenChange={(open) => !open && setMealToDelete(null)}>
-        <DrawerContent>
-          <DrawerHeader className="text-center">
-            <DrawerTitle>Deletar refeição?</DrawerTitle>
-            <DrawerDescription>
-              Você perderá todos os dados e macros desta refeição. Esta ação não pode ser desfeita.
-            </DrawerDescription>
-          </DrawerHeader>
-          <DrawerFooter className="flex-row gap-3 pb-8">
-            <Button variant="outline" className="flex-1" onClick={() => setMealToDelete(null)}>
-              Cancelar
-            </Button>
-            <Button variant="destructive" className="flex-1" onClick={handleDeleteMeal}>
-              Deletar
-            </Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+      <DeleteConfirmationDrawer
+        open={!!mealToDelete}
+        onOpenChange={(open) => !open && setMealToDelete(null)}
+        onConfirm={handleDeleteMeal}
+        title="Deletar refeição?"
+        description="Você perderá todos os dados e macros desta refeição. Esta ação não pode ser desfeita."
+      />
     </div>;
 }

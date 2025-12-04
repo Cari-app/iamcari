@@ -6,6 +6,7 @@ import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { CircularProgress } from '@/components/CircularProgress';
 import { ProtocolSelector } from '@/components/dashboard/ProtocolSelector';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
+import { DeleteConfirmationDrawer } from '@/components/DeleteConfirmationDrawer';
 import { useFastingTimer } from '@/hooks/useFastingTimer';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -45,6 +46,7 @@ export default function Fasting() {
   const [currentStreak, setCurrentStreak] = useState(0);
   const [weeklyGoal, setWeeklyGoal] = useState({ completed: 0, target: 7 });
   const [historyList, setHistoryList] = useState<HistorySession[]>([]);
+  const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   
   // Load protocol from profile
@@ -293,8 +295,11 @@ export default function Fasting() {
   };
 
   // Handle delete session
-  const handleDeleteSession = async (sessionId: string) => {
-    if (!user) return;
+  const handleDeleteSession = async () => {
+    if (!user || !sessionToDelete) return;
+    
+    const sessionId = sessionToDelete;
+    setSessionToDelete(null);
     
     // Optimistic UI update - remove immediately
     setHistoryList(prev => prev.filter(s => s.id !== sessionId));
@@ -471,7 +476,7 @@ export default function Fasting() {
                 {historyList.map((session) => (
                   <SwipeableRow
                     key={session.id}
-                    onDelete={() => handleDeleteSession(session.id)}
+                    onDelete={() => setSessionToDelete(session.id)}
                   >
                     <div className="p-4 rounded-2xl bg-card border border-border">
                       <div className="flex items-start gap-3">
@@ -506,6 +511,14 @@ export default function Fasting() {
       </div>
 
       <BottomNav />
+      
+      <DeleteConfirmationDrawer
+        open={!!sessionToDelete}
+        onOpenChange={(open) => !open && setSessionToDelete(null)}
+        onConfirm={handleDeleteSession}
+        title="Deletar jejum?"
+        description="Você perderá o registro deste jejum. Esta ação não pode ser desfeita."
+      />
     </div>
   );
 }
