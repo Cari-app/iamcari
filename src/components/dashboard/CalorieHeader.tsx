@@ -18,24 +18,24 @@ export function CalorieHeader({ consumed, target }: CalorieHeaderProps) {
       className="text-center px-4 pb-6"
     >
       <div className="mb-2">
-        <span className="text-6xl font-extrabold text-foreground tabular-nums dark:text-primary dark:drop-shadow-[0_0_20px_rgba(132,204,22,0.3)]">
+        <span className="text-6xl font-extrabold text-white tabular-nums">
           {formattedConsumed}
         </span>
-        <p className="text-muted-foreground text-lg mt-1">kcal</p>
+        <p className="text-white/70 text-lg mt-1">kcal</p>
       </div>
       
       <div className="mt-4 space-y-2">
-        <div className="h-3 bg-muted dark:bg-primary/10 rounded-full overflow-hidden">
+        <div className="h-3 bg-green-200 rounded-full overflow-hidden">
           <motion.div 
             initial={{ width: 0 }} 
             animate={{ width: `${percentage}%` }} 
             transition={{ duration: 0.8, ease: 'easeOut' }} 
-            className="h-full bg-primary rounded-full dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]" 
+            className="h-full bg-green-500 rounded-full" 
           />
         </div>
         <div className="flex justify-between text-sm">
-          <span className="font-bold text-muted-foreground">0 kcal</span>
-          <span className="font-bold text-muted-foreground">{formattedTarget} kcal</span>
+          <span className="font-bold text-white">0 kcal</span>
+          <span className="font-bold text-white">{formattedTarget} kcal</span>
         </div>
       </div>
     </motion.div>
