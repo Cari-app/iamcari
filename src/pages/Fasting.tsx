@@ -289,9 +289,8 @@ export default function Fasting() {
                 className="p-4 rounded-2xl bg-card border border-border"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex gap-1">
-                    <div className="w-1.5 h-8 bg-[#84cc16] rounded-full" />
-                    <div className="w-1.5 h-8 bg-[#84cc16] rounded-full" />
+                  <div className="p-2 rounded-full bg-[#84cc16]/20">
+                    <Pause className="h-5 w-5 text-[#84cc16]" />
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-muted-foreground">
