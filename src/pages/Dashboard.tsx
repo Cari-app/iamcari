@@ -133,10 +133,10 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-24">
+    <div className="min-h-[100dvh] pb-24">
       <div className="mx-auto max-w-lg">
-        {/* Green Gradient Header */}
-        <div className="bg-gradient-to-b from-green-950 via-green-900 to-green-800 pt-safe-top rounded-b-3xl">
+        {/* Full Page Gradient Background */}
+        <div className="bg-gradient-to-b from-green-950 via-green-900/80 to-background pt-safe-top min-h-screen">
           {/* Top Bar */}
           <div className="flex items-center justify-between px-4 pt-4 pb-2">
             <img src={logoImage} alt="Cari" className="h-8" />
@@ -161,25 +161,24 @@ export default function Dashboard() {
             consumed={totalCalories} 
             target={caloriesTarget} 
           />
-        </div>
 
-      {/* Main Content */}
-      <main className="relative z-10">
-        {/* Macro Cards */}
-        <MacroCards
-          protein={{ 
-            value: totalMacros.protein, 
-            percentage: Math.round((totalMacros.protein / macroTargets.protein) * 100) 
-          }}
-          carbs={{ 
-            value: totalMacros.carbs, 
-            percentage: Math.round((totalMacros.carbs / macroTargets.carbs) * 100) 
-          }}
-          fat={{ 
-            value: totalMacros.fat, 
-            percentage: Math.round((totalMacros.fat / macroTargets.fat) * 100) 
-          }}
-        />
+        {/* Main Content */}
+        <main className="relative z-10">
+          {/* Macro Cards */}
+          <MacroCards
+            protein={{ 
+              value: totalMacros.protein, 
+              percentage: Math.round((totalMacros.protein / macroTargets.protein) * 100) 
+            }}
+            carbs={{ 
+              value: totalMacros.carbs, 
+              percentage: Math.round((totalMacros.carbs / macroTargets.carbs) * 100) 
+            }}
+            fat={{ 
+              value: totalMacros.fat, 
+              percentage: Math.round((totalMacros.fat / macroTargets.fat) * 100) 
+            }}
+          />
 
         {/* Pagination Dots */}
         <div className="flex justify-center gap-1.5 my-4">
@@ -238,8 +237,8 @@ export default function Dashboard() {
             </motion.div>
           )}
         </div>
-      </main>
-
+        </main>
+        </div>
       </div>
 
       {/* FAB */}
