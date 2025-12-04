@@ -1,28 +1,41 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { format, isSameDay, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 
 interface WeekCalendarProps {
   selectedDate: Date;
   onDateSelect: (date: Date) => void;
 }
 
+interface DayItem {
+  date: Date;
+  dayName: string;
+  dayNumber: string;
+}
+
 export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const dragState = useRef({ isDragging: false, startX: 0, scrollLeft: 0 });
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
   
-  const today = new Date();
-  const days = Array.from({ length: 31 }, (_, i) => subDays(today, 15 - i));
+  const today = useMemo(() => new Date(), []);
+  
+  // Pre-calculate all day data to avoid recalculation on render
+  const days = useMemo<DayItem[]>(() => 
+    Array.from({ length: 31 }, (_, i) => {
+      const date = subDays(today, 15 - i);
+      return {
+        date,
+        dayName: format(date, 'EEEEE', { locale: ptBR }).toUpperCase(),
+        dayNumber: format(date, 'd'),
+      };
+    }), [today]
+  );
 
-  const ITEM_WIDTH = 44; // w-11 = 44px
-
-  const findCenterItem = useCallback(() => {
-    if (!scrollRef.current) return;
+  const findCenterIndex = useCallback((): number => {
+    if (!scrollRef.current) return 15;
     
     const container = scrollRef.current;
     const containerCenter = container.scrollLeft + container.offsetWidth / 2;
@@ -39,175 +52,120 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
       }
     });
     
-    const centerDay = days[closestIndex];
-    if (centerDay && !isSameDay(centerDay, selectedDate)) {
-      onDateSelect(centerDay);
-    }
-  }, [days, selectedDate, onDateSelect]);
+    return closestIndex;
+  }, []);
 
   const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = 'smooth') => {
     const element = itemRefs.current.get(index);
     if (element && scrollRef.current) {
       const container = scrollRef.current;
-      const containerWidth = container.offsetWidth;
-      const elementLeft = element.offsetLeft;
-      const elementWidth = element.offsetWidth;
-      const scrollPosition = elementLeft - (containerWidth / 2) + (elementWidth / 2);
+      const scrollPosition = element.offsetLeft - (container.offsetWidth / 2) + (element.offsetWidth / 2);
       container.scrollTo({ left: scrollPosition, behavior });
     }
   }, []);
 
+  const handleScrollEnd = useCallback(() => {
+    const centerIndex = findCenterIndex();
+    const centerDay = days[centerIndex];
+    
+    if (centerDay && !isSameDay(centerDay.date, selectedDate)) {
+      onDateSelect(centerDay.date);
+    }
+    
+    scrollToIndex(centerIndex, 'smooth');
+  }, [findCenterIndex, days, selectedDate, onDateSelect, scrollToIndex]);
+
   // Center today on mount
   useEffect(() => {
-    const todayIndex = days.findIndex(day => isSameDay(day, today));
+    const todayIndex = days.findIndex(day => isSameDay(day.date, today));
     if (todayIndex !== -1) {
-      setTimeout(() => scrollToIndex(todayIndex, 'auto'), 50);
+      requestAnimationFrame(() => scrollToIndex(todayIndex, 'auto'));
     }
-  }, []);
+  }, [days, today, scrollToIndex]);
 
-  // Handle scroll end - snap to center and select
-  const handleScrollEnd = useCallback(() => {
-    findCenterItem();
-    
-    // Snap to center
-    if (!scrollRef.current) return;
-    const container = scrollRef.current;
-    const containerCenter = container.scrollLeft + container.offsetWidth / 2;
-    
-    let closestIndex = 0;
-    let closestDistance = Infinity;
-    
-    itemRefs.current.forEach((element, index) => {
-      const elementCenter = element.offsetLeft + element.offsetWidth / 2;
-      const distance = Math.abs(containerCenter - elementCenter);
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestIndex = index;
-      }
-    });
-    
-    scrollToIndex(closestIndex, 'smooth');
-  }, [findCenterItem, scrollToIndex]);
-
-  // Debounced scroll handler
+  // Scroll listener with debounce
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
     
-    let scrollTimeout: NodeJS.Timeout;
-    
     const handleScroll = () => {
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => {
-        if (!isDragging) {
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+      scrollTimeout.current = setTimeout(() => {
+        if (!dragState.current.isDragging) {
           handleScrollEnd();
         }
       }, 100);
     };
     
-    container.addEventListener('scroll', handleScroll);
+    container.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       container.removeEventListener('scroll', handleScroll);
-      clearTimeout(scrollTimeout);
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
     };
-  }, [handleScrollEnd, isDragging]);
+  }, [handleScrollEnd]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setStartX(e.pageX - (scrollRef.current?.offsetLeft || 0));
-    setScrollLeft(scrollRef.current?.scrollLeft || 0);
+  const handlePointerDown = (e: React.PointerEvent) => {
+    dragState.current = {
+      isDragging: true,
+      startX: e.pageX - (scrollRef.current?.offsetLeft || 0),
+      scrollLeft: scrollRef.current?.scrollLeft || 0,
+    };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!dragState.current.isDragging) return;
     e.preventDefault();
     const x = e.pageX - (scrollRef.current?.offsetLeft || 0);
-    const walk = (x - startX) * 1.5;
+    const walk = (x - dragState.current.startX) * 1.5;
     if (scrollRef.current) {
-      scrollRef.current.scrollLeft = scrollLeft - walk;
+      scrollRef.current.scrollLeft = dragState.current.scrollLeft - walk;
     }
   };
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    handleScrollEnd();
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true);
-    setStartX(e.touches[0].pageX - (scrollRef.current?.offsetLeft || 0));
-    setScrollLeft(scrollRef.current?.scrollLeft || 0);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-    const x = e.touches[0].pageX - (scrollRef.current?.offsetLeft || 0);
-    const walk = (x - startX) * 1.5;
-    if (scrollRef.current) {
-      scrollRef.current.scrollLeft = scrollLeft - walk;
-    }
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
+  const handlePointerUp = () => {
+    dragState.current.isDragging = false;
     handleScrollEnd();
   };
 
   return (
     <div 
       ref={scrollRef}
-      className="flex items-end justify-start gap-0 overflow-x-auto scrollbar-hide py-4 px-8 cursor-grab active:cursor-grabbing select-none"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+      className="flex items-end gap-0 overflow-x-auto scrollbar-hide py-4 px-8 cursor-grab active:cursor-grabbing select-none touch-pan-x"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+      onPointerCancel={handlePointerUp}
     >
       {days.map((day, index) => {
-        const isSelected = isSameDay(day, selectedDate);
-        const dayName = format(day, 'EEEEE', { locale: ptBR }).toUpperCase();
-        const dayNumber = format(day, 'd');
+        const isSelected = isSameDay(day.date, selectedDate);
         
         return (
-          <motion.button
+          <div
             key={index}
             ref={(el) => {
               if (el) itemRefs.current.set(index, el);
             }}
-            className="flex flex-col items-center shrink-0 transition-all duration-300 ease-out w-11"
+            className="flex flex-col items-center shrink-0 w-11"
           >
-            <motion.span 
+            <span 
               className={cn(
-                'font-semibold tracking-wider transition-all duration-300',
-                isSelected
-                  ? 'text-primary' 
-                  : 'text-white/35'
+                'font-semibold tracking-wider transition-all duration-200 ease-out',
+                isSelected ? 'text-[13px] mb-1 text-primary' : 'text-[10px] mb-0.5 text-white/35'
               )}
-              animate={{ 
-                fontSize: isSelected ? '13px' : '10px',
-                marginBottom: isSelected ? '4px' : '2px',
-              }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
-              {dayName}
-            </motion.span>
-            <motion.span 
+              {day.dayName}
+            </span>
+            <span 
               className={cn(
-                'font-bold transition-all duration-300',
-                isSelected
-                  ? 'text-primary' 
-                  : 'text-white/50'
+                'font-bold transition-all duration-200 ease-out',
+                isSelected ? 'text-[28px] text-primary' : 'text-lg text-white/50'
               )}
-              animate={{ 
-                fontSize: isSelected ? '28px' : '18px',
-              }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
-              {dayNumber}
-            </motion.span>
-          </motion.button>
+              {day.dayNumber}
+            </span>
+          </div>
         );
       })}
     </div>
