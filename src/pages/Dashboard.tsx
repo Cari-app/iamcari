@@ -133,37 +133,38 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-[100dvh] pb-24">
-      <div className="mx-auto max-w-lg">
-        {/* Full Page Gradient Background */}
-        <div className="bg-gradient-to-b from-green-950 via-green-900/80 to-background pt-safe-top min-h-screen">
-          {/* Top Bar */}
-          <div className="flex items-center justify-between px-4 pt-4 pb-2">
-            <img src={logoImage} alt="Cari" className="h-8" />
-            <Link to="/profile">
-              <Avatar className="h-10 w-10 border-2 border-white/30">
-                <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback className="bg-white/20 text-white">
-                  {profile?.full_name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
-          </div>
+    <div className="min-h-[100dvh] pb-24 bg-background relative">
+      {/* Green Gradient Background - stops at middle of cards */}
+      <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+      
+      <div className="mx-auto max-w-lg relative z-10">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
+          <img src={logoImage} alt="Cari" className="h-8" />
+          <Link to="/profile">
+            <Avatar className="h-10 w-10 border-2 border-white/30">
+              <AvatarImage src={profile?.avatar_url || ''} />
+              <AvatarFallback className="bg-white/20 text-white">
+                {profile?.full_name?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+        </div>
 
-          {/* Week Calendar */}
-          <WeekCalendar 
-            selectedDate={selectedDate} 
-            onDateSelect={setSelectedDate} 
-          />
+        {/* Week Calendar */}
+        <WeekCalendar 
+          selectedDate={selectedDate} 
+          onDateSelect={setSelectedDate} 
+        />
 
-          {/* Calorie Header */}
-          <CalorieHeader 
-            consumed={totalCalories} 
-            target={caloriesTarget} 
-          />
+        {/* Calorie Header */}
+        <CalorieHeader 
+          consumed={totalCalories} 
+          target={caloriesTarget} 
+        />
 
         {/* Main Content */}
-        <main className="relative z-10">
+        <main>
           {/* Macro Cards */}
           <MacroCards
             protein={{ 
@@ -238,7 +239,6 @@ export default function Dashboard() {
           )}
         </div>
         </main>
-        </div>
       </div>
 
       {/* FAB */}
