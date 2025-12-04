@@ -112,24 +112,20 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
             }}
             whileTap={{ scale: 0.92 }}
             onClick={() => handleSelect(day, index)}
-            className={cn(
-              'flex flex-col items-center justify-end shrink-0 transition-all duration-300 ease-out',
-              isSelected 
-                ? 'w-16 py-3' 
-                : 'w-11 py-2'
-            )}
+            className="flex flex-col items-center shrink-0 transition-all duration-300 ease-out w-11"
           >
             <motion.span 
               className={cn(
                 'font-semibold tracking-wider transition-all duration-300',
-                isSelected ? 'text-[11px] mb-1.5' : 'text-[9px] mb-1',
                 isSelected
                   ? 'text-primary' 
                   : 'text-white/35'
               )}
               animate={{ 
-                opacity: isSelected ? 1 : 0.6,
+                fontSize: isSelected ? '13px' : '10px',
+                marginBottom: isSelected ? '4px' : '2px',
               }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
               {dayName}
             </motion.span>
@@ -141,22 +137,12 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
                   : 'text-white/50'
               )}
               animate={{ 
-                fontSize: isSelected ? '32px' : '18px',
-                opacity: isSelected ? 1 : 0.7,
+                fontSize: isSelected ? '28px' : '18px',
               }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
               {dayNumber}
             </motion.span>
-            <motion.div 
-              className="w-1 h-1 rounded-full bg-primary mt-2"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ 
-                scale: isSelected ? 1 : 0, 
-                opacity: isSelected ? 1 : 0 
-              }}
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            />
           </motion.button>
         );
       })}
