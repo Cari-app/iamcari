@@ -393,10 +393,10 @@ export default function Fasting() {
                 
                 {isActive ? (
                   <motion.div 
-                    className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card/80 backdrop-blur-md border border-border dark:border-primary/20 shadow-lg dark:shadow-[0_0_20px_-5px_rgba(132,204,22,0.2)]"
+                    className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20"
                   >
-                    <Clock className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-semibold text-foreground">
+                    <Clock className="h-4 w-4 text-green-300" />
+                    <span className="text-sm font-semibold text-white">
                       Meta: {targetHours}h
                     </span>
                   </motion.div>
