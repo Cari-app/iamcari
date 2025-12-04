@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { InstallPWAButton } from "@/components/InstallPWAButton";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Fasting from "./pages/Fasting";
 import Diary from "./pages/Diary";
 import Progress from "./pages/Progress";
 import Profile from "./pages/Profile";
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/fasting-result" element={<ProtectedRoute><FastingResult /></ProtectedRoute>} />
             <Route path="/diet-result" element={<ProtectedRoute><DietResult /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/fasting" element={<ProtectedRoute><Fasting /></ProtectedRoute>} />
             <Route path="/diary" element={<ProtectedRoute><Diary /></ProtectedRoute>} />
             <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

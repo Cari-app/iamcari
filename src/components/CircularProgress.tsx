@@ -28,11 +28,11 @@ export function CircularProgress({
         className="transform -rotate-90 overflow-visible"
         style={{ overflow: 'visible' }}
       >
-        {/* Gradient definition */}
+        {/* Gradient definition - Green palette */}
         <defs>
           <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(263 70% 58%)" />
-            <stop offset="100%" stopColor="hsl(168 76% 48%)" />
+            <stop offset="0%" stopColor="hsl(142 76% 36%)" />
+            <stop offset="100%" stopColor="hsl(158 64% 52%)" />
           </linearGradient>
           
           {/* Stronger glow filter */}
@@ -75,7 +75,7 @@ export function CircularProgress({
           strokeDashoffset={offset}
           filter="url(#glow)"
           style={{ 
-            filter: 'drop-shadow(0 0 12px hsl(263 70% 58% / 0.5)) drop-shadow(0 0 24px hsl(168 76% 48% / 0.3))'
+            filter: 'drop-shadow(0 0 12px hsl(142 76% 36% / 0.5)) drop-shadow(0 0 24px hsl(158 64% 52% / 0.3))'
           }}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
@@ -88,10 +88,10 @@ export function CircularProgress({
             cx={size / 2 + radius * Math.sin((progress / 100) * 2 * Math.PI)}
             cy={size / 2 - radius * Math.cos((progress / 100) * 2 * Math.PI)}
             r={strokeWidth / 2 + 6}
-            fill="hsl(168 76% 48%)"
+            fill="hsl(158 64% 52%)"
             className="opacity-60"
             style={{ 
-              filter: 'drop-shadow(0 0 8px hsl(168 76% 48% / 0.8))'
+              filter: 'drop-shadow(0 0 8px hsl(158 64% 52% / 0.8))'
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.7 }}
