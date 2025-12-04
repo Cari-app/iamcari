@@ -151,7 +151,7 @@ export default function Dashboard() {
           .from('fasting_sessions')
           .select('*')
           .eq('user_id', user.id)
-          .or(`start_time.gte.${startOfDay.toISOString()}.start_time.lte.${endOfDay.toISOString()},end_time.gte.${startOfDay.toISOString()}.end_time.lte.${endOfDay.toISOString()}`)
+          .or(`and(start_time.gte.${startOfDay.toISOString()},start_time.lte.${endOfDay.toISOString()}),and(end_time.gte.${startOfDay.toISOString()},end_time.lte.${endOfDay.toISOString()})`)
           .order('start_time', { ascending: false });
 
         if (daySessions) {
