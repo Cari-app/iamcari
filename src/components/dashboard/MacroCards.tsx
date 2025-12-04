@@ -46,7 +46,7 @@ export const MacroCards = memo(function MacroCards({
       y: 0
     }} transition={{
       delay: index * 0.1
-    }} className="bg-white/95 rounded-2xl p-4 text-center shadow-sm border-green-800 border-0">
+    }} className="bg-white/95 rounded-2xl p-4 text-center border-green-800 border-0 shadow-md">
           <p className="text-green-800 text-sm font-medium">{label}</p>
           <p className="text-2xl font-bold text-green-900 mt-1">
             {macros[key].value}G
