@@ -1,20 +1,23 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Card } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, ArrowRight, User, Activity, Target, Sparkles, TrendingUp, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import logoImage from '@/assets/logo-cari.png';
 
 const Assessment = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { refreshProfile } = useAuth();
+  const { refreshProfile, profile } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [calculatedData, setCalculatedData] = useState<{
@@ -152,43 +155,49 @@ const Assessment = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background flex flex-col">
-      {/* Header with Progress */}
-      <div 
-        className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border"
-        style={{ paddingTop: 'calc(2rem + env(safe-area-inset-top, 0px))' }}
-      >
-        <div className="max-w-2xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-3 mb-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => step === 1 ? navigate('/dashboard') : handleBack()}
-              className="shrink-0"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div className="flex-1">
-              <h1 className="text-lg font-semibold">Avaliação Metabólica</h1>
-              <p className="text-xs text-muted-foreground">Passo {step} de 3</p>
+    <div className="min-h-[100dvh] pb-8 bg-background">
+      <div className="mx-auto max-w-lg relative">
+        {/* Green Gradient Background */}
+        <div className="absolute inset-x-0 top-0 h-[200px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+        
+        <div className="relative z-10">
+          {/* Top Bar */}
+          <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
+            <img src={logoImage} alt="Cari" className="h-8" />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => step === 1 ? navigate('/dashboard') : handleBack()}
+                className="text-white hover:bg-white/20"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <Link to="/profile">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={profile?.avatar_url || ''} />
+                  <AvatarFallback className="bg-white/20 text-white">
+                    {profile?.full_name?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
             </div>
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <motion.div
-              className="h-full gradient-primary"
-              initial={{ width: '0%' }}
-              animate={{ width: `${(step / 3) * 100}%` }}
-              transition={{ duration: 0.3 }}
-            />
-          </div>
-        </div>
-      </div>
+          </header>
 
-      {/* Content */}
-      <div className="flex-1 max-w-2xl mx-auto w-full px-4 py-6 pb-24">
-        <AnimatePresence mode="wait">
+          {/* Progress Section */}
+          <div className="px-4 py-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-white/80">Avaliação Metabólica</span>
+              <span className="text-sm font-medium text-white/60">
+                Passo {step}/3
+              </span>
+            </div>
+            <Progress value={(step / 3) * 100} className="h-2" />
+          </div>
+
+          {/* Content */}
+          <main className="px-4 pt-4">
+            <AnimatePresence mode="wait">
           {/* RESULT STEP (Step 4) */}
           {step === 4 && calculatedData && (
             <motion.div
@@ -568,6 +577,10 @@ const Assessment = () => {
           </div>
         </div>
       )}
+            </AnimatePresence>
+          </main>
+        </div>
+      </div>
     </div>
   );
 };
