@@ -78,7 +78,7 @@ export function TimelineEntryCard({ entry, onEdit }: TimelineEntryCardProps) {
             
             {/* Food name */}
             <p className="text-sm font-medium text-foreground truncate mt-0.5">
-              {isPending ? 'Aguardando análise de imagem...' : entry.food_name}
+              {isPending ? 'Aguardando análise de imagem...' : (entry.food_name || 'Refeição')}
             </p>
             
             {/* Calories */}
