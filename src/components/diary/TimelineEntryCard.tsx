@@ -57,7 +57,7 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
                 <h3 className="font-semibold text-foreground truncate">
                   {isPending ? 'Aguardando análise de imagem...' : (entry.food_name || 'Refeição')}
                 </h3>
-                <p className="text-lg text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {entry.calories || 0}kcal
                 </p>
               </div>
@@ -76,14 +76,14 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
             </div>
             
             {/* Macro badges */}
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-xs px-2.5 py-1 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
+            <div className="flex items-center gap-1.5 mt-2">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
                 Prot: {macros.protein}g
               </span>
-              <span className="text-xs px-2.5 py-1 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
                 Carb: {macros.carbs}g
               </span>
-              <span className="text-xs px-2.5 py-1 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
                 Fat: {macros.fat}g
               </span>
             </div>
