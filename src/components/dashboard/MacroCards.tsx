@@ -14,20 +14,20 @@ export function MacroCards({ protein, carbs, fat }: MacroCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-3 px-4 -mt-4">
+    <div className="grid grid-cols-3 gap-3 px-4">
       {macros.map((macro, index) => (
         <motion.div
           key={macro.label}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
-          className="bg-card border border-border rounded-2xl p-4 text-center"
+          className="bg-white/95 rounded-2xl p-4 text-center shadow-sm"
         >
-          <p className="text-muted-foreground text-sm">{macro.label}</p>
-          <p className="text-2xl font-bold text-primary mt-1">
+          <p className="text-green-800 text-sm font-medium">{macro.label}</p>
+          <p className="text-2xl font-bold text-green-900 mt-1">
             {macro.value}G
           </p>
-          <p className="text-muted-foreground text-xs mt-1">
+          <p className="text-green-700/70 text-xs mt-1">
             {macro.percentage}%
           </p>
         </motion.div>
