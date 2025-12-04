@@ -21,6 +21,10 @@ export const useAchievementNotifications = () => {
           filter: `user_id=eq.${user.id}`,
         },
         async (payload) => {
+          // Check if notifications are enabled
+          const notificationsEnabled = localStorage.getItem('notifications_enabled') !== 'false';
+          if (!notificationsEnabled) return;
+
           // Fetch achievement details
           const { data: achievement } = await supabase
             .from('achievements')

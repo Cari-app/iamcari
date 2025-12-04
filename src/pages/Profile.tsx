@@ -117,6 +117,17 @@ export default function Profile() {
   const [editNickname, setEditNickname] = useState('');
   const [savingPersonalData, setSavingPersonalData] = useState(false);
 
+  // Notifications preference
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    const saved = localStorage.getItem('notifications_enabled');
+    return saved !== 'false'; // Default to true
+  });
+
+  const handleNotificationsToggle = (checked: boolean) => {
+    setNotificationsEnabled(checked);
+    localStorage.setItem('notifications_enabled', String(checked));
+  };
+
   // Fetch essential profile data (fast)
   useEffect(() => {
     if (!user) {
@@ -773,15 +784,18 @@ export default function Profile() {
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </button>
 
-                  <button
-                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
+                  <div
+                    className="w-full flex items-center justify-between p-4 border-b border-border"
                   >
                     <div className="flex items-center gap-3">
                       <Bell className="h-5 w-5 text-muted-foreground" />
                       <span className="font-medium text-foreground">Notificações</span>
                     </div>
-                    <Switch defaultChecked />
-                  </button>
+                    <Switch 
+                      checked={notificationsEnabled} 
+                      onCheckedChange={handleNotificationsToggle}
+                    />
+                  </div>
 
                   <div className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
