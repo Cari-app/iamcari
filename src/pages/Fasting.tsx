@@ -296,6 +296,9 @@ export default function Fasting() {
   const handleDeleteSession = async (sessionId: string) => {
     if (!user) return;
     
+    // Optimistic UI update - remove immediately
+    setHistoryList(prev => prev.filter(s => s.id !== sessionId));
+    
     const { error } = await supabase
       .from('fasting_sessions')
       .delete()
@@ -303,6 +306,8 @@ export default function Fasting() {
       .eq('user_id', user.id);
     
     if (error) {
+      // Revert on error - refetch data
+      fetchFastingData();
       toast({
         title: 'Erro',
         description: 'Não foi possível deletar o jejum.',
@@ -313,7 +318,6 @@ export default function Fasting() {
         title: 'Jejum deletado',
         description: 'O registro foi removido.',
       });
-      // Data will be refreshed via real-time subscription
     }
   };
 
