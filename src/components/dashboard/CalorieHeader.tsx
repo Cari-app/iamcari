@@ -25,12 +25,12 @@ export function CalorieHeader({ consumed, target }: CalorieHeaderProps) {
       
       {/* Progress Bar */}
       <div className="mt-4 space-y-2">
-        <div className="h-3 bg-white/20 rounded-full overflow-hidden">
+        <div className="h-3 bg-lime-100/30 rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${percentage}%` }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="h-full bg-white rounded-full"
+            className="h-full bg-gradient-to-r from-lime-300 to-lime-400 rounded-full"
           />
         </div>
         <div className="flex justify-between text-sm">
