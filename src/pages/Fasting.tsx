@@ -15,13 +15,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import logoImage from '@/assets/logo-cari.png';
 import { toast } from '@/hooks/use-toast';
 
-interface PausedSession {
+interface HistorySession {
   id: string;
   start_time: string;
   end_time: string;
   target_hours: number;
   elapsed_minutes: number;
   progress: number;
+  status: 'completed' | 'paused';
 }
 
 interface FastingSession {
@@ -42,7 +43,7 @@ export default function Fasting() {
   const [bestStreak, setBestStreak] = useState(0);
   const [currentStreak, setCurrentStreak] = useState(0);
   const [weeklyGoal, setWeeklyGoal] = useState({ completed: 0, target: 7 });
-  const [pausedSession, setPausedSession] = useState<PausedSession | null>(null);
+  const [historyList, setHistoryList] = useState<HistorySession[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Load protocol from profile
@@ -194,27 +195,30 @@ export default function Fasting() {
         
         setWeeklyGoal({ completed: weeklyCompleted, target: 7 });
         
-        // Find last paused session
-        const lastPaused = sessions.find(s => s.status === 'paused');
-        
-        if (lastPaused && lastPaused.end_time) {
-          const start = new Date(lastPaused.start_time);
-          const end = new Date(lastPaused.end_time);
-          const elapsedMs = end.getTime() - start.getTime();
-          const elapsedMins = Math.floor(elapsedMs / (1000 * 60));
-          const targetMins = (lastPaused.target_hours || 16) * 60;
-          
-          setPausedSession({
-            id: lastPaused.id,
-            start_time: lastPaused.start_time,
-            end_time: lastPaused.end_time,
-            target_hours: lastPaused.target_hours || 16,
-            elapsed_minutes: elapsedMins,
-            progress: Math.round((elapsedMins / targetMins) * 100),
+        // Build history list from completed and paused sessions
+        const historyData = sessions
+          .filter(s => s.status === 'completed' || s.status === 'paused')
+          .filter(s => s.end_time) // Only sessions with end time
+          .slice(0, 10) // Limit to last 10
+          .map(session => {
+            const start = new Date(session.start_time);
+            const end = new Date(session.end_time!);
+            const elapsedMs = end.getTime() - start.getTime();
+            const elapsedMins = Math.floor(elapsedMs / (1000 * 60));
+            const targetMins = (session.target_hours || 16) * 60;
+            
+            return {
+              id: session.id,
+              start_time: session.start_time,
+              end_time: session.end_time!,
+              target_hours: session.target_hours || 16,
+              elapsed_minutes: elapsedMins,
+              progress: Math.round((elapsedMins / targetMins) * 100),
+              status: session.status as 'completed' | 'paused',
+            };
           });
-        } else {
-          setPausedSession(null);
-        }
+        
+        setHistoryList(historyData);
       }
     } catch (error) {
       console.error('Error fetching fasting data:', error);
@@ -431,33 +435,40 @@ export default function Fasting() {
               )}
             </div>
 
-            {/* Last Paused Session */}
-            {pausedSession && !isActive && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-4 rounded-2xl bg-card border border-border"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-full bg-[#84cc16]/20 mt-1">
-                    <Pause className="h-5 w-5 text-[#84cc16]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground">
-                      Inicio {new Date(pausedSession.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    <p className="font-semibold text-foreground truncate">
-                      Jejum de {formatPausedTime(pausedSession.elapsed_minutes)} pausado
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(pausedSession.end_time).toLocaleDateString('pt-BR')}
-                    </p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-medium text-[#84cc16]">{pausedSession.progress}% reach</p>
-                  </div>
-                </div>
-              </motion.div>
+            {/* Fasting History List */}
+            {historyList.length > 0 && !isActive && (
+              <div className="space-y-3">
+                {historyList.map((session) => (
+                  <motion.div
+                    key={session.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 rounded-2xl bg-card border border-border"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-[#84cc16]/20' : 'bg-orange-500/20'}`}>
+                        <Pause className={`h-5 w-5 ${session.status === 'completed' ? 'text-[#84cc16]' : 'text-orange-500'}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground">
+                          Início {new Date(session.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <p className="font-semibold text-foreground truncate">
+                          Jejum de {formatPausedTime(session.elapsed_minutes)} {session.status === 'completed' ? 'completo' : 'pausado'}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(session.end_time).toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className={`text-sm font-medium ${session.progress >= 100 ? 'text-[#84cc16]' : 'text-orange-500'}`}>
+                          {session.progress}% reach
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             )}
 
           </main>
