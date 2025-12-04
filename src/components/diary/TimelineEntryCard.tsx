@@ -34,7 +34,7 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
       <div className="p-4 rounded-2xl bg-card border border-border group">
         <div className="flex gap-4">
           {/* Image */}
-          <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted shrink-0">
+          <div className="w-20 h-24 rounded-xl overflow-hidden bg-muted shrink-0">
             {entry.image_url ? (
               <img 
                 src={entry.image_url} 
