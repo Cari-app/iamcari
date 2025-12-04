@@ -190,19 +190,17 @@ export default function Dashboard() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-border mx-4">
-          <button className="flex-1 py-3 text-center text-muted-foreground font-medium relative">
+        <div className="flex mx-4 mt-6">
+          <button className="flex-1 pb-3 text-center text-green-900 font-medium relative">
             Dieta
-            <motion.div 
-              layoutId="tab-indicator"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" 
-            />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-400 rounded-full" />
           </button>
           <button 
             onClick={() => navigate('/fasting')}
-            className="flex-1 py-3 text-center text-muted-foreground font-medium"
+            className="flex-1 pb-3 text-center text-green-800 font-medium relative"
           >
             Jejum
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-800 rounded-full" />
           </button>
         </div>
 
