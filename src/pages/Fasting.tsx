@@ -296,8 +296,8 @@ export default function Fasting() {
                 animate={{ opacity: 1, y: 0 }}
                 className="p-4 rounded-2xl bg-card border border-border"
               >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-full bg-[#84cc16]/20">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-full bg-[#84cc16]/20 mt-1">
                     <Pause className="h-5 w-5 text-[#84cc16]" />
                   </div>
                   <div className="flex-1 min-w-0">
