@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,7 +24,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,6 +35,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
+import logoImage from '@/assets/logo-cari.png';
 
 export default function Profile() {
   const { theme, toggleTheme } = useTheme();
@@ -342,99 +341,104 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-24 safe-pt-20 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#84cc16]" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24 safe-pt-20 relative overflow-hidden">
-      {/* Background gradient effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
-      
-      <Navbar />
-      
-      <main className="px-4 py-6">
-        <div className="mx-auto max-w-lg space-y-6">
-          {/* Profile Card */}
+    <div className="min-h-[100dvh] pb-32 bg-background">
+      <div className="mx-auto max-w-lg relative">
+        {/* Green Gradient Background */}
+        <div className="absolute inset-x-0 top-0 h-[320px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+        
+        <div className="relative z-10">
+          {/* Top Bar */}
+          <header className="flex items-center justify-center px-4 pt-4 pb-2 pt-safe-top">
+            <img src={logoImage} alt="Cari" className="h-8" />
+          </header>
+
+          {/* Profile Header */}
+          <div className="text-center px-4 mt-4">
+            <h2 className="text-2xl text-white font-semibold">Meu Perfil</h2>
+            <p className="text-white/60 text-sm mt-1">Gerencie suas informações</p>
+          </div>
+
+          {/* Avatar Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            className="px-4 pt-6"
           >
-            <Card className="glass border-primary/30 overflow-hidden">
-              <CardContent className="p-5 space-y-4">
-                {/* Avatar + Info */}
-                <div className="flex items-start gap-4">
-                  {/* Avatar */}
-                  <div className="relative flex-shrink-0">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      className="hidden"
-                    />
-                    
-                    <div className="relative w-20 h-20 group">
-                      {avatarUrl ? (
-                        <img
-                          src={avatarUrl}
-                          alt="Avatar"
-                          className="w-20 h-20 rounded-2xl object-cover border-2 border-primary/50"
-                        />
-                      ) : (
-                        <div className="w-20 h-20 rounded-2xl gradient-primary flex items-center justify-center border-2 border-primary/50">
-                          <User className="h-10 w-10 text-white" />
-                        </div>
-                      )}
-                      
-                      <button
-                        onClick={handleAvatarClick}
-                        disabled={uploadingAvatar}
-                        className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-                      >
-                        {uploadingAvatar ? (
-                          <Loader2 className="h-6 w-6 text-white animate-spin" />
-                        ) : (
-                          <Camera className="h-6 w-6 text-white" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Name & Info */}
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h1 className="text-xl font-bold text-foreground truncate">
-                          {fullName}
-                        </h1>
-                        {isAdmin && (
-                          <Badge className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs border-none">
-                            <Shield className="h-3 w-3 mr-1" />
-                            ADMIN
-                          </Badge>
-                        )}
+            <div className="p-5 rounded-2xl bg-card border border-border">
+              <div className="flex items-start gap-4">
+                {/* Avatar */}
+                <div className="relative flex-shrink-0">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                  />
+                  
+                  <div className="relative w-20 h-20 group">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt="Avatar"
+                        className="w-20 h-20 rounded-2xl object-cover border-2 border-[#84cc16]/50"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center border-2 border-[#84cc16]/50">
+                        <User className="h-10 w-10 text-white" />
                       </div>
-                      {nickname && (
-                        <p className="text-sm text-muted-foreground">
-                          @{nickname}
-                        </p>
-                      )}
-                    </div>
+                    )}
                     
-                    {/* Stats */}
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 text-teal" />
-                      <span>{totalFastingHours}h de jejum total</span>
-                    </div>
+                    <button
+                      onClick={handleAvatarClick}
+                      disabled={uploadingAvatar}
+                      className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                    >
+                      {uploadingAvatar ? (
+                        <Loader2 className="h-6 w-6 text-white animate-spin" />
+                      ) : (
+                        <Camera className="h-6 w-6 text-white" />
+                      )}
+                    </button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+
+                {/* Name & Info */}
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h1 className="text-xl font-bold text-foreground truncate">
+                        {fullName}
+                      </h1>
+                      {isAdmin && (
+                        <Badge className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-xs border-none">
+                          <Shield className="h-3 w-3 mr-1" />
+                          ADMIN
+                        </Badge>
+                      )}
+                    </div>
+                    {nickname && (
+                      <p className="text-sm text-muted-foreground">
+                        @{nickname}
+                      </p>
+                    )}
+                  </div>
+                  
+                  {/* Stats */}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4 text-[#84cc16]" />
+                    <span>{totalFastingHours}h de jejum total</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
 
           {/* Active Diet Card */}
@@ -443,183 +447,190 @@ export default function Profile() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 }}
+              className="px-4 pt-4"
             >
-              <Card className="glass border-teal-500/30 overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
-                      Sua Dieta Ativa
-                    </h2>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate('/diet-result')}
-                      className="h-7 text-xs"
-                    >
-                      Ver detalhes
-                      <ChevronRight className="h-3 w-3 ml-1" />
-                    </Button>
+              <div className="p-4 rounded-2xl bg-card border border-border">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                    Sua Dieta Ativa
+                  </h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate('/diet-result')}
+                    className="h-7 text-xs"
+                  >
+                    Ver detalhes
+                    <ChevronRight className="h-3 w-3 ml-1" />
+                  </Button>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  {/* Diet Icon */}
+                  <div className={cn(
+                    "w-16 h-16 rounded-2xl flex items-center justify-center text-3xl",
+                    "border-2",
+                    activeDiet.color_theme === 'violet' && "bg-violet-500/10 border-violet-500/50",
+                    activeDiet.color_theme === 'teal' && "bg-teal-500/10 border-teal-500/50",
+                    activeDiet.color_theme === 'blue' && "bg-blue-500/10 border-blue-500/50",
+                    activeDiet.color_theme === 'red' && "bg-red-500/10 border-red-500/50",
+                    activeDiet.color_theme === 'orange' && "bg-orange-500/10 border-orange-500/50",
+                    activeDiet.color_theme === 'green' && "bg-green-500/10 border-green-500/50",
+                  )}>
+                    {activeDiet.icon}
                   </div>
-                  
-                  <div className="flex items-center gap-4">
-                    {/* Diet Icon */}
-                    <div className={cn(
-                      "w-16 h-16 rounded-2xl flex items-center justify-center text-3xl",
-                      "border-2",
-                      activeDiet.color_theme === 'violet' && "bg-violet-500/10 border-violet-500/50",
-                      activeDiet.color_theme === 'teal' && "bg-teal-500/10 border-teal-500/50",
-                      activeDiet.color_theme === 'blue' && "bg-blue-500/10 border-blue-500/50",
-                      activeDiet.color_theme === 'red' && "bg-red-500/10 border-red-500/50",
-                      activeDiet.color_theme === 'orange' && "bg-orange-500/10 border-orange-500/50",
-                      activeDiet.color_theme === 'green' && "bg-green-500/10 border-green-500/50",
-                    )}>
-                      {activeDiet.icon}
-                    </div>
 
-                    {/* Diet Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className={cn(
-                        "text-lg font-bold mb-1",
-                        activeDiet.color_theme === 'violet' && "text-violet-400",
-                        activeDiet.color_theme === 'teal' && "text-teal-400",
-                        activeDiet.color_theme === 'blue' && "text-blue-400",
-                        activeDiet.color_theme === 'red' && "text-red-400",
-                        activeDiet.color_theme === 'orange' && "text-orange-400",
-                        activeDiet.color_theme === 'green' && "text-green-400",
-                      )}>
-                        {activeDiet.name}
-                      </h3>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        {activeDiet.short_description}
-                      </p>
-                    </div>
+                  {/* Diet Info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className={cn(
+                      "text-lg font-bold mb-1",
+                      activeDiet.color_theme === 'violet' && "text-violet-400",
+                      activeDiet.color_theme === 'teal' && "text-teal-400",
+                      activeDiet.color_theme === 'blue' && "text-blue-400",
+                      activeDiet.color_theme === 'red' && "text-red-400",
+                      activeDiet.color_theme === 'orange' && "text-orange-400",
+                      activeDiet.color_theme === 'green' && "text-green-400",
+                    )}>
+                      {activeDiet.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {activeDiet.short_description}
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </motion.div>
           )}
 
           {/* Settings Menu */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="space-y-6"
-          >
+          <main className="px-4 pt-4 space-y-4">
             {/* Group 1: Biometria */}
-            <div className="space-y-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="space-y-2"
+            >
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
                 Biometria
               </p>
-              <Card>
-                <CardContent className="p-0">
-                  <button
-                    onClick={handleEditPersonalData}
-                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <User className="h-5 w-5 text-muted-foreground" />
-                      <span className="font-medium text-foreground">Meus Dados</span>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </button>
+              <div className="rounded-2xl bg-card border border-border overflow-hidden">
+                <button
+                  onClick={handleEditPersonalData}
+                  className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
+                >
+                  <div className="flex items-center gap-3">
+                    <User className="h-5 w-5 text-muted-foreground" />
+                    <span className="font-medium text-foreground">Meus Dados</span>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </button>
 
-                  <button
-                    onClick={handleEditBodyStats}
-                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Scale className="h-5 w-5 text-muted-foreground" />
-                      <span className="font-medium text-foreground">Dados Corporais</span>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </button>
-                </CardContent>
-              </Card>
-            </div>
+                <button
+                  onClick={handleEditBodyStats}
+                  className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Scale className="h-5 w-5 text-muted-foreground" />
+                    <span className="font-medium text-foreground">Dados Corporais</span>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </button>
+              </div>
+            </motion.div>
 
             {/* Group 2: App Settings */}
-            <div className="space-y-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="space-y-2"
+            >
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
                 Configurações
               </p>
-              <Card>
-                <CardContent className="p-0">
-                  <div
-                    className="w-full flex items-center justify-between p-4 border-b border-border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Bell className="h-5 w-5 text-muted-foreground" />
-                      <span className="font-medium text-foreground">Notificações</span>
-                    </div>
-                    <Switch 
-                      checked={notificationsEnabled} 
-                      onCheckedChange={handleNotificationsToggle}
-                    />
+              <div className="rounded-2xl bg-card border border-border overflow-hidden">
+                <div className="w-full flex items-center justify-between p-4 border-b border-border">
+                  <div className="flex items-center gap-3">
+                    <Bell className="h-5 w-5 text-muted-foreground" />
+                    <span className="font-medium text-foreground">Notificações</span>
                   </div>
+                  <Switch 
+                    checked={notificationsEnabled} 
+                    onCheckedChange={handleNotificationsToggle}
+                  />
+                </div>
 
-                  <div className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
-                      {theme === 'dark' ? (
-                        <Moon className="h-5 w-5 text-primary" />
-                      ) : (
-                        <Sun className="h-5 w-5 text-yellow-500" />
-                      )}
-                      <span className="font-medium text-foreground">Modo Escuro</span>
-                    </div>
-                    <Switch
-                      checked={theme === 'dark'}
-                      onCheckedChange={toggleTheme}
-                    />
+                <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    {theme === 'dark' ? (
+                      <Moon className="h-5 w-5 text-[#84cc16]" />
+                    ) : (
+                      <Sun className="h-5 w-5 text-yellow-500" />
+                    )}
+                    <span className="font-medium text-foreground">Modo Escuro</span>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <Switch
+                    checked={theme === 'dark'}
+                    onCheckedChange={toggleTheme}
+                  />
+                </div>
+              </div>
+            </motion.div>
 
             {/* Group 3: Suporte */}
-            <div className="space-y-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="space-y-2"
+            >
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
                 Suporte
               </p>
-              <Card>
-                <CardContent className="p-0">
-                  <button
-                    onClick={() => navigate('/help')}
-                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <HelpCircle className="h-5 w-5 text-muted-foreground" />
-                      <span className="font-medium text-foreground">Ajuda & Suporte</span>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </button>
+              <div className="rounded-2xl bg-card border border-border overflow-hidden">
+                <button
+                  onClick={() => navigate('/help')}
+                  className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors border-b border-border"
+                >
+                  <div className="flex items-center gap-3">
+                    <HelpCircle className="h-5 w-5 text-muted-foreground" />
+                    <span className="font-medium text-foreground">Ajuda & Suporte</span>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </button>
 
-                  <button
-                    onClick={() => navigate('/privacy')}
-                    className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Shield className="h-5 w-5 text-muted-foreground" />
-                      <span className="font-medium text-foreground">Termos & Privacidade</span>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </button>
-                </CardContent>
-              </Card>
-            </div>
+                <button
+                  onClick={() => navigate('/privacy')}
+                  className="w-full flex items-center justify-between p-4 press-effect hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Shield className="h-5 w-5 text-muted-foreground" />
+                    <span className="font-medium text-foreground">Termos & Privacidade</span>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </button>
+              </div>
+            </motion.div>
 
             {/* Footer: Logout */}
-            <Button
-              onClick={handleSignOut}
-              variant="outline"
-              className="w-full justify-start gap-3 h-auto py-4 border-destructive/30 hover:bg-destructive/10 text-destructive"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
             >
-              <LogOut className="h-5 w-5" />
-              <span className="font-medium">Sair da Conta</span>
-            </Button>
-          </motion.div>
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="w-full justify-start gap-3 h-auto py-4 rounded-2xl border-destructive/30 hover:bg-destructive/10 text-destructive"
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="font-medium">Sair da Conta</span>
+              </Button>
+            </motion.div>
+          </main>
         </div>
-      </main>
+      </div>
 
       <BottomNav />
 
