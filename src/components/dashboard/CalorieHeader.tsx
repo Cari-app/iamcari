@@ -38,7 +38,7 @@ export function CalorieHeader({
         </div>
         <div className="flex justify-between text-sm">
           <span className="font-bold text-green-50">0 kcal</span>
-          <span className="font-bold text-red-100">{formattedTarget}kcal</span>
+          <span className="font-bold text-green-300">{formattedTarget}kcal</span>
         </div>
       </div>
     </motion.div>;
