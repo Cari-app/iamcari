@@ -161,12 +161,6 @@ export default function Dashboard() {
           <main>
             <MacroCards {...macroProps} />
 
-            {/* Pagination Dots */}
-            <div className="flex justify-center gap-1.5 my-4">
-              <div className="w-2 h-2 rounded-full bg-primary" />
-              <div className="w-2 h-2 rounded-full bg-muted" />
-              <div className="w-2 h-2 rounded-full bg-muted" />
-            </div>
 
             {/* Tab Navigation */}
             <div className="flex mx-4 mt-6">
