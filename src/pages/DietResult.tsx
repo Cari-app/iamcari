@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { Logo } from '@/components/Logo';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { BottomNav } from '@/components/BottomNav';
+import { ArrowLeft, Sparkles, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DietType {
   id: string;
@@ -17,8 +21,9 @@ interface DietType {
 }
 
 export default function DietResult() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [diet, setDiet] = useState<DietType | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +32,6 @@ export default function DietResult() {
 
     const fetchDietResult = async () => {
       try {
-        // Fetch the most recent nutrition assessment
         const { data: assessment, error: assessmentError } = await supabase
           .from('nutrition_assessments')
           .select('suggested_diet')
@@ -48,7 +52,6 @@ export default function DietResult() {
           return;
         }
 
-        // Fetch diet details using the suggested_diet
         const { data: dietData, error: dietError } = await supabase
           .from('diet_types')
           .select('*')
@@ -84,18 +87,6 @@ export default function DietResult() {
     fetchDietResult();
   }, [user, navigate]);
 
-  const getColorClasses = (theme: string) => {
-    const colorMap: Record<string, { glow: string; border: string; text: string }> = {
-      violet: { glow: 'shadow-violet-500/50', border: 'border-violet-500/50', text: 'text-violet-400' },
-      teal: { glow: 'shadow-teal-500/50', border: 'border-teal-500/50', text: 'text-teal-400' },
-      red: { glow: 'shadow-red-500/50', border: 'border-red-500/50', text: 'text-red-400' },
-      orange: { glow: 'shadow-orange-500/50', border: 'border-orange-500/50', text: 'text-orange-400' },
-      blue: { glow: 'shadow-blue-500/50', border: 'border-blue-500/50', text: 'text-blue-400' },
-      green: { glow: 'shadow-green-500/50', border: 'border-green-500/50', text: 'text-green-400' },
-    };
-    return colorMap[theme] || colorMap.violet;
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -106,35 +97,43 @@ export default function DietResult() {
 
   if (!diet) return null;
 
-  const colors = getColorClasses(diet.color_theme);
-
   return (
     <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
-      {/* Background gradient effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
-      
+      {/* Green Gradient Background */}
+      <div className="absolute top-0 left-0 right-0 h-72 bg-gradient-to-b from-[#22c55e] to-[#16a34a] -z-10" />
+
       {/* Header */}
       <header 
-        className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border"
-        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+        className="px-4 flex items-center justify-between"
+        style={{ 
+          paddingTop: isMobile 
+            ? 'calc(1rem + env(safe-area-inset-top, 0px))' 
+            : '1rem' 
+        }}
       >
-        <div className="max-w-lg mx-auto px-4 h-16 flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate('/dashboard')}
-            className="shrink-0"
+            className="text-white hover:bg-white/20"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-lg font-semibold">Resultado</h1>
+          <Logo size="xs" forceDark />
         </div>
+        <button onClick={() => navigate('/profile')} className="press-effect">
+          <Avatar className="h-10 w-10 ring-2 ring-white/30">
+            <AvatarImage src={profile?.avatar_url || ''} alt="Avatar" />
+            <AvatarFallback className="bg-white/20">
+              <User className="h-5 w-5 text-white" />
+            </AvatarFallback>
+          </Avatar>
+        </button>
       </header>
 
       {/* Main Content */}
-      <main className="safe-pt-24 px-4 max-w-lg mx-auto">
+      <main className="px-4 pt-6 max-w-lg mx-auto">
         {/* Reveal Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -143,12 +142,12 @@ export default function DietResult() {
           className="text-center mb-8"
         >
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <p className="text-sm text-muted-foreground uppercase tracking-wider">
+            <Sparkles className="w-5 h-5 text-white" />
+            <p className="text-sm text-white/80 uppercase tracking-wider">
               Análise Concluída
             </p>
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">
+          <h2 className="text-2xl font-bold text-white mb-2">
             Sua Estratégia Ideal é...
           </h2>
         </motion.div>
@@ -158,21 +157,18 @@ export default function DietResult() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className={`relative rounded-2xl border bg-card/50 backdrop-blur-xl p-8 mb-6 shadow-2xl ${colors.border} ${colors.glow}`}
+          className="relative rounded-2xl border border-border bg-card p-8 mb-6 shadow-lg"
         >
-          {/* Icon */}
           <div className="flex justify-center mb-4">
-            <div className="w-20 h-20 rounded-full bg-background/50 border border-border flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
               <span className="text-5xl">{diet.icon}</span>
             </div>
           </div>
 
-          {/* Diet Name */}
-          <h3 className={`text-3xl font-bold text-center mb-2 ${colors.text}`}>
+          <h3 className="text-3xl font-bold text-center mb-2 text-primary">
             {diet.name}
           </h3>
 
-          {/* Short Description */}
           <p className="text-muted-foreground text-center leading-relaxed mb-4">
             {diet.full_description?.split('\n')[0]?.replace(/^##\s*/, '') || 'Sua dieta personalizada'}
           </p>
@@ -192,7 +188,7 @@ export default function DietResult() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="rounded-2xl border border-border bg-card/30 backdrop-blur-xl p-6 mb-6"
+          className="rounded-2xl border border-border bg-card p-6 mb-6"
         >
           <h4 className="text-lg font-semibold text-foreground mb-2">
             Por que esta dieta?
@@ -226,6 +222,8 @@ export default function DietResult() {
           </Button>
         </motion.div>
       </main>
+
+      <BottomNav />
     </div>
   );
 }
