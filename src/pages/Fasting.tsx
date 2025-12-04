@@ -374,14 +374,14 @@ export default function Fasting() {
           <div className="flex flex-col items-center py-6 px-4">
             <CircularProgress progress={isActive ? progress : 0} size={260} strokeWidth={14}>
               <div className="flex items-baseline justify-center">
-                <span className="text-6xl font-black tabular-nums bg-gradient-to-r from-green-700 to-green-500 bg-clip-text text-transparent">
+                <span className="text-6xl font-black tabular-nums bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent">
                   {time.hours}
                 </span>
-                <span className="text-4xl font-bold text-green-600 mx-1">:</span>
-                <span className="text-6xl font-black tabular-nums bg-gradient-to-r from-green-700 to-green-500 bg-clip-text text-transparent">
+                <span className="text-4xl font-bold bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent mx-1">:</span>
+                <span className="text-6xl font-black tabular-nums bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent">
                   {time.minutes}
                 </span>
-                <span className="text-2xl font-semibold tabular-nums text-green-400 ml-1">
+                <span className="text-2xl font-semibold tabular-nums text-green-500 ml-1">
                   :{time.seconds}
                 </span>
               </div>
