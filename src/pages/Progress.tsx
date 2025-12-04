@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
+import { DeleteConfirmationDrawer } from '@/components/DeleteConfirmationDrawer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Flame, Target, Trophy, TrendingUp, Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,7 @@ export default function Progress() {
   const [achievements, setAchievements] = useState<Array<{ id: string; emoji: string; title: string; description: string }>>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [achievementToDelete, setAchievementToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -258,13 +260,19 @@ export default function Progress() {
     };
   }, [user, selectedDate]);
 
-  const handleDeleteFasting = async (id: string) => {
-    if (!user || id === 'empty') return;
+  const handleDeleteFasting = async () => {
+    if (!user || !achievementToDelete || achievementToDelete === 'empty') return;
+
+    const idToDelete = achievementToDelete;
+    setAchievementToDelete(null);
+
+    // Optimistic update
+    setAchievements(prev => prev.filter(a => a.id !== idToDelete));
 
     const { error } = await supabase
       .from('fasting_sessions')
       .delete()
-      .eq('id', id);
+      .eq('id', idToDelete);
 
     if (error) {
       console.error('Error deleting fasting session:', error);
@@ -276,7 +284,6 @@ export default function Progress() {
       return;
     }
 
-    setAchievements(prev => prev.filter(a => a.id !== id));
     toast({
       title: '🗑️ Jejum removido',
       description: 'O registro de jejum foi apagado',
@@ -457,7 +464,7 @@ export default function Progress() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + index * 0.05 }}
                 >
-                  <SwipeableRow onDelete={() => handleDeleteFasting(achievement.id)}>
+                  <SwipeableRow onDelete={() => setAchievementToDelete(achievement.id)}>
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                       <span className="text-2xl">{achievement.emoji}</span>
                       <div>
@@ -485,6 +492,14 @@ export default function Progress() {
           </motion.div>
         </div>
       </main>
+
+      <DeleteConfirmationDrawer
+        open={!!achievementToDelete}
+        onOpenChange={(open) => !open && setAchievementToDelete(null)}
+        onConfirm={handleDeleteFasting}
+        title="Deletar jejum?"
+        description="Este registro de jejum será removido permanentemente do seu histórico."
+      />
 
       <BottomNav />
     </div>
