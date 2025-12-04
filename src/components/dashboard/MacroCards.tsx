@@ -15,6 +15,7 @@ interface MacroCardsProps {
     value: number;
     percentage: number;
   };
+  className?: string;
 }
 
 const MACROS_CONFIG = [
@@ -26,12 +27,13 @@ const MACROS_CONFIG = [
 export const MacroCards = memo(function MacroCards({
   protein,
   carbs,
-  fat
+  fat,
+  className
 }: MacroCardsProps) {
   const macros = { protein, carbs, fat };
 
   return (
-    <div className="grid grid-cols-3 gap-3 px-4">
+    <div className={`grid grid-cols-3 gap-3 px-4 ${className || ''}`}>
       {MACROS_CONFIG.map(({ key, label, icon: Icon }, index) => (
         <motion.div
           key={key}
