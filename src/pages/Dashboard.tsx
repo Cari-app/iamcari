@@ -1,489 +1,254 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Navbar } from '@/components/Navbar';
 import { BottomNav } from '@/components/BottomNav';
-import { CircularProgress } from '@/components/CircularProgress';
-import { FloatingActionButton } from '@/components/FloatingActionButton';
+import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
+import { CalorieHeader } from '@/components/dashboard/CalorieHeader';
+import { MacroCards } from '@/components/dashboard/MacroCards';
+import { MealCard } from '@/components/dashboard/MealCard';
 import { MealInputDialog } from '@/components/diary/MealInputDialog';
-import { ProtocolSelector } from '@/components/dashboard/ProtocolSelector';
-import { BentoStats } from '@/components/dashboard/BentoStats';
-import { useFastingTimer } from '@/hooks/useFastingTimer';
-import { Button } from '@/components/ui/button';
+import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Play, Pause, RotateCcw, Flame, Zap, Sparkles, Target, MapPin, UtensilsCrossed, Clock } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { TimelineEntry } from '@/types';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function Dashboard() {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isProtocolOpen, setIsProtocolOpen] = useState(false);
-  const [selectedProtocol, setSelectedProtocol] = useState(16);
-  const [isCustomProtocol, setIsCustomProtocol] = useState(false);
-  
-  // Sync selected protocol with profile on mount
-  useEffect(() => {
-    if (profile?.fasting_protocol) {
-      const hours = parseInt(profile.fasting_protocol.replace('h', ''));
-      setSelectedProtocol(hours);
-    }
-  }, [profile]);
-  
-  const {
-    elapsedSeconds,
-    progress,
-    isActive,
-    currentPhase,
-    phaseInfo,
-    startFasting,
-    stopFasting,
-    formatTime,
-    targetHours,
-  } = useFastingTimer();
-
-  // Fetch real data from Supabase
-  const [caloriesConsumed, setCaloriesConsumed] = useState(0);
-  const [lastCheckIn, setLastCheckIn] = useState<{ isEmotional: boolean; time: string } | null>(null);
-  const [weeklyFasts, setWeeklyFasts] = useState(0);
-  const [totalFastingHours, setTotalFastingHours] = useState(0);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [meals, setMeals] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Fetch meals for selected date
   useEffect(() => {
     if (!user) {
       setLoading(false);
       return;
     }
-    
-    const fetchDashboardData = async () => {
+
+    const fetchMeals = async () => {
       try {
         setLoading(true);
-        const today = new Date().toISOString().split('T')[0];
-        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const startOfDay = new Date(selectedDate);
+        startOfDay.setHours(0, 0, 0, 0);
         
-        // Fetch today's meals
-        const { data: mealsData, error: mealsError } = await supabase
-        .from('meal_logs')
-        .select('calories, is_emotional, created_at')
-        .eq('user_id', user.id)
-        .gte('created_at', `${today}T00:00:00`)
-        .order('created_at', { ascending: false });
-      
-      if (mealsError) {
-        console.error('Error fetching meals:', mealsError);
-        toast({
-          title: '❌ Erro ao carregar dados',
-          description: 'Não foi possível carregar as refeições. Tente novamente.',
-          variant: 'destructive',
-        });
-      }
-      
-      if (mealsData) {
-        const totalCalories = mealsData.reduce((sum, log) => sum + (log.calories || 0), 0);
-        setCaloriesConsumed(totalCalories);
+        const endOfDay = new Date(selectedDate);
+        endOfDay.setHours(23, 59, 59, 999);
         
-        if (mealsData.length > 0) {
-          const lastLog = mealsData[0];
-          const logTime = new Date(lastLog.created_at);
-          const now = new Date();
-          const diffMinutes = Math.floor((now.getTime() - logTime.getTime()) / 60000);
-          
-          let timeText = '';
-          if (diffMinutes < 60) {
-            timeText = `Há ${diffMinutes} minutos`;
-          } else {
-            const hours = Math.floor(diffMinutes / 60);
-            timeText = `Há ${hours} hora${hours > 1 ? 's' : ''}`;
-          }
-          
-          setLastCheckIn({
-            isEmotional: lastLog.is_emotional || false,
-            time: timeText,
+        const { data, error } = await supabase
+          .from('meal_logs')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('entry_type', 'meal')
+          .gte('created_at', startOfDay.toISOString())
+          .lte('created_at', endOfDay.toISOString())
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching meals:', error);
+          toast({
+            title: '❌ Erro ao carregar',
+            description: 'Não foi possível carregar as refeições.',
+            variant: 'destructive',
           });
+          return;
         }
-      }
-      
-      // Fetch weekly fasting sessions (last 7 days, completed only)
-      const { data: weeklyData, error: weeklyError } = await supabase
-        .from('fasting_sessions')
-        .select('id, start_time, end_time')
-        .eq('user_id', user.id)
-        .not('end_time', 'is', null)
-        .gte('start_time', sevenDaysAgo);
-      
-      if (weeklyError) {
-        console.error('Error fetching weekly data:', weeklyError);
-      }
-      
-      setWeeklyFasts(weeklyData?.length || 0);
-      
-      // Calculate total fasting hours
-      if (weeklyData) {
-        const totalHours = weeklyData.reduce((acc, session) => {
-          const start = new Date(session.start_time);
-          const end = new Date(session.end_time!);
-          return acc + (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-        }, 0);
-        setTotalFastingHours(Math.floor(totalHours));
-      }
+
+        if (data) {
+          const entries: TimelineEntry[] = data.map(log => ({
+            id: log.id,
+            type: 'meal' as const,
+            time: new Date(log.created_at).toLocaleTimeString('pt-BR', { 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            }),
+            created_at: log.created_at,
+            entry_method: log.image_url ? 'ai' as const : 'manual' as const,
+            food_name: log.food_name || '',
+            calories: log.calories || 0,
+            image_url: log.image_url,
+            is_emotional: log.is_emotional || false,
+            hunger_level: log.hunger_level,
+            ai_analysis: typeof log.ai_analysis === 'string' ? log.ai_analysis : log.ai_analysis as any,
+            status: log.status || 'manual',
+          }));
+          setMeals(entries);
+        }
       } catch (error) {
-        console.error('Unexpected error fetching dashboard data:', error);
-        toast({
-          title: '❌ Erro inesperado',
-          description: 'Ocorreu um erro ao carregar os dados. Tente recarregar a página.',
-          variant: 'destructive',
-        });
+        console.error('Unexpected error:', error);
       } finally {
         setLoading(false);
       }
     };
-    
-    fetchDashboardData();
-    
-    // Realtime subscriptions for profile updates
+
+    fetchMeals();
+
+    // Realtime subscription
     const channel = supabase
-      .channel('dashboard-updates')
+      .channel('dashboard-meals')
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${user.id}`,
+          table: 'meal_logs',
+          filter: `user_id=eq.${user.id}`,
         },
         () => {
-          refreshProfile();
+          fetchMeals();
         }
       )
       .subscribe();
-    
+
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, refreshProfile]);
+  }, [user, selectedDate]);
 
-  const handleProtocolSelect = async (hours: number, isCustom: boolean = false) => {
-    setSelectedProtocol(hours);
-    setIsCustomProtocol(isCustom);
-    
-    if (!user) return;
-    
-    const { error } = await supabase
-      .from('profiles')
-      .update({ fasting_protocol: `${hours}h` })
-      .eq('id', user.id);
-    
-    if (error) {
-      console.error('Error updating fasting protocol:', error);
-    } else {
-      refreshProfile?.();
-    }
-  };
+  // Calculate totals
+  const totalCalories = meals.reduce((sum, m) => sum + (m.calories || 0), 0);
+  const caloriesTarget = profile?.daily_calories_target || 2000;
 
-  const handleMealSubmit = async (data: { 
-    method: 'ai' | 'manual';
-    description: string;
-    calories?: number;
-    imageUrl?: string;
-    isEmotional?: boolean;
-  }) => {
-    // Manual entry handling if needed
-  };
+  // Calculate macros from meals with AI analysis
+  const totalMacros = meals.reduce((acc, meal) => {
+    const analysis = typeof meal.ai_analysis === 'object' ? meal.ai_analysis : null;
+    return {
+      protein: acc.protein + (analysis?.protein || 0),
+      carbs: acc.carbs + (analysis?.carbs || 0),
+      fat: acc.fat + (analysis?.fat || 0),
+    };
+  }, { protein: 0, carbs: 0, fat: 0 });
+
+  // Target macros (example targets, could come from profile)
+  const macroTargets = { protein: 150, carbs: 250, fat: 70 };
 
   const handlePhotoSubmitted = () => {
     setIsModalOpen(false);
-    navigate('/diary');
   };
-
-  const time = formatTime(elapsedSeconds);
-
-  const phaseIcons = {
-    'fed': Flame,
-    'fasting': Zap,
-    'ketosis': Flame,
-    'autophagy': Sparkles,
-    'deep-autophagy': Sparkles,
-  };
-
-  const PhaseIcon = phaseIcons[currentPhase];
 
   return (
-    <div className="min-h-[100dvh] bg-background pb-24 safe-pt-navbar overflow-x-clip overflow-y-visible relative">
-      {/* Background gradient effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-teal-500/5 via-transparent to-violet-500/5 pointer-events-none" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
-      
-      <Navbar />
-      
-      <main className="px-4 py-6 overflow-visible">
-        <div className="mx-auto max-w-lg space-y-6 overflow-visible">
-          {/* Greeting */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
+    <div className="min-h-[100dvh] bg-background pb-24">
+      {/* Green Gradient Header */}
+      <div className="bg-gradient-to-b from-primary via-primary/90 to-primary/80 pt-safe-top">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-2">
+          <h1 className="text-2xl font-bold text-white">Cari</h1>
+          <Link to="/profile">
+            <Avatar className="h-10 w-10 border-2 border-white/30">
+              <AvatarImage src={profile?.avatar_url || ''} />
+              <AvatarFallback className="bg-white/20 text-white">
+                {profile?.full_name?.charAt(0) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+        </div>
+
+        {/* Week Calendar */}
+        <WeekCalendar 
+          selectedDate={selectedDate} 
+          onDateSelect={setSelectedDate} 
+        />
+
+        {/* Calorie Header */}
+        <CalorieHeader 
+          consumed={totalCalories} 
+          target={caloriesTarget} 
+        />
+      </div>
+
+      {/* Main Content */}
+      <main className="relative z-10">
+        {/* Macro Cards */}
+        <MacroCards
+          protein={{ 
+            value: totalMacros.protein, 
+            percentage: Math.round((totalMacros.protein / macroTargets.protein) * 100) 
+          }}
+          carbs={{ 
+            value: totalMacros.carbs, 
+            percentage: Math.round((totalMacros.carbs / macroTargets.carbs) * 100) 
+          }}
+          fat={{ 
+            value: totalMacros.fat, 
+            percentage: Math.round((totalMacros.fat / macroTargets.fat) * 100) 
+          }}
+        />
+
+        {/* Pagination Dots */}
+        <div className="flex justify-center gap-1.5 my-4">
+          <div className="w-2 h-2 rounded-full bg-primary" />
+          <div className="w-2 h-2 rounded-full bg-muted" />
+          <div className="w-2 h-2 rounded-full bg-muted" />
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex border-b border-border mx-4">
+          <button className="flex-1 py-3 text-center text-muted-foreground font-medium relative">
+            Dieta
+            <motion.div 
+              layoutId="tab-indicator"
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" 
+            />
+          </button>
+          <button 
+            onClick={() => navigate('/fasting')}
+            className="flex-1 py-3 text-center text-muted-foreground font-medium"
           >
-            <h1 className="text-2xl font-bold text-foreground">
-              {isActive ? 'Jejum em andamento' : 'Pronto para começar?'}
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              {isActive ? `Meta: ${targetHours}h de jejum` : 'Inicie seu jejum quando estiver pronto'}
-            </p>
-          </motion.div>
+            Jejum
+          </button>
+        </div>
 
-          {/* Timer */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-            className="flex justify-center py-4 overflow-visible"
-          >
-            <CircularProgress progress={isActive ? progress : 0} size={260} strokeWidth={20}>
-              <div className="text-center">
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-5xl font-extrabold tabular-nums text-foreground dark:text-slate-50">
-                    {time.hours}
-                  </span>
-                  <span className="text-2xl font-bold text-foreground/60 dark:text-slate-400">:</span>
-                  <span className="text-5xl font-extrabold tabular-nums text-foreground dark:text-slate-50">
-                    {time.minutes}
-                  </span>
-                  <span className="text-2xl font-bold text-foreground/60 dark:text-slate-400">:</span>
-                  <span className="text-3xl font-bold tabular-nums text-foreground/70 dark:text-slate-300">
-                    {time.seconds}
-                  </span>
-                </div>
-                
-                {isActive ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-3"
-                  >
-                    <div className={cn(
-                      "inline-flex items-center gap-2 px-4 py-2 rounded-full",
-                      "bg-card border border-border"
-                    )}>
-                      <PhaseIcon className={cn("h-4 w-4", phaseInfo.color)} />
-                      <span className={cn("text-sm font-medium", phaseInfo.color)}>
-                        {phaseInfo.label}
-                      </span>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="mt-3"
-                  >
-                    <ProtocolSelector
-                      selectedHours={selectedProtocol}
-                      onSelect={handleProtocolSelect}
-                      isOpen={isProtocolOpen}
-                      onOpenChange={setIsProtocolOpen}
-                    />
-                  </motion.div>
-                )}
-              </div>
-            </CircularProgress>
-          </motion.div>
-
-          {/* Bento Stats Grid */}
-          <BentoStats
-            caloriesConsumed={caloriesConsumed}
-            caloriesTarget={profile?.daily_calories_target || 1800}
-            lastCheckIn={lastCheckIn}
-          />
-
-          {/* Warning: No Metabolic Assessment */}
-          {(!profile?.daily_calories_target || profile.daily_calories_target === 0) && (
+        {/* Meal List */}
+        <div className="px-4 py-4 space-y-3">
+          {loading ? (
+            <>
+              <Skeleton className="h-32 rounded-2xl" />
+              <Skeleton className="h-32 rounded-2xl" />
+            </>
+          ) : meals.length > 0 ? (
+            meals.map((meal) => (
+              <MealCard 
+                key={meal.id} 
+                meal={meal} 
+                dailyTarget={caloriesTarget}
+              />
+            ))
+          ) : (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12"
             >
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
-                  <Target className="h-5 w-5 text-amber-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-amber-400 mb-1">
-                    Avaliação Metabólica Necessária
-                  </p>
-                  <p className="text-sm text-amber-300/80 mb-3">
-                    Complete sua avaliação para calcular suas metas calóricas personalizadas
-                  </p>
-                  <Button
-                    onClick={() => navigate('/assessment')}
-                    size="sm"
-                    className="bg-amber-500 hover:bg-amber-600 text-white"
-                  >
-                    Fazer Avaliação Agora
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Phase Info Card */}
-          {isActive && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-2xl bg-card border border-border"
-            >
-              <p className="text-center text-muted-foreground">
-                {phaseInfo.description}
+              <p className="text-muted-foreground">
+                Nenhuma refeição registrada hoje
               </p>
-              <div className="mt-3 flex items-center justify-center gap-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-secondary tabular-nums">
-                    {Math.round(progress)}%
-                  </p>
-                  <p className="text-xs text-muted-foreground">Progresso</p>
-                </div>
-                <div className="w-px h-10 bg-border" />
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-primary tabular-nums">
-                    {targetHours}h
-                  </p>
-                  <p className="text-xs text-muted-foreground">Meta</p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Action Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex gap-3"
-          >
-            {!isActive ? (
-              <Button
-                onClick={() => startFasting(selectedProtocol, isCustomProtocol ? 'custom' : 'standard')}
-                className="flex-1 h-14 rounded-2xl gradient-primary text-white font-semibold text-base press-effect shadow-violet"
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="mt-4 text-primary font-medium"
               >
-                <Play className="mr-2 h-5 w-5" />
-                Iniciar Jejum {selectedProtocol}h
-              </Button>
-            ) : (
-              <>
-                <Button
-                  onClick={stopFasting}
-                  variant="outline"
-                  className="flex-1 h-14 rounded-2xl font-semibold text-base press-effect border-destructive/30 text-destructive hover:bg-destructive/10"
-                >
-                  <Pause className="mr-2 h-5 w-5" />
-                  Encerrar
-                </Button>
-                <Button
-                  onClick={() => {
-                    stopFasting();
-                    setTimeout(() => startFasting(selectedProtocol, isCustomProtocol ? 'custom' : 'standard'), 100);
-                  }}
-                  variant="outline"
-                  className="h-14 w-14 rounded-2xl press-effect"
-                >
-                  <RotateCcw className="h-5 w-5" />
-                </Button>
-              </>
-            )}
-          </motion.div>
-
-          {/* Quick Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-2 gap-3"
-          >
-            {loading ? (
-              <>
-                <Skeleton className="h-20 rounded-2xl" />
-                <Skeleton className="h-20 rounded-2xl" />
-              </>
-            ) : (
-              <>
-                <div className="p-4 rounded-2xl bg-card border border-border text-center">
-                  <p className="text-2xl font-bold text-foreground tabular-nums">
-                    {weeklyFasts}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Jejuns esta semana
-                  </p>
-                </div>
-                
-                <div className="p-4 rounded-2xl bg-card border border-border text-center">
-                  <p className="text-2xl font-bold text-foreground tabular-nums">
-                    {totalFastingHours}h
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Horas de jejum
-                  </p>
-                </div>
-              </>
-            )}
-          </motion.div>
-
-          {/* Feature Navigation Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="grid grid-cols-3 gap-3"
-          >
-            <button
-              onClick={() => navigate('/nutrition-quiz')}
-              className="p-4 rounded-2xl bg-card border border-border hover:bg-accent/50 transition-colors press-effect text-center"
-            >
-              <div className="flex justify-center mb-2">
-                <MapPin className="h-6 w-6 text-violet-500" />
-              </div>
-              <p className="text-xs text-foreground font-medium leading-tight">
-                Mapeamento<br/>Alimentar
-              </p>
-            </button>
-
-            <button
-              onClick={() => navigate('/diets')}
-              className="p-4 rounded-2xl bg-card border border-border hover:bg-accent/50 transition-colors press-effect text-center"
-            >
-              <div className="flex justify-center mb-2">
-                <UtensilsCrossed className="h-6 w-6 text-teal-500" />
-              </div>
-              <p className="text-xs text-foreground font-medium leading-tight">
-                Explorar<br/>Dietas
-              </p>
-            </button>
-
-            <button
-              onClick={() => navigate('/fasting-quiz')}
-              className="p-4 rounded-2xl bg-card border border-border hover:bg-accent/50 transition-colors press-effect text-center"
-            >
-              <div className="flex justify-center mb-2">
-                <Clock className="h-6 w-6 text-violet-500" />
-              </div>
-              <p className="text-xs text-foreground font-medium leading-tight">
-                Jejum<br/>Prime
-              </p>
-            </button>
-          </motion.div>
+                Adicionar primeira refeição
+              </button>
+            </motion.div>
+          )}
         </div>
       </main>
 
+      {/* FAB */}
       <FloatingActionButton onClick={() => setIsModalOpen(true)} />
+
+      {/* Bottom Navigation */}
       <BottomNav />
-      
+
+      {/* Meal Input Modal */}
       <MealInputDialog
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        onSubmit={handleMealSubmit}
+        onSubmit={() => {}}
         onPhotoSubmitted={handlePhotoSubmitted}
       />
     </div>
