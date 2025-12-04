@@ -12,16 +12,16 @@ const navItems = [
 
 export function BottomNav() {
   return (
-    <motion.nav 
-      initial={{ y: 100 }}
-      animate={{ y: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="fixed bottom-0 left-0 right-0 z-50 safe-area-inset-bottom"
-    >
-      {/* Gradient fade */}
-      <div className="h-16 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
+    <div className="fixed bottom-0 left-0 right-0 z-50 safe-area-inset-bottom">
+      {/* Gradient fade - ends at top of menu */}
+      <div className="h-12 bg-gradient-to-t from-white to-transparent pointer-events-none" />
       
-      <div className="px-4 pb-4 bg-white">
+      <motion.nav 
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="px-4 pb-4 bg-white"
+      >
         <div className="mx-auto max-w-lg">
           <div className="rounded-3xl shadow-lg backdrop-blur-2xl bg-white/90 dark:bg-card/90 border border-border/50">
             <div className="flex items-center justify-around py-2">
@@ -54,7 +54,7 @@ export function BottomNav() {
             </div>
           </div>
         </div>
-      </div>
-    </motion.nav>
+      </motion.nav>
+    </div>
   );
 }
