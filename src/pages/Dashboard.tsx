@@ -48,12 +48,17 @@ export default function Dashboard() {
   // Memoized calculations for meals
   const totalCalories = useMemo(() => meals.reduce((sum, m) => sum + (m.calories || 0), 0), [meals]);
   const totalMacros = useMemo(() => meals.reduce((acc, meal) => {
-    const analysis = typeof meal.ai_analysis === 'object' ? meal.ai_analysis : null;
-    const macros = typeof meal.macros === 'object' ? meal.macros : null;
+    const analysis = meal.ai_analysis && typeof meal.ai_analysis === 'object' && !Array.isArray(meal.ai_analysis) ? meal.ai_analysis as unknown as Record<string, number> : null;
+    const macros = meal.macros && typeof meal.macros === 'object' && !Array.isArray(meal.macros) ? meal.macros : null;
+    
+    const protein = Number(macros?.protein) || Number(analysis?.protein) || 0;
+    const carbs = Number(macros?.carbs) || Number(analysis?.carbs) || 0;
+    const fat = Number(macros?.fat) || Number(analysis?.fat) || 0;
+    
     return {
-      protein: acc.protein + (analysis?.protein || macros?.protein || 0),
-      carbs: acc.carbs + (analysis?.carbs || macros?.carbs || 0),
-      fat: acc.fat + (analysis?.fat || macros?.fat || 0)
+      protein: acc.protein + protein,
+      carbs: acc.carbs + carbs,
+      fat: acc.fat + fat
     };
   }, { protein: 0, carbs: 0, fat: 0 }), [meals]);
 
