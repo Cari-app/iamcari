@@ -1,4 +1,4 @@
 project_id = "kjxtihzksqmrbatezecq"
 
-[functions.consume-fitcoin-for-meal]
+[functions.analyze-meal]
 verify_jwt = true

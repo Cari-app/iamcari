@@ -52,6 +52,7 @@ export function MealInputDialog({
     'Comprimindo imagem...',
     'Enviando para a nuvem...',
     'Salvando registro...',
+    'Cari está analisando...',
   ];
 
   // Cycle through upload steps
@@ -128,22 +129,41 @@ export function MealInputDialog({
       const publicUrl = urlData.publicUrl;
 
       // Step 3: Create meal log entry
-      const { error: insertError } = await supabase
+      const { data: mealLog, error: insertError } = await supabase
         .from('meal_logs')
         .insert({
           user_id: user.id,
           image_url: publicUrl,
+          food_name: 'Analisando refeição...',
           is_emotional: isEmotional,
           status: 'pending',
           entry_type: 'meal',
-        });
+        })
+        .select('id')
+        .single();
 
       if (insertError) throw insertError;
 
-      toast({
-        title: '✅ Foto enviada!',
-        description: 'Sua refeição foi registrada com sucesso.',
+      // Step 4: Trigger AI analysis
+      setUploadStep(3);
+      
+      const { error: analyzeError } = await supabase.functions.invoke('analyze-meal', {
+        body: { meal_log_id: mealLog.id }
       });
+
+      if (analyzeError) {
+        console.error('AI analysis error:', analyzeError);
+        // Não bloqueia o fluxo, apenas loga o erro
+        toast({
+          title: '⚠️ Análise pendente',
+          description: 'A foto foi salva. A análise será feita em breve.',
+        });
+      } else {
+        toast({
+          title: '✅ Refeição analisada!',
+          description: 'Cari identificou sua refeição com sucesso.',
+        });
+      }
 
       if (onPhotoSubmitted) {
         onPhotoSubmitted();
