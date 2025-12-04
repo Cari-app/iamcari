@@ -37,7 +37,7 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
     >
       <div className="flex gap-4">
         {/* Image */}
-        <div className="w-20 h-20 rounded-xl overflow-hidden bg-muted shrink-0">
+        <div className="w-20 h-24 rounded-xl overflow-hidden bg-muted shrink-0">
           {meal.image_url ? (
             <img 
               src={meal.image_url} 
