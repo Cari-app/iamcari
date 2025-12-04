@@ -342,16 +342,16 @@ export default function Fasting() {
     <div className="min-h-[100dvh] pb-32 bg-background">
       <div className="mx-auto max-w-lg relative">
         {/* Green Gradient Background */}
-        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-primary/20 via-primary/10 to-transparent dark:from-primary/15 dark:via-primary/5" />
         
         <div className="relative z-10">
           {/* Top Bar */}
           <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
             <img src={logoImage} alt="Cari" className="h-8" />
             <Link to="/profile">
-              <Avatar className="h-10 w-10">
+              <Avatar className="h-10 w-10 ring-2 ring-primary/20 dark:ring-primary/30">
                 <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback className="bg-white/20 text-white">
+                <AvatarFallback className="bg-primary/20 text-primary dark:bg-primary/10">
                   {profile?.full_name?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
@@ -362,10 +362,10 @@ export default function Fasting() {
 
           {/* Status Text */}
           <div className="text-center px-4 mt-4">
-            <h2 className="text-2xl text-white font-semibold">
+            <h2 className="text-2xl text-foreground font-semibold">
               {isActive ? 'Jejum em andamento' : 'Pronto pra começar'}
             </h2>
-            <p className="text-white/60 text-sm mt-1">
+            <p className="text-muted-foreground text-sm mt-1">
               {isActive ? `Meta: ${targetHours}h de jejum` : 'Inicie seu jejum quando estiver pronto'}
             </p>
           </div>
@@ -379,23 +379,23 @@ export default function Fasting() {
             <CircularProgress progress={isActive ? progress : 0} size={300} strokeWidth={16}>
               <div className="text-center">
                 <div className="flex items-baseline justify-center">
-                  <span className="text-7xl font-black tabular-nums tracking-tight bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent">
+                  <span className="text-7xl font-black tabular-nums tracking-tight text-foreground dark:text-primary dark:drop-shadow-[0_0_15px_rgba(132,204,22,0.3)]">
                     {time.hours}
                   </span>
-                  <span className="text-5xl font-bold bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent mx-1">:</span>
-                  <span className="text-7xl font-black tabular-nums tracking-tight bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent">
+                  <span className="text-5xl font-bold text-foreground dark:text-primary mx-1">:</span>
+                  <span className="text-7xl font-black tabular-nums tracking-tight text-foreground dark:text-primary dark:drop-shadow-[0_0_15px_rgba(132,204,22,0.3)]">
                     {time.minutes}
                   </span>
-                  <span className="text-3xl font-semibold tabular-nums text-green-700/60 ml-1">
+                  <span className="text-3xl font-semibold tabular-nums text-muted-foreground ml-1">
                     :{time.seconds}
                   </span>
                 </div>
                 
                 {isActive ? (
                   <motion.div 
-                    className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg"
+                    className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card/80 backdrop-blur-md border border-border dark:border-primary/20 shadow-lg dark:shadow-[0_0_20px_-5px_rgba(132,204,22,0.2)]"
                   >
-                    <Clock className="h-4 w-4 text-[#84cc16]" />
+                    <Clock className="h-4 w-4 text-primary" />
                     <span className="text-sm font-semibold text-foreground">
                       Meta: {targetHours}h
                     </span>
@@ -423,7 +423,7 @@ export default function Fasting() {
             {!isActive ? (
               <Button
                 onClick={handleStartFasting}
-                className="w-full h-14 rounded-2xl bg-gradient-to-r from-green-900 to-green-500 text-white font-semibold text-base shadow-lg press-effect"
+                className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary/80 to-primary text-primary-foreground font-semibold text-base shadow-lg dark:shadow-[0_8px_30px_-10px_rgba(132,204,22,0.4)] press-effect"
               >
                 <Play className="mr-2 h-5 w-5" />
                 Iniciar Jejum {selectedProtocol}h
@@ -449,22 +449,22 @@ export default function Fasting() {
                 </>
               ) : (
                 <>
-                  <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                  <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center dark:hover:border-primary/20 transition-colors">
                     <p className="text-xs text-muted-foreground mb-1">Melhor sequência</p>
                     <p className="text-2xl font-bold text-foreground">{bestStreak} Dias</p>
-                    <Flame className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
+                    <Flame className="h-5 w-5 mx-auto mt-2 text-primary" />
                   </div>
                   
-                  <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                  <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center dark:hover:border-primary/20 transition-colors">
                     <p className="text-xs text-muted-foreground mb-1">Sequência atual</p>
                     <p className="text-2xl font-bold text-foreground">{currentStreak} Dias</p>
-                    <Trophy className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
+                    <Trophy className="h-5 w-5 mx-auto mt-2 text-primary" />
                   </div>
                   
-                  <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                  <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center dark:hover:border-primary/20 transition-colors">
                     <p className="text-xs text-muted-foreground mb-1">Meta Semanal</p>
                     <p className="text-2xl font-bold text-foreground">{weeklyGoal.completed}/{weeklyGoal.target}</p>
-                    <Target className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
+                    <Target className="h-5 w-5 mx-auto mt-2 text-primary" />
                   </div>
                 </>
               )}

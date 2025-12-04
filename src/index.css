@@ -74,69 +74,98 @@
   }
 
   .dark {
-    /* Cari Dark Mode - Near Black Base */
-    --background: 150 30% 4%;
-    --foreground: 150 20% 98%;
+    /* ═══════════════════════════════════════════════════════════════
+       CARI DARK MODE - Premium Night Forest Theme
+       Inspired by deep forest at night with bioluminescent accents
+    ═══════════════════════════════════════════════════════════════ */
+    
+    /* Base - Deep Forest Night */
+    --background: 160 25% 3%;
+    --foreground: 140 15% 95%;
 
-    --card: 150 30% 7%;
-    --card-foreground: 150 20% 98%;
+    /* Cards - Elevated surfaces with subtle green tint */
+    --card: 155 20% 6%;
+    --card-foreground: 140 15% 95%;
 
-    --popover: 150 30% 4%;
-    --popover-foreground: 150 20% 98%;
+    /* Popover - Slightly elevated */
+    --popover: 155 22% 8%;
+    --popover-foreground: 140 15% 95%;
 
-    /* Green Primary - Brighter for dark */
-    --primary: 142 70% 45%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary - Vibrant Lime for maximum pop */
+    --primary: 84 85% 50%;
+    --primary-foreground: 160 25% 3%;
 
-    /* Green Secondary - Brighter for dark */
-    --secondary: 158 64% 52%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary - Softer green accent */
+    --secondary: 142 60% 40%;
+    --secondary-foreground: 140 15% 95%;
 
-    --muted: 150 20% 12%;
-    --muted-foreground: 150 15% 65%;
+    /* Muted - Subtle forest undertones */
+    --muted: 155 15% 12%;
+    --muted-foreground: 150 10% 55%;
 
-    --accent: 150 20% 12%;
-    --accent-foreground: 150 20% 98%;
+    /* Accent - Glowing highlight */
+    --accent: 155 25% 15%;
+    --accent-foreground: 84 85% 55%;
 
-    /* Red for destructive */
-    --destructive: 0 84% 60%;
+    /* Destructive - Warm coral red */
+    --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 150 20% 17%;
-    --input: 150 20% 17%;
-    --ring: 142 70% 45%;
+    /* Borders - Subtle with green undertone */
+    --border: 155 15% 15%;
+    --input: 155 18% 13%;
+    --ring: 84 85% 50%;
 
-    /* Custom Brand Colors - Adjusted */
-    --green: 142 70% 45%;
-    --green-glow: 142 70% 55%;
-    --green-light: 158 64% 52%;
-    --green-light-glow: 158 64% 60%;
+    /* ═══════════════════════════════════════════════════════════════
+       BRAND COLORS - Bioluminescent Green Palette
+    ═══════════════════════════════════════════════════════════════ */
+    --green: 84 85% 50%;
+    --green-glow: 84 90% 55%;
+    --green-light: 142 70% 50%;
+    --green-light-glow: 142 80% 55%;
 
-    /* Glassmorphism Dark */
-    --glass-bg: 150 30% 8%;
-    --glass-opacity: 0.6;
-    --glass-border: 150 20% 20%;
+    /* Success/Info/Warning for data visualization */
+    --success: 142 70% 45%;
+    --info: 200 80% 55%;
+    --warning: 45 95% 55%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(142 70% 45%) 0%, hsl(158 64% 52%) 100%);
-    --gradient-warm: linear-gradient(135deg, hsl(158 64% 52%) 0%, hsl(142 70% 45%) 100%);
+    /* ═══════════════════════════════════════════════════════════════
+       GLASSMORPHISM - Frosted dark glass
+    ═══════════════════════════════════════════════════════════════ */
+    --glass-bg: 155 20% 8%;
+    --glass-opacity: 0.75;
+    --glass-border: 155 25% 20%;
 
-    /* Shadows Dark */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
-    --shadow-green: 0 8px 32px -8px hsl(142 70% 45% / 0.4);
-    --shadow-green-light: 0 8px 32px -8px hsl(158 64% 52% / 0.4);
+    /* ═══════════════════════════════════════════════════════════════
+       GRADIENTS - Mystical forest vibes
+    ═══════════════════════════════════════════════════════════════ */
+    --gradient-primary: linear-gradient(135deg, hsl(84 85% 45%) 0%, hsl(142 70% 45%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(142 70% 45%) 0%, hsl(84 85% 50%) 100%);
+    --gradient-glow: linear-gradient(180deg, hsl(84 85% 50% / 0.15) 0%, transparent 100%);
+    --gradient-card: linear-gradient(145deg, hsl(155 20% 8%) 0%, hsl(155 25% 5%) 100%);
 
-    /* Sidebar Dark */
-    --sidebar-background: 150 30% 6%;
-    --sidebar-foreground: 150 20% 96%;
-    --sidebar-primary: 142 70% 45%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 150 20% 12%;
-    --sidebar-accent-foreground: 150 20% 96%;
-    --sidebar-border: 150 20% 17%;
-    --sidebar-ring: 142 70% 45%;
+    /* ═══════════════════════════════════════════════════════════════
+       SHADOWS - Glowing effects for depth
+    ═══════════════════════════════════════════════════════════════ */
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5);
+    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.6), 0 2px 6px -2px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.5), 0 6px 12px -6px rgb(0 0 0 / 0.4);
+    --shadow-green: 0 8px 32px -8px hsl(84 85% 50% / 0.35);
+    --shadow-green-light: 0 8px 32px -8px hsl(142 70% 50% / 0.3);
+    --shadow-glow: 0 0 30px -5px hsl(84 85% 50% / 0.4);
+    --shadow-inner-glow: inset 0 1px 0 0 hsl(84 85% 50% / 0.1);
+
+    /* ═══════════════════════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════════════════════ */
+    --sidebar-background: 155 22% 5%;
+    --sidebar-foreground: 140 15% 90%;
+    --sidebar-primary: 84 85% 50%;
+    --sidebar-primary-foreground: 160 25% 3%;
+    --sidebar-accent: 155 20% 12%;
+    --sidebar-accent-foreground: 140 15% 95%;
+    --sidebar-border: 155 15% 15%;
+    --sidebar-ring: 84 85% 50%;
   }
 }
 
@@ -215,7 +244,28 @@
   }
 
   .dark .glass {
-    @apply border-white/10;
+    @apply border-white/5;
+    background: hsl(var(--glass-bg) / var(--glass-opacity));
+    box-shadow: var(--shadow-inner-glow);
+  }
+
+  /* Card Glow Effect for Dark Mode */
+  .dark .card-glow {
+    position: relative;
+  }
+  
+  .dark .card-glow::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(84 85% 50% / 0.2), transparent 50%, hsl(142 70% 50% / 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
   }
 
   /* Gradient Backgrounds */
@@ -227,12 +277,22 @@
     background: var(--gradient-warm);
   }
 
+  /* Dark mode gradient header */
+  .dark .gradient-header {
+    background: linear-gradient(180deg, hsl(155 22% 8%) 0%, hsl(160 25% 3%) 100%);
+  }
+
   /* Gradient Text */
   .gradient-text {
     background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Dark mode enhanced text glow */
+  .dark .text-glow {
+    text-shadow: 0 0 20px hsl(84 85% 50% / 0.5);
   }
 
   /* Tabular Numbers for Timers */
@@ -272,15 +332,15 @@
   }
 
   .dark ::-webkit-scrollbar-track {
-    background: hsl(var(--muted) / 0.2);
+    background: hsl(155 20% 8% / 0.5);
   }
 
   .dark ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.3);
+    background: hsl(84 85% 50% / 0.25);
   }
 
   .dark ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary) / 0.5);
+    background: hsl(84 85% 50% / 0.4);
   }
 
   /* Firefox scrollbar */
@@ -290,7 +350,7 @@
   }
 
   .dark * {
-    scrollbar-color: hsl(var(--primary) / 0.3) hsl(var(--muted) / 0.2);
+    scrollbar-color: hsl(84 85% 50% / 0.25) hsl(155 20% 8% / 0.5);
   }
 
   /* Press Effect */
@@ -305,6 +365,66 @@
 
   .glow-green-light {
     box-shadow: var(--shadow-green-light);
+  }
+
+  /* Dark mode pulse glow animation */
+  .dark .glow-pulse {
+    animation: glowPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes glowPulse {
+    0%, 100% {
+      box-shadow: 0 0 20px -5px hsl(84 85% 50% / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 30px -5px hsl(84 85% 50% / 0.5);
+    }
+  }
+
+  /* Dark mode border glow */
+  .dark .border-glow {
+    border-color: hsl(84 85% 50% / 0.2);
+    box-shadow: 0 0 15px -5px hsl(84 85% 50% / 0.2);
+  }
+
+  /* Dark mode input focus glow */
+  .dark input:focus,
+  .dark textarea:focus {
+    box-shadow: 0 0 0 2px hsl(84 85% 50% / 0.15), 0 0 20px -5px hsl(84 85% 50% / 0.2);
+  }
+
+  /* Dark mode button hover effects */
+  .dark .btn-glow:hover {
+    box-shadow: 0 0 25px -5px hsl(84 85% 50% / 0.4);
+  }
+
+  /* Dark mode card hover */
+  .dark .card-hover:hover {
+    background: hsl(155 20% 8%);
+    border-color: hsl(84 85% 50% / 0.15);
+    box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.4), 0 0 15px -5px hsl(84 85% 50% / 0.15);
+  }
+
+  /* Progress bar glow in dark mode */
+  .dark .progress-glow {
+    box-shadow: 0 0 10px -2px hsl(84 85% 50% / 0.5);
+  }
+
+  /* Floating elements in dark mode */
+  .dark .floating-glow {
+    box-shadow: 0 8px 32px -8px rgb(0 0 0 / 0.5), 0 0 20px -5px hsl(84 85% 50% / 0.2);
+  }
+
+  /* Stats badge dark mode */
+  .dark .stats-badge {
+    background: linear-gradient(135deg, hsl(155 20% 10%) 0%, hsl(155 25% 8%) 100%);
+    border: 1px solid hsl(84 85% 50% / 0.15);
+  }
+
+  /* Navigation active state dark mode */
+  .dark .nav-active {
+    background: hsl(84 85% 50% / 0.1);
+    border-color: hsl(84 85% 50% / 0.2);
   }
 }
 

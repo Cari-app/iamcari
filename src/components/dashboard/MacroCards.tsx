@@ -40,13 +40,13 @@ export const MacroCards = memo(function MacroCards({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
-          className="p-4 rounded-2xl bg-card border border-border text-center shadow-sm"
+          className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center shadow-sm dark:hover:border-primary/20 transition-colors"
         >
           <p className="text-xs text-muted-foreground mb-1">{label}</p>
           <p className="text-2xl font-bold text-foreground">
             {macros[key].value}g
           </p>
-          <Icon className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
+          <Icon className="h-5 w-5 mx-auto mt-2 text-primary" />
         </motion.div>
       ))}
     </div>

@@ -35,7 +35,7 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-4 rounded-2xl bg-card border border-border"
+      className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 dark:hover:border-primary/20 transition-colors"
     >
       <div className="flex gap-4">
         {/* Image */}
@@ -48,7 +48,7 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-[#84cc16]/20 to-[#84cc16]/5 flex items-center justify-center">
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
               <span className="text-2xl">🍽️</span>
             </div>
           )}
@@ -69,19 +69,19 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
               </p>
             </div>
             <div className="text-right shrink-0">
-              <span className="text-sm font-medium text-[#84cc16]">{reachPercentage}% reach</span>
+              <span className="text-sm font-medium text-primary">{reachPercentage}% reach</span>
             </div>
           </div>
           
           {/* Macro badges */}
           <div className="flex items-center gap-1.5 mt-2">
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
               Prot: {macros.protein}g
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
               Carb: {macros.carbs}g
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
               Fat: {macros.fat}g
             </span>
           </div>
