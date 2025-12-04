@@ -311,20 +311,6 @@ export default function Fasting() {
               </motion.div>
             )}
 
-            {/* Tab Navigation */}
-            <div className="flex mt-4">
-              <button 
-                onClick={() => navigate('/dashboard')}
-                className="flex-1 pb-3 text-center text-green-800 font-medium relative"
-              >
-                Dieta
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-800 rounded-full" />
-              </button>
-              <button className="flex-1 pb-3 text-center text-green-900 font-medium relative">
-                Jejum
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#84cc16] rounded-full" />
-              </button>
-            </div>
           </main>
         </div>
       </div>
