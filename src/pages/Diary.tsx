@@ -10,6 +10,7 @@ import { MealInputDialog } from '@/components/diary/MealInputDialog';
 import { MealEditDialog } from '@/components/diary/MealEditDialog';
 import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
+import { DeleteConfirmationDrawer } from '@/components/DeleteConfirmationDrawer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar as CalendarIcon, Camera, Coffee } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
@@ -35,6 +36,7 @@ export default function Diary() {
   const [refetchTrigger, setRefetchTrigger] = useState(0);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<TimelineEntry | null>(null);
 
   // Fetch meal logs for selected date
   useEffect(() => {
@@ -441,13 +443,19 @@ export default function Diary() {
     setRefetchTrigger(prev => prev + 1);
   };
 
-  const handleDeleteEntry = async (id: string) => {
-    if (!user) return;
+  const handleDeleteEntry = async () => {
+    if (!user || !entryToDelete) return;
+
+    const entryId = entryToDelete.id;
+    setEntryToDelete(null);
+
+    // Optimistic update
+    setTimeline(prev => prev.filter(e => e.id !== entryId));
 
     const { error } = await supabase
       .from('meal_logs')
       .delete()
-      .eq('id', id);
+      .eq('id', entryId);
 
     if (error) {
       console.error('Error deleting meal log:', error);
@@ -456,10 +464,11 @@ export default function Diary() {
         description: 'Não foi possível remover o registro',
         variant: 'destructive',
       });
+      // Refetch on error
+      setRefetchTrigger(prev => prev + 1);
       return;
     }
 
-    setTimeline(prev => prev.filter(e => e.id !== id));
     toast({
       title: '🗑️ Registro apagado',
       description: 'O registro foi removido da timeline',
@@ -649,7 +658,7 @@ export default function Diary() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 + index * 0.05 }}
                 >
-                  <SwipeableRow onDelete={() => handleDeleteEntry(entry.id)}>
+                  <SwipeableRow onDelete={() => setEntryToDelete(entry)}>
                     <TimelineEntryCard 
                       entry={entry} 
                       onEdit={entry.type === 'meal' ? () => handleEditMeal(entry) : undefined}
@@ -714,6 +723,14 @@ export default function Diary() {
           calories: editingMeal?.calories,
           is_emotional: editingMeal?.is_emotional,
         }}
+      />
+
+      <DeleteConfirmationDrawer
+        open={!!entryToDelete}
+        onOpenChange={(open) => !open && setEntryToDelete(null)}
+        onConfirm={handleDeleteEntry}
+        title="Deletar registro?"
+        description="Este registro será removido permanentemente da sua timeline."
       />
 
       <BottomNav />
