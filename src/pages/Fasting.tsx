@@ -445,19 +445,19 @@ export default function Fasting() {
                   <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center dark:hover:border-primary/20 transition-colors">
                     <p className="text-xs text-muted-foreground mb-1">Melhor sequência</p>
                     <p className="text-2xl font-bold text-foreground">{bestStreak} Dias</p>
-                    <Flame className="h-5 w-5 mx-auto mt-2 text-primary" />
+                    <Flame className="h-5 w-5 mx-auto mt-2 text-lime-500" />
                   </div>
                   
                   <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center dark:hover:border-primary/20 transition-colors">
                     <p className="text-xs text-muted-foreground mb-1">Sequência atual</p>
                     <p className="text-2xl font-bold text-foreground">{currentStreak} Dias</p>
-                    <Trophy className="h-5 w-5 mx-auto mt-2 text-primary" />
+                    <Trophy className="h-5 w-5 mx-auto mt-2 text-lime-500" />
                   </div>
                   
                   <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center dark:hover:border-primary/20 transition-colors">
                     <p className="text-xs text-muted-foreground mb-1">Meta Semanal</p>
                     <p className="text-2xl font-bold text-foreground">{weeklyGoal.completed}/{weeklyGoal.target}</p>
-                    <Target className="h-5 w-5 mx-auto mt-2 text-primary" />
+                    <Target className="h-5 w-5 mx-auto mt-2 text-lime-500" />
                   </div>
                 </>
               )}
