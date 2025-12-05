@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+
 import { useNavigate } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -293,13 +293,7 @@ export default function Profile() {
           </div>
 
           {/* Avatar Card */}
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} className="px-4 pt-6">
+          <div className="px-4 pt-6">
             <div className="p-5 rounded-2xl bg-card border border-border">
               <div className="flex items-start gap-4">
                 {/* Avatar */}
@@ -342,18 +336,10 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Quick Action Buttons */}
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          delay: 0.03
-        }} className="px-4 pt-4">
+          <div className="px-4 pt-4">
             <div className="grid grid-cols-3 gap-3">
               <button onClick={() => navigate('/nutrition-quiz')} className="p-4 rounded-2xl bg-card border border-border flex flex-col items-center gap-2 press-effect hover:bg-muted/50 transition-colors">
                 <div className="h-10 w-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
@@ -376,18 +362,10 @@ export default function Profile() {
                 <span className="text-xs font-medium text-foreground text-center">Quiz Jejum</span>
               </button>
             </div>
-          </motion.div>
+          </div>
 
           {/* Active Diet Card */}
-          {activeDiet && <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          delay: 0.05
-        }} className="px-4 pt-4">
+          {activeDiet && <div className="px-4 pt-4">
               <div className="p-4 rounded-2xl bg-card border border-border">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -416,20 +394,12 @@ export default function Profile() {
                   </div>
                 </div>
               </div>
-            </motion.div>}
+            </div>}
 
           {/* Settings Menu */}
           <main className="px-4 pt-4 space-y-4 pb-[20px]">
             {/* Group 1: Biometria */}
-            <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            delay: 0.1
-          }} className="space-y-2">
+            <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
                 Biometria
               </p>
@@ -450,18 +420,10 @@ export default function Profile() {
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
                 </button>
               </div>
-            </motion.div>
+            </div>
 
             {/* Group 2: App Settings */}
-            <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            delay: 0.15
-          }} className="space-y-2">
+            <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
                 Configurações
               </p>
@@ -482,18 +444,10 @@ export default function Profile() {
                   <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Group 3: Suporte */}
-            <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            delay: 0.2
-          }} className="space-y-2">
+            <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
                 Suporte
               </p>
@@ -514,23 +468,15 @@ export default function Profile() {
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
                 </button>
               </div>
-            </motion.div>
+            </div>
 
             {/* Footer: Logout */}
-            <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} animate={{
-            opacity: 1,
-            y: 0
-          }} transition={{
-            delay: 0.25
-          }}>
+            <div>
               <Button onClick={handleSignOut} variant="outline" className="w-full justify-start gap-3 h-auto py-4 rounded-2xl border-destructive/30 hover:bg-destructive/10 text-destructive">
                 <LogOut className="h-5 w-5" />
                 <span className="font-medium">Sair da Conta</span>
               </Button>
-            </motion.div>
+            </div>
           </main>
         </div>
       </div>
