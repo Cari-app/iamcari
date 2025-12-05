@@ -13,14 +13,14 @@ const NAV_ITEMS = [
 
 export const BottomNav = memo(function BottomNav() {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 safe-area-inset-bottom">
-      <div className="h-12 bg-gradient-to-t from-background to-transparent pointer-events-none dark:from-background" />
+    <div className="fixed bottom-0 left-0 right-0 z-50 safe-area-inset-bottom bg-background">
+      <div className="h-12 bg-gradient-to-t from-background to-transparent pointer-events-none" />
       
       <motion.nav 
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="px-4 pb-4 bg-background"
+        className="px-4 pb-safe-bottom bg-background"
       >
         <div className="mx-auto max-w-lg">
           <div className="rounded-3xl shadow-lg backdrop-blur-2xl bg-card/90 border border-border/50 dark:border-primary/10 dark:shadow-[0_-8px_30px_-10px_rgba(132,204,22,0.15)]">
