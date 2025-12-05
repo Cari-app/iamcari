@@ -52,36 +52,33 @@ export default function Help() {
 
   return (
     <div className="min-h-[100dvh] pb-32 bg-background">
-      {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-green-950 to-green-900 px-4 pb-3 pt-safe-top">
-        <div className="mx-auto max-w-lg flex items-center justify-between">
-          <img src={logoImage} alt="Cari" className="h-8" />
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="text-white hover:bg-white/20"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <Link to="/profile">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback className="bg-white/20 text-white">
-                  {profile?.full_name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <div className="mx-auto max-w-lg relative pt-[calc(4rem+env(safe-area-inset-top,0px))]">
+      <div className="mx-auto max-w-lg relative">
         {/* Green Gradient Background */}
         <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
         
         <div className="relative z-10">
+          {/* Top Bar */}
+          <header className="flex items-center justify-between px-4 pb-2 pt-safe-top">
+            <img src={logoImage} alt="Cari" className="h-8" />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="text-white hover:bg-white/20"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <Link to="/profile">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={profile?.avatar_url || ''} />
+                  <AvatarFallback className="bg-white/20 text-white">
+                    {profile?.full_name?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            </div>
+          </header>
       
           {/* Status Text */}
           <motion.div
