@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { CalorieHeader } from '@/components/dashboard/CalorieHeader';
@@ -281,84 +280,70 @@ export default function Dashboard() {
 
             {/* Content List */}
             <div className="px-4 py-4 space-y-3">
-              <AnimatePresence mode="wait">
-                {activeTab === 'dieta' ? (
-                  <motion.div
-                    key="dieta-list"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-3"
-                  >
-                    {loading ? (
-                      <>
-                        <Skeleton className="h-32 rounded-2xl" />
-                        <Skeleton className="h-32 rounded-2xl" />
-                      </>
-                    ) : meals.length > 0 ? (
-                      meals.map(meal => (
-                        <SwipeableRow key={meal.id} onDelete={() => setMealToDelete(meal)}>
-                          <MealCard meal={meal} dailyTarget={caloriesTarget} />
-                        </SwipeableRow>
-                      ))
-                    ) : (
-                      <div className="text-center py-12">
-                        <p className="text-muted-foreground">Nenhuma refeição registrada hoje</p>
-                        <button onClick={handleOpenModal} className="mt-4 text-lime-500 font-medium">
-                          Adicionar primeira refeição
-                        </button>
-                      </div>
-                    )}
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="jejum-list"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-3"
-                  >
-                    {fastingSessions.length > 0 ? (
-                      fastingSessions.map(session => (
-                        <SwipeableRow key={session.id} onDelete={() => setSessionToDelete(session.id)}>
-                          <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 dark:hover:border-primary/20 transition-colors">
-                            <div className="flex items-start gap-3">
-                              <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-lime-500/20' : 'bg-orange-500/20'}`}>
-                                {session.status === 'completed' ? (
-                                  <Clock className="h-5 w-5 text-lime-500" />
-                                ) : (
-                                  <Pause className="h-5 w-5 text-orange-500" />
-                                )}
+              {activeTab === 'dieta' ? (
+                <div className="space-y-3">
+                  {loading ? (
+                    <>
+                      <Skeleton className="h-32 rounded-2xl" />
+                      <Skeleton className="h-32 rounded-2xl" />
+                    </>
+                  ) : meals.length > 0 ? (
+                    meals.map(meal => (
+                      <SwipeableRow key={meal.id} onDelete={() => setMealToDelete(meal)}>
+                        <MealCard meal={meal} dailyTarget={caloriesTarget} />
+                      </SwipeableRow>
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">Nenhuma refeição registrada hoje</p>
+                      <button onClick={handleOpenModal} className="mt-4 text-lime-500 font-medium">
+                        Adicionar primeira refeição
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {fastingSessions.length > 0 ? (
+                    fastingSessions.map(session => (
+                      <SwipeableRow key={session.id} onDelete={() => setSessionToDelete(session.id)}>
+                        <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 dark:hover:border-primary/20 transition-colors">
+                          <div className="flex items-start gap-3">
+                            <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-lime-500/20' : 'bg-orange-500/20'}`}>
+                              {session.status === 'completed' ? (
+                                <Clock className="h-5 w-5 text-lime-500" />
+                              ) : (
+                                <Pause className="h-5 w-5 text-orange-500" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <h3 className="font-semibold text-foreground">
+                                  {session.status === 'completed' 
+                                    ? `Jejum de ${session.target_hours}h concluído`
+                                    : `Jejum de ${formatPausedTime(session)} pausado`
+                                  }
+                                </h3>
                               </div>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                  <h3 className="font-semibold text-foreground">
-                                    {session.status === 'completed' 
-                                      ? `Jejum de ${session.target_hours}h concluído`
-                                      : `Jejum de ${formatPausedTime(session)} pausado`
-                                    }
-                                  </h3>
-                                </div>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  {new Date(session.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                  {session.end_time && ` - ${new Date(session.end_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
-                                </p>
-                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {new Date(session.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                {session.end_time && ` - ${new Date(session.end_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
+                              </p>
                             </div>
                           </div>
-                        </SwipeableRow>
-                      ))
-                    ) : (
-                      <div className="text-center py-12">
-                        <p className="text-muted-foreground">Nenhum jejum registrado hoje</p>
-                        <Link to="/fasting" className="mt-4 text-lime-500 font-medium block">
-                          Iniciar jejum
-                        </Link>
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                        </div>
+                      </SwipeableRow>
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">Nenhum jejum registrado hoje</p>
+                      <Link to="/fasting" className="mt-4 text-lime-500 font-medium block">
+                        Iniciar jejum
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </main>
         </div>
