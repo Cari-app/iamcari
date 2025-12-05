@@ -533,7 +533,7 @@ export default function Progress() {
             <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
           </div>
 
-          <main className="px-4 pt-4 space-y-4">
+          <main className="px-4 pt-4 space-y-4 pb-[20px]">
             {/* Quick Stats Row */}
             <div className="grid grid-cols-4 gap-2">
               {loading ? Array.from({
