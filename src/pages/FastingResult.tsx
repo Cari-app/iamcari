@@ -202,7 +202,7 @@ export default function FastingResult() {
         
         <div className="relative z-10">
           {/* Top Bar */}
-          <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
+          <header className="flex items-center justify-between px-4 pb-2 pt-safe-top">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
