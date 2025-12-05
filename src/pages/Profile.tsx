@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -369,7 +370,11 @@ export default function Profile() {
           </div>
 
           {/* Avatar Card */}
-          <div className="px-4 pt-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="px-4 pt-6"
+          >
             <div className="p-5 rounded-2xl bg-card border border-border">
               <div className="flex items-start gap-4">
                 {/* Avatar */}
@@ -438,10 +443,15 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Quick Action Buttons */}
-          <div className="px-4 pt-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.03 }}
+            className="px-4 pt-4"
+          >
             <div className="grid grid-cols-3 gap-3">
               <button
                 onClick={() => navigate('/nutrition-quiz')}
@@ -473,11 +483,16 @@ export default function Profile() {
                 <span className="text-xs font-medium text-foreground text-center">Quiz Jejum</span>
               </button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Active Diet Card */}
           {activeDiet && (
-            <div className="px-4 pt-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="px-4 pt-4"
+            >
               <div className="p-4 rounded-2xl bg-card border border-border">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -511,13 +526,18 @@ export default function Profile() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Settings Menu */}
           <main className="px-4 pt-4 space-y-4">
             {/* Group 1: Biometria */}
-            <div className="space-y-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="space-y-2"
+            >
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
                 Biometria
               </p>
@@ -544,10 +564,15 @@ export default function Profile() {
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
                 </button>
               </div>
-            </div>
+            </motion.div>
 
             {/* Group 2: App Settings */}
-            <div className="space-y-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="space-y-2"
+            >
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
                 Configurações
               </p>
@@ -578,10 +603,15 @@ export default function Profile() {
                   />
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Group 3: Suporte */}
-            <div className="space-y-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="space-y-2"
+            >
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
                 Suporte
               </p>
@@ -608,19 +638,23 @@ export default function Profile() {
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
                 </button>
               </div>
-            </div>
+            </motion.div>
 
             {/* Footer: Logout */}
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+            >
               <Button
                 onClick={handleSignOut}
                 variant="outline"
                 className="w-full justify-start gap-3 h-auto py-4 rounded-2xl border-destructive/30 hover:bg-destructive/10 text-destructive"
               >
                 <LogOut className="h-5 w-5" />
-              <span className="font-medium">Sair da Conta</span>
+                <span className="font-medium">Sair da Conta</span>
               </Button>
-            </div>
+            </motion.div>
           </main>
         </div>
       </div>

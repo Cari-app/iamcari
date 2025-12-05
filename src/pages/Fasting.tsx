@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { CircularProgress } from '@/components/CircularProgress';
@@ -15,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import logoImage from '@/assets/logo-cari.png';
 import { toast } from '@/hooks/use-toast';
+
 interface HistorySession {
   id: string;
   start_time: string;
@@ -24,6 +26,7 @@ interface HistorySession {
   progress: number;
   status: 'completed' | 'paused';
 }
+
 interface FastingSession {
   id: string;
   start_time: string;
@@ -31,12 +34,9 @@ interface FastingSession {
   target_hours: number | null;
   status: string | null;
 }
+
 export default function Fasting() {
-  const {
-    user,
-    profile,
-    refreshProfile
-  } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [selectedProtocol, setSelectedProtocol] = useState(16);
@@ -44,14 +44,11 @@ export default function Fasting() {
   const [isProtocolOpen, setIsProtocolOpen] = useState(false);
   const [bestStreak, setBestStreak] = useState(0);
   const [currentStreak, setCurrentStreak] = useState(0);
-  const [weeklyGoal, setWeeklyGoal] = useState({
-    completed: 0,
-    target: 7
-  });
+  const [weeklyGoal, setWeeklyGoal] = useState({ completed: 0, target: 7 });
   const [historyList, setHistoryList] = useState<HistorySession[]>([]);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
+  
   // Load protocol from profile
   useEffect(() => {
     if (profile?.fasting_protocol) {
@@ -62,6 +59,7 @@ export default function Fasting() {
       }
     }
   }, [profile]);
+  
   const {
     elapsedSeconds,
     progress,
@@ -70,7 +68,7 @@ export default function Fasting() {
     stopFasting,
     formatTime,
     targetHours,
-    loading: timerLoading
+    loading: timerLoading,
   } = useFastingTimer();
 
   // Calculate streaks from sessions
@@ -82,7 +80,10 @@ export default function Fasting() {
     }
 
     // Filter completed sessions and sort by date
-    const completedSessions = sessions.filter(s => s.status === 'completed').sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime());
+    const completedSessions = sessions
+      .filter(s => s.status === 'completed')
+      .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime());
+
     if (completedSessions.length === 0) {
       setBestStreak(0);
       setCurrentStreak(0);
@@ -95,21 +96,27 @@ export default function Fasting() {
       const date = new Date(session.start_time);
       uniqueDays.add(`${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`);
     });
-    const sortedDays = Array.from(uniqueDays).map(d => {
-      const [y, m, day] = d.split('-').map(Number);
-      return new Date(y, m, day);
-    }).sort((a, b) => b.getTime() - a.getTime());
+
+    const sortedDays = Array.from(uniqueDays)
+      .map(d => {
+        const [y, m, day] = d.split('-').map(Number);
+        return new Date(y, m, day);
+      })
+      .sort((a, b) => b.getTime() - a.getTime());
 
     // Calculate current streak
     let currentStreakCount = 0;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    
     for (let i = 0; i < sortedDays.length; i++) {
       const expectedDate = new Date(today);
       expectedDate.setDate(today.getDate() - i);
       expectedDate.setHours(0, 0, 0, 0);
+      
       const sessionDate = new Date(sortedDays[i]);
       sessionDate.setHours(0, 0, 0, 0);
+      
       if (sessionDate.getTime() === expectedDate.getTime()) {
         currentStreakCount++;
       } else if (i === 0 && sessionDate.getTime() === expectedDate.getTime() - 86400000) {
@@ -125,15 +132,18 @@ export default function Fasting() {
         break;
       }
     }
+    
     setCurrentStreak(currentStreakCount);
 
     // Calculate best streak (historical)
     let maxStreak = currentStreakCount;
     let tempStreak = 1;
+    
     for (let i = 1; i < sortedDays.length; i++) {
       const prevDate = sortedDays[i - 1];
       const currDate = sortedDays[i];
       const diffDays = Math.round((prevDate.getTime() - currDate.getTime()) / 86400000);
+      
       if (diffDays === 1) {
         tempStreak++;
         maxStreak = Math.max(maxStreak, tempStreak);
@@ -141,6 +151,7 @@ export default function Fasting() {
         tempStreak = 1;
       }
     }
+    
     setBestStreak(Math.max(maxStreak, currentStreakCount));
   }, []);
 
@@ -150,58 +161,66 @@ export default function Fasting() {
       setLoading(false);
       return;
     }
+    
     try {
       setLoading(true);
-
+      
       // Fetch all sessions for this user
-      const {
-        data: sessions,
-        error: sessionsError
-      } = await supabase.from('fasting_sessions').select('*').eq('user_id', user.id).order('start_time', {
-        ascending: false
-      });
+      const { data: sessions, error: sessionsError } = await supabase
+        .from('fasting_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('start_time', { ascending: false });
+      
       if (sessionsError) {
         console.error('Error fetching sessions:', sessionsError);
         toast({
           title: 'Erro ao carregar dados',
           description: 'Não foi possível carregar seu histórico de jejum.',
-          variant: 'destructive'
+          variant: 'destructive',
         });
         return;
       }
+
       if (sessions) {
         // Calculate streaks
         calculateStreaks(sessions as FastingSession[]);
-
+        
         // Weekly goal - completed sessions in last 7 days
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         sevenDaysAgo.setHours(0, 0, 0, 0);
-        const weeklyCompleted = sessions.filter(s => s.status === 'completed' && new Date(s.start_time) >= sevenDaysAgo).length;
-        setWeeklyGoal({
-          completed: weeklyCompleted,
-          target: 7
-        });
-
+        
+        const weeklyCompleted = sessions.filter(s => 
+          s.status === 'completed' && 
+          new Date(s.start_time) >= sevenDaysAgo
+        ).length;
+        
+        setWeeklyGoal({ completed: weeklyCompleted, target: 7 });
+        
         // Build history list from completed and paused sessions
-        const historyData = sessions.filter(s => s.status === 'completed' || s.status === 'paused').filter(s => s.end_time) // Only sessions with end time
-        .slice(0, 10) // Limit to last 10
-        .map(session => {
-          const start = new Date(session.start_time);
-          const end = new Date(session.end_time!);
-          const elapsedMs = end.getTime() - start.getTime();
-          const elapsedMins = Math.floor(elapsedMs / (1000 * 60));
-          const targetMins = (session.target_hours || 16) * 60;
-          return {
-            id: session.id,
-            start_time: session.start_time,
-            end_time: session.end_time!,
-            target_hours: session.target_hours || 16,
-            elapsed_minutes: elapsedMins,
-            progress: Math.round(elapsedMins / targetMins * 100),
-            status: session.status as 'completed' | 'paused'
-          };
-        });
+        const historyData = sessions
+          .filter(s => s.status === 'completed' || s.status === 'paused')
+          .filter(s => s.end_time) // Only sessions with end time
+          .slice(0, 10) // Limit to last 10
+          .map(session => {
+            const start = new Date(session.start_time);
+            const end = new Date(session.end_time!);
+            const elapsedMs = end.getTime() - start.getTime();
+            const elapsedMins = Math.floor(elapsedMs / (1000 * 60));
+            const targetMins = (session.target_hours || 16) * 60;
+            
+            return {
+              id: session.id,
+              start_time: session.start_time,
+              end_time: session.end_time!,
+              target_hours: session.target_hours || 16,
+              elapsed_minutes: elapsedMins,
+              progress: Math.round((elapsedMins / targetMins) * 100),
+              status: session.status as 'completed' | 'paused',
+            };
+          });
+        
         setHistoryList(historyData);
       }
     } catch (error) {
@@ -214,18 +233,23 @@ export default function Fasting() {
   // Initial fetch and real-time subscription
   useEffect(() => {
     fetchFastingData();
+    
     if (!user) return;
 
     // Subscribe to real-time changes
-    const channel = supabase.channel('fasting-sessions-changes').on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'fasting_sessions',
-      filter: `user_id=eq.${user.id}`
-    }, () => {
-      // Refetch data when any change happens
-      fetchFastingData();
-    }).subscribe();
+    const channel = supabase
+      .channel('fasting-sessions-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'fasting_sessions',
+        filter: `user_id=eq.${user.id}`,
+      }, () => {
+        // Refetch data when any change happens
+        fetchFastingData();
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
     };
@@ -235,18 +259,20 @@ export default function Fasting() {
   const handleProtocolSelect = async (hours: number, isCustom: boolean = false) => {
     setSelectedProtocol(hours);
     setIsCustomProtocol(isCustom);
+    
     if (!user) return;
-    const {
-      error
-    } = await supabase.from('profiles').update({
-      fasting_protocol: `${hours}h`
-    }).eq('id', user.id);
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update({ fasting_protocol: `${hours}h` })
+      .eq('id', user.id);
+    
     if (error) {
       console.error('Error updating protocol:', error);
       toast({
         title: 'Erro',
         description: 'Não foi possível salvar o protocolo.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } else {
       refreshProfile?.();
@@ -258,7 +284,7 @@ export default function Fasting() {
     await startFasting(selectedProtocol, isCustomProtocol ? 'custom' : 'standard');
     toast({
       title: 'Jejum iniciado!',
-      description: `Meta de ${selectedProtocol} horas de jejum.`
+      description: `Meta de ${selectedProtocol} horas de jejum.`,
     });
   };
 
@@ -271,30 +297,37 @@ export default function Fasting() {
   // Handle delete session
   const handleDeleteSession = async () => {
     if (!user || !sessionToDelete) return;
+    
     const sessionId = sessionToDelete;
     setSessionToDelete(null);
-
+    
     // Optimistic UI update - remove immediately
     setHistoryList(prev => prev.filter(s => s.id !== sessionId));
-    const {
-      error
-    } = await supabase.from('fasting_sessions').delete().eq('id', sessionId).eq('user_id', user.id);
+    
+    const { error } = await supabase
+      .from('fasting_sessions')
+      .delete()
+      .eq('id', sessionId)
+      .eq('user_id', user.id);
+    
     if (error) {
       // Revert on error - refetch data
       fetchFastingData();
       toast({
         title: 'Erro',
         description: 'Não foi possível deletar o jejum.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } else {
       toast({
         title: 'Jejum deletado',
-        description: 'O registro foi removido.'
+        description: 'O registro foi removido.',
       });
     }
   };
+
   const time = formatTime(elapsedSeconds);
+
   const formatPausedTime = (minutes: number) => {
     if (minutes < 60) return `${minutes} minutos`;
     const hours = Math.floor(minutes / 60);
@@ -302,8 +335,11 @@ export default function Fasting() {
     if (mins === 0) return `${hours}h`;
     return `${hours}h${mins}min`;
   };
+
   const isLoading = loading || timerLoading;
-  return <div className="min-h-[100dvh] pb-32 bg-background relative">
+
+  return (
+    <div className="min-h-[100dvh] pb-32 bg-background relative">
       {/* Green Gradient Background */}
       <div className="absolute inset-x-0 -top-[100px] h-[520px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
       <div className="mx-auto max-w-lg relative">
@@ -331,7 +367,7 @@ export default function Fasting() {
             <h2 className="text-2xl text-white font-semibold">
               {isActive ? 'Jejum em andamento' : 'Pronto pra começar'}
             </h2>
-            <p className="text-sm mt-1 text-lime-950">
+            <p className="text-green-500 text-sm mt-1">
               {isActive ? `Meta: ${targetHours}h de jejum` : 'Inicie seu jejum quando estiver pronto'}
             </p>
           </div>
@@ -340,68 +376,101 @@ export default function Fasting() {
           <div className="flex flex-col items-center py-6 px-4">
             <CircularProgress progress={isActive ? progress : 0} size={260} strokeWidth={14}>
               <div className="flex items-baseline justify-center">
-                <span className="text-6xl font-black tabular-nums text-green-800">
+                <span className="text-6xl font-black tabular-nums text-green-500">
                   {time.hours}
                 </span>
-                <span className="text-4xl font-bold mx-1 text-green-800">:</span>
-                <span className="text-6xl font-black tabular-nums text-green-800">
+                <span className="text-4xl font-bold text-green-500 mx-1">:</span>
+                <span className="text-6xl font-black tabular-nums text-green-500">
                   {time.minutes}
                 </span>
-                <span className="text-2xl font-semibold tabular-nums ml-1 text-green-800">
+                <span className="text-2xl font-semibold tabular-nums text-green-500 ml-1">
                   :{time.seconds}
                 </span>
               </div>
             </CircularProgress>
 
             {/* Meta Badge */}
-            <div className="mt-5">
-              {isActive ? <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-green-500/20 border border-green-500/40">
+            <motion.div 
+              className="mt-5"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {isActive ? (
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-green-500/20 border border-green-500/40">
                   <Clock className="h-4 w-4 text-green-500" />
                   <span className="text-sm font-semibold text-green-500">Meta: {targetHours}h</span>
-                </div> : <ProtocolSelector selectedHours={selectedProtocol} onSelect={handleProtocolSelect} isOpen={isProtocolOpen} onOpenChange={setIsProtocolOpen} />}
-            </div>
+                </div>
+              ) : (
+                <ProtocolSelector
+                  selectedHours={selectedProtocol}
+                  onSelect={handleProtocolSelect}
+                  isOpen={isProtocolOpen}
+                  onOpenChange={setIsProtocolOpen}
+                />
+              )}
+            </motion.div>
           </div>
 
           <main className="px-4 space-y-4">
             {/* Action Button */}
-            {!isActive ? <Button onClick={handleStartFasting} className="w-full h-14 rounded-2xl bg-gradient-to-r from-green-800 to-green-700 hover:from-green-700 hover:to-green-600 text-white font-bold text-base shadow-lg">
+            {!isActive ? (
+              <Button
+                onClick={handleStartFasting}
+                className="w-full h-14 rounded-2xl bg-green-500 hover:bg-green-600 text-white font-bold text-base shadow-lg"
+              >
                 <Play className="mr-2 h-5 w-5" />
                 Iniciar Jejum {selectedProtocol}h
-              </Button> : <Button onClick={handleStopFasting} variant="outline" className="w-full h-14 rounded-2xl font-semibold text-base border-red-400/50 text-red-400 hover:bg-red-400/10">
+              </Button>
+            ) : (
+              <Button
+                onClick={handleStopFasting}
+                variant="outline"
+                className="w-full h-14 rounded-2xl font-semibold text-base border-red-400/50 text-red-400 hover:bg-red-400/10"
+              >
                 <Pause className="mr-2 h-5 w-5" />
                 Encerrar Jejum
-              </Button>}
+              </Button>
+            )}
 
             {/* Stats Cards */}
             <div className="grid grid-cols-3 gap-3">
-              {isLoading ? <>
+              {isLoading ? (
+                <>
                   <Skeleton className="h-24 rounded-2xl" />
                   <Skeleton className="h-24 rounded-2xl" />
                   <Skeleton className="h-24 rounded-2xl" />
-                </> : <>
+                </>
+              ) : (
+                <>
                   <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center dark:hover:border-primary/20 transition-colors">
                     <p className="text-xs text-muted-foreground mb-1">Melhor sequência</p>
                     <p className="text-2xl font-bold text-foreground">{bestStreak} Dias</p>
-                    <Flame className="h-5 w-5 mx-auto mt-2 text-lime-500" />
+                    <Flame className="h-5 w-5 mx-auto mt-2 text-primary" />
                   </div>
                   
                   <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center dark:hover:border-primary/20 transition-colors">
                     <p className="text-xs text-muted-foreground mb-1">Sequência atual</p>
                     <p className="text-2xl font-bold text-foreground">{currentStreak} Dias</p>
-                    <Trophy className="h-5 w-5 mx-auto mt-2 text-lime-500" />
+                    <Trophy className="h-5 w-5 mx-auto mt-2 text-primary" />
                   </div>
                   
                   <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center dark:hover:border-primary/20 transition-colors">
                     <p className="text-xs text-muted-foreground mb-1">Meta Semanal</p>
                     <p className="text-2xl font-bold text-foreground">{weeklyGoal.completed}/{weeklyGoal.target}</p>
-                    <Target className="h-5 w-5 mx-auto mt-2 text-lime-500" />
+                    <Target className="h-5 w-5 mx-auto mt-2 text-primary" />
                   </div>
-                </>}
+                </>
+              )}
             </div>
 
             {/* Fasting History List */}
-            {historyList.length > 0 && !isActive && <div className="space-y-3">
-                {historyList.map(session => <SwipeableRow key={session.id} onDelete={() => setSessionToDelete(session.id)}>
+            {historyList.length > 0 && !isActive && (
+              <div className="space-y-3">
+                {historyList.map((session) => (
+                  <SwipeableRow
+                    key={session.id}
+                    onDelete={() => setSessionToDelete(session.id)}
+                  >
                     <div className="p-4 rounded-2xl bg-card border border-border">
                       <div className="flex items-start gap-3">
                         <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-lime-500/20' : 'bg-orange-500/20'}`}>
@@ -409,10 +478,7 @@ export default function Fasting() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-muted-foreground">
-                            Início {new Date(session.start_time).toLocaleTimeString('pt-BR', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                            Início {new Date(session.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                           </p>
                           <p className="font-semibold text-foreground truncate">
                             Jejum de {formatPausedTime(session.elapsed_minutes)} {session.status === 'completed' ? 'completo' : 'pausado'}
@@ -428,8 +494,10 @@ export default function Fasting() {
                         </div>
                       </div>
                     </div>
-                  </SwipeableRow>)}
-              </div>}
+                  </SwipeableRow>
+                ))}
+              </div>
+            )}
 
           </main>
         </div>
@@ -437,6 +505,13 @@ export default function Fasting() {
 
       <BottomNav />
       
-      <DeleteConfirmationDrawer open={!!sessionToDelete} onOpenChange={open => !open && setSessionToDelete(null)} onConfirm={handleDeleteSession} title="Deletar jejum?" description="Você perderá o registro deste jejum. Esta ação não pode ser desfeita." />
-    </div>;
+      <DeleteConfirmationDrawer
+        open={!!sessionToDelete}
+        onOpenChange={(open) => !open && setSessionToDelete(null)}
+        onConfirm={handleDeleteSession}
+        title="Deletar jejum?"
+        description="Você perderá o registro deste jejum. Esta ação não pode ser desfeita."
+      />
+    </div>
+  );
 }

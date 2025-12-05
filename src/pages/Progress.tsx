@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
@@ -424,14 +425,17 @@ export default function Progress() {
                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />)
               ) : (
                 stats.map((stat, index) => (
-                  <div
+                  <motion.div
                     key={stat.label}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
                     className="p-3 rounded-2xl bg-card border border-border text-center"
                   >
                     <p className="text-[10px] text-muted-foreground mb-0.5">{stat.label}</p>
                     <p className="text-lg font-bold text-foreground">{stat.value}</p>
                     <stat.icon className="h-4 w-4 mx-auto mt-1 text-[#84cc16]" />
-                  </div>
+                  </motion.div>
                 ))
               )}
             </div>
@@ -456,7 +460,7 @@ export default function Progress() {
               {/* Tab: Hoje */}
               <TabsContent value="hoje" className="mt-4 space-y-4">
                 {/* Today Summary */}
-                <div className="p-4 rounded-2xl bg-card border border-border">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 rounded-2xl bg-card border border-border">
                   <div className="grid grid-cols-4 gap-2 text-center">
                     <div>
                       <p className="text-xs text-muted-foreground">Calorias</p>
@@ -479,12 +483,13 @@ export default function Progress() {
                     </div>
                   </div>
                   <div className="mt-3 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div
-                      style={{ width: `${Math.min((todayCalories / (profile?.daily_calories_target || 2000)) * 100, 100)}%` }}
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min((todayCalories / (profile?.daily_calories_target || 2000)) * 100, 100)}%` }}
                       className="h-full rounded-full bg-[#84cc16]"
                     />
                   </div>
-                </div>
+                </motion.div>
 
                 <QuickAssessmentBar
                   onMoodClick={() => setMoodDrawerOpen(true)}
@@ -500,11 +505,11 @@ export default function Progress() {
                     Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)
                   ) : sortedTimeline.length > 0 ? (
                     sortedTimeline.map((entry, index) => (
-                      <div key={entry.id}>
+                      <motion.div key={entry.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.03 }}>
                         <SwipeableRow onDelete={() => setEntryToDelete(entry)}>
                           <TimelineEntryCard entry={entry} onEdit={entry.type === 'meal' ? () => handleEditMeal(entry) : undefined} />
                         </SwipeableRow>
-                      </div>
+                      </motion.div>
                     ))
                   ) : (
                     <div className="text-center py-8 rounded-xl bg-card border border-border">
@@ -517,7 +522,7 @@ export default function Progress() {
 
               {/* Tab: Progresso */}
               <TabsContent value="progresso" className="mt-4 space-y-4">
-                <div className="p-4 rounded-2xl bg-card border border-border">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 rounded-2xl bg-card border border-border">
                   <div className="flex items-center gap-2 mb-3">
                     <CalendarDays className="h-4 w-4 text-[#84cc16]" />
                     <h3 className="text-sm font-semibold text-foreground">Atividade dos últimos 90 dias</h3>
@@ -531,8 +536,11 @@ export default function Progress() {
                         {weeks.map((week, weekIndex) => (
                           <div key={weekIndex} className="flex flex-col gap-1">
                             {week.map((day, dayIndex) => (
-                              <div
+                              <motion.div
                                 key={`${weekIndex}-${dayIndex}`}
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.2 + weekIndex * 0.01 }}
                                 className={cn(
                                   "w-3.5 h-3.5 rounded-sm",
                                   day.intensity === 0 && "bg-muted",
@@ -560,26 +568,29 @@ export default function Progress() {
                       </div>
                     </>
                   )}
-                </div>
+                </motion.div>
 
                 {/* Stats detail */}
                 <div className="grid grid-cols-2 gap-3">
                   {stats.map((stat, index) => (
-                    <div
+                    <motion.div
                       key={stat.label}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
                       className="p-4 rounded-2xl bg-card border border-border text-center"
                     >
                       <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
                       <p className="text-2xl font-bold text-foreground">{stat.value}</p>
                       <stat.icon className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </TabsContent>
 
               {/* Tab: Conquistas */}
               <TabsContent value="conquistas" className="mt-4 space-y-4">
-                <div className="p-4 rounded-2xl bg-card border border-border">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 rounded-2xl bg-card border border-border">
                   <div className="flex items-center gap-2 mb-3">
                     <Trophy className="h-4 w-4 text-[#84cc16]" />
                     <h3 className="text-sm font-semibold text-foreground">Histórico de Jejuns</h3>
@@ -590,7 +601,7 @@ export default function Progress() {
                   ) : achievements.length > 0 ? (
                     <div className="space-y-2">
                       {achievements.map((achievement, index) => (
-                        <div key={achievement.id}>
+                        <motion.div key={achievement.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
                           <SwipeableRow onDelete={() => setAchievementToDelete(achievement.id)}>
                             <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                               <div className={cn(
@@ -608,7 +619,7 @@ export default function Progress() {
                               </div>
                             </div>
                           </SwipeableRow>
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
                   ) : (
@@ -618,7 +629,7 @@ export default function Progress() {
                       <p className="text-xs text-muted-foreground">Complete jejuns para ver seu histórico</p>
                     </div>
                   )}
-                </div>
+                </motion.div>
               </TabsContent>
             </Tabs>
           </main>

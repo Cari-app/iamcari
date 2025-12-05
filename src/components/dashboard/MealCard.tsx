@@ -1,4 +1,5 @@
 import { memo, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { TimelineEntry } from '@/types';
 
 interface MealCardProps {
@@ -31,7 +32,11 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
   }, [meal.calories, meal.ai_analysis, meal.macros, dailyTarget, meal.status]);
 
   return (
-    <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 dark:hover:border-primary/20 transition-colors">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 dark:hover:border-primary/20 transition-colors"
+    >
       <div className="flex gap-4">
         {/* Image */}
         <div className="w-20 h-24 rounded-xl overflow-hidden bg-muted shrink-0">
@@ -82,6 +87,6 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 });

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import DOMPurify from 'dompurify';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { BottomNav } from '@/components/BottomNav';
@@ -212,25 +211,23 @@ export default function DietDetail() {
                       </AccordionTrigger>
                       <AccordionContent className="px-5 pb-4 pt-2">
                         <div className="prose prose-sm prose-invert max-w-none">
-                        <div
+                          <div
                             className="text-muted-foreground leading-relaxed text-sm"
                             dangerouslySetInnerHTML={{
-                              __html: DOMPurify.sanitize(
-                                section.content
-                                  .replace(/\*([^\*\n]+)\*/g, '$1')
-                                  .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>')
-                                  .replace(/\\n/g, '\n')
-                                  .replace(/^---+$/gm, '')
-                                  .replace(/^>\s*/gm, '')
-                                  .replace(/^\* (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-[#84cc16] shrink-0">•</span><span>$1</span></div>')
-                                  .replace(/^- (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-[#84cc16] shrink-0">•</span><span>$1</span></div>')
-                                  .replace(/^(\d+)\. (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-[#84cc16] font-semibold shrink-0">$1.</span><span>$2</span></div>')
-                                  .replace(/✔️/g, '<span class="text-[#84cc16]">✔️</span>')
-                                  .split('\n')
-                                  .map(line => line.trim())
-                                  .filter(line => line.length > 0)
-                                  .join('<br/><br/>')
-                              )
+                              __html: section.content
+                                .replace(/\*([^\*\n]+)\*/g, '$1')
+                                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>')
+                                .replace(/\\n/g, '\n')
+                                .replace(/^---+$/gm, '')
+                                .replace(/^>\s*/gm, '')
+                                .replace(/^\* (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-[#84cc16] shrink-0">•</span><span>$1</span></div>')
+                                .replace(/^- (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-[#84cc16] shrink-0">•</span><span>$1</span></div>')
+                                .replace(/^(\d+)\. (.+)$/gm, '<div class="flex gap-2 mb-2"><span class="text-[#84cc16] font-semibold shrink-0">$1.</span><span>$2</span></div>')
+                                .replace(/✔️/g, '<span class="text-[#84cc16]">✔️</span>')
+                                .split('\n')
+                                .map(line => line.trim())
+                                .filter(line => line.length > 0)
+                                .join('<br/><br/>')
                             }}
                           />
                         </div>
