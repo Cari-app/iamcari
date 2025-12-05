@@ -36,11 +36,34 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// TEMPORARY: Mock data for preview testing
+const BYPASS_AUTH = true;
+const MOCK_PROFILE: Profile = {
+  id: 'mock-user-id',
+  whatsapp_number: '+5511999999999',
+  token_balance: 30,
+  tier: 'free',
+  onboarding_completed: true,
+  created_at: new Date().toISOString(),
+  daily_calories_target: 2000,
+  full_name: 'Usuário Demo',
+  nickname: 'Demo',
+  active_diet: 'balanced',
+  avatar_url: null,
+  fasting_protocol: '16:8',
+  weight: 75,
+  height: 175,
+  age: 30,
+  gender: 'male',
+  activity_level: 'moderate',
+  email: 'demo@example.com'
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(BYPASS_AUTH ? MOCK_PROFILE : null);
+  const [loading, setLoading] = useState(BYPASS_AUTH ? false : true);
 
   const fetchProfile = async (userId: string) => {
     const { data, error } = await supabase
