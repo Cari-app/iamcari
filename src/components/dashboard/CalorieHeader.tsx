@@ -30,7 +30,7 @@ export function CalorieHeader({
       {/* Progress section */}
       <div className="mt-6 mx-auto max-w-xs">
         {/* Progress bar with glow */}
-        <div className="relative h-4 bg-white/10 rounded-full overflow-hidden border border-white/10">
+        <div className="relative h-4 bg-white/10 rounded-full overflow-hidden border border-[#83cc16]/[0.51]">
           <motion.div initial={{
           width: 0
         }} animate={{
