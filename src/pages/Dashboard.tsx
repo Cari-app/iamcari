@@ -18,13 +18,11 @@ import { TimelineEntry } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Pause, Clock } from 'lucide-react';
 import logoImage from '@/assets/logo-cari.png';
-
 const MACRO_TARGETS = {
   protein: 150,
   carbs: 250,
   fat: 70
 };
-
 interface FastingSession {
   id: string;
   start_time: string;
@@ -32,10 +30,15 @@ interface FastingSession {
   target_hours: number;
   status: string;
 }
-
 export default function Dashboard() {
-  const { user, profile } = useAuth();
-  const { selectedDate, setSelectedDate } = useSelectedDate();
+  const {
+    user,
+    profile
+  } = useAuth();
+  const {
+    selectedDate,
+    setSelectedDate
+  } = useSelectedDate();
   const [activeTab, setActiveTab] = useState<'dieta' | 'jejum'>('dieta');
   const [meals, setMeals] = useState<TimelineEntry[]>([]);
   const [fastingSessions, setFastingSessions] = useState<FastingSession[]>([]);
@@ -50,18 +53,19 @@ export default function Dashboard() {
   const totalMacros = useMemo(() => meals.reduce((acc, meal) => {
     const analysis = meal.ai_analysis && typeof meal.ai_analysis === 'object' && !Array.isArray(meal.ai_analysis) ? meal.ai_analysis as unknown as Record<string, number> : null;
     const macros = meal.macros && typeof meal.macros === 'object' && !Array.isArray(meal.macros) ? meal.macros : null;
-    
     const protein = Number(macros?.protein) || Number(analysis?.protein) || 0;
     const carbs = Number(macros?.carbs) || Number(analysis?.carbs) || 0;
     const fat = Number(macros?.fat) || Number(analysis?.fat) || 0;
-    
     return {
       protein: acc.protein + protein,
       carbs: acc.carbs + carbs,
       fat: acc.fat + fat
     };
-  }, { protein: 0, carbs: 0, fat: 0 }), [meals]);
-
+  }, {
+    protein: 0,
+    carbs: 0,
+    fat: 0
+  }), [meals]);
   const macroProps = useMemo(() => ({
     protein: {
       value: totalMacros.protein,
@@ -90,15 +94,12 @@ export default function Dashboard() {
         startOfDay.setHours(0, 0, 0, 0);
         const endOfDay = new Date(selectedDate);
         endOfDay.setHours(23, 59, 59, 999);
-        const { data, error } = await supabase
-          .from('meal_logs')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('entry_type', 'meal')
-          .gte('created_at', startOfDay.toISOString())
-          .lte('created_at', endOfDay.toISOString())
-          .order('created_at', { ascending: false });
-        
+        const {
+          data,
+          error
+        } = await supabase.from('meal_logs').select('*').eq('user_id', user.id).eq('entry_type', 'meal').gte('created_at', startOfDay.toISOString()).lte('created_at', endOfDay.toISOString()).order('created_at', {
+          ascending: false
+        });
         if (error) {
           toast({
             title: '❌ Erro ao carregar',
@@ -111,7 +112,10 @@ export default function Dashboard() {
           setMeals(data.map(log => ({
             id: log.id,
             type: 'meal' as const,
-            time: new Date(log.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+            time: new Date(log.created_at).toLocaleTimeString('pt-BR', {
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
             created_at: log.created_at,
             entry_method: log.image_url ? 'ai' as const : 'manual' as const,
             food_name: log.food_name || '',
@@ -121,7 +125,11 @@ export default function Dashboard() {
             is_emotional: log.is_emotional || false,
             hunger_level: log.hunger_level,
             ai_analysis: log.ai_analysis as any,
-            macros: log.macros as { protein?: number; carbs?: number; fat?: number } | undefined,
+            macros: log.macros as {
+              protein?: number;
+              carbs?: number;
+              fat?: number;
+            } | undefined,
             status: log.status || 'manual'
           })));
         }
@@ -144,7 +152,6 @@ export default function Dashboard() {
   // Fetch fasting sessions
   useEffect(() => {
     if (!user) return;
-    
     const fetchFastingData = async () => {
       try {
         const startOfDay = new Date(selectedDate);
@@ -153,13 +160,11 @@ export default function Dashboard() {
         endOfDay.setHours(23, 59, 59, 999);
 
         // Fetch sessions that started OR ended on selected date
-        const { data: daySessions } = await supabase
-          .from('fasting_sessions')
-          .select('*')
-          .eq('user_id', user.id)
-          .or(`and(start_time.gte.${startOfDay.toISOString()},start_time.lte.${endOfDay.toISOString()}),and(end_time.gte.${startOfDay.toISOString()},end_time.lte.${endOfDay.toISOString()})`)
-          .order('start_time', { ascending: false });
-
+        const {
+          data: daySessions
+        } = await supabase.from('fasting_sessions').select('*').eq('user_id', user.id).or(`and(start_time.gte.${startOfDay.toISOString()},start_time.lte.${endOfDay.toISOString()}),and(end_time.gte.${startOfDay.toISOString()},end_time.lte.${endOfDay.toISOString()})`).order('start_time', {
+          ascending: false
+        });
         if (daySessions) {
           setFastingSessions(daySessions);
         }
@@ -167,62 +172,61 @@ export default function Dashboard() {
         console.error('Error fetching fasting data:', error);
       }
     };
-
     fetchFastingData();
-    
     const channel = supabase.channel('dashboard-fasting').on('postgres_changes', {
       event: '*',
       schema: 'public',
       table: 'fasting_sessions',
       filter: `user_id=eq.${user.id}`
     }, fetchFastingData).subscribe();
-    
     return () => {
       supabase.removeChannel(channel);
     };
   }, [user, selectedDate]);
-
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
   const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
-  
   const handleDeleteMeal = async () => {
     if (!user || !mealToDelete) return;
     const mealId = mealToDelete.id;
     setMealToDelete(null);
     setMeals(prev => prev.filter(m => m.id !== mealId));
-    
-    const { error } = await supabase
-      .from('meal_logs')
-      .delete()
-      .eq('id', mealId)
-      .eq('user_id', user.id);
-    
+    const {
+      error
+    } = await supabase.from('meal_logs').delete().eq('id', mealId).eq('user_id', user.id);
     if (error) {
-      toast({ title: 'Erro', description: 'Não foi possível deletar a refeição.', variant: 'destructive' });
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível deletar a refeição.',
+        variant: 'destructive'
+      });
     } else {
-      toast({ title: 'Refeição deletada', description: 'O registro e macros foram removidos.' });
+      toast({
+        title: 'Refeição deletada',
+        description: 'O registro e macros foram removidos.'
+      });
     }
   };
-
   const handleDeleteSession = async () => {
     if (!user || !sessionToDelete) return;
     const sessionId = sessionToDelete;
     setSessionToDelete(null);
     setFastingSessions(prev => prev.filter(s => s.id !== sessionId));
-    
-    const { error } = await supabase
-      .from('fasting_sessions')
-      .delete()
-      .eq('id', sessionId)
-      .eq('user_id', user.id);
-    
+    const {
+      error
+    } = await supabase.from('fasting_sessions').delete().eq('id', sessionId).eq('user_id', user.id);
     if (error) {
-      toast({ title: 'Erro', description: 'Não foi possível deletar o jejum.', variant: 'destructive' });
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível deletar o jejum.',
+        variant: 'destructive'
+      });
     } else {
-      toast({ title: 'Jejum deletado', description: 'O registro foi removido.' });
+      toast({
+        title: 'Jejum deletado',
+        description: 'O registro foi removido.'
+      });
     }
   };
-
   const formatPausedTime = (session: FastingSession) => {
     if (!session.end_time) return '';
     const start = new Date(session.start_time);
@@ -234,9 +238,7 @@ export default function Dashboard() {
     const mins = minutes % 60;
     return mins === 0 ? `${hours}h` : `${hours}h${mins}min`;
   };
-
-  return (
-    <div className="min-h-[100dvh] bg-background relative">
+  return <div className="min-h-[100dvh] bg-background relative">
       {/* Premium gradient header with depth */}
       <div className="absolute inset-x-0 -top-[100px] h-[580px]">
         <div className="absolute inset-0 bg-gradient-to-b from-green-900 via-green-800 to-transparent" />
@@ -271,88 +273,63 @@ export default function Dashboard() {
               {/* Tab indicator background */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-muted/50 rounded-full" />
               
-              <button 
-                onClick={() => setActiveTab('dieta')}
-                className={`flex-1 pb-3 text-center font-medium relative transition-all duration-200 ${activeTab === 'dieta' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'}`}
-              >
+              <button onClick={() => setActiveTab('dieta')} className={`flex-1 pb-3 text-center font-medium relative transition-all duration-200 ${activeTab === 'dieta' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'}`}>
                 Dieta
                 <div className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300 ${activeTab === 'dieta' ? 'bg-lime-500 shadow-[0_0_8px_rgba(132,204,22,0.4)]' : 'bg-transparent'}`} />
               </button>
-              <button 
-                onClick={() => setActiveTab('jejum')}
-                className={`flex-1 pb-3 text-center font-medium relative transition-all duration-200 ${activeTab === 'jejum' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'}`}
-              >
+              <button onClick={() => setActiveTab('jejum')} className={`flex-1 pb-3 text-center font-medium relative transition-all duration-200 ${activeTab === 'jejum' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'}`}>
                 Jejum
                 <div className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300 ${activeTab === 'jejum' ? 'bg-lime-500 shadow-[0_0_8px_rgba(132,204,22,0.4)]' : 'bg-transparent'}`} />
               </button>
             </div>
 
             {/* Content List */}
-            <div className="px-4 py-4 space-y-3">
-              {activeTab === 'dieta' ? (
-                <div className="space-y-3">
-                  {loading ? (
-                    <>
+            <div className="px-4 py-4 space-y-3 mb-[20px]">
+              {activeTab === 'dieta' ? <div className="space-y-3">
+                  {loading ? <>
                       <Skeleton className="h-32 rounded-2xl" />
                       <Skeleton className="h-32 rounded-2xl" />
-                    </>
-                  ) : meals.length > 0 ? (
-                    meals.map(meal => (
-                      <SwipeableRow key={meal.id} onDelete={() => setMealToDelete(meal)}>
+                    </> : meals.length > 0 ? meals.map(meal => <SwipeableRow key={meal.id} onDelete={() => setMealToDelete(meal)}>
                         <MealCard meal={meal} dailyTarget={caloriesTarget} />
-                      </SwipeableRow>
-                    ))
-                  ) : (
-                    <div className="text-center py-12">
+                      </SwipeableRow>) : <div className="text-center py-12">
                       <p className="text-muted-foreground">Nenhuma refeição registrada hoje</p>
                       <button onClick={handleOpenModal} className="mt-4 text-lime-500 font-medium">
                         Adicionar primeira refeição
                       </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {fastingSessions.length > 0 ? (
-                    fastingSessions.map(session => (
-                      <SwipeableRow key={session.id} onDelete={() => setSessionToDelete(session.id)}>
+                    </div>}
+                </div> : <div className="space-y-3">
+                  {fastingSessions.length > 0 ? fastingSessions.map(session => <SwipeableRow key={session.id} onDelete={() => setSessionToDelete(session.id)}>
                         <div className="p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/60 dark:border-primary/10 dark:hover:border-primary/20 transition-all duration-300">
                           <div className="flex items-start gap-3">
                             <div className={`p-2.5 rounded-xl mt-0.5 ${session.status === 'completed' ? 'bg-lime-500/15 ring-1 ring-lime-500/20' : 'bg-orange-500/15 ring-1 ring-orange-500/20'}`}>
-                              {session.status === 'completed' ? (
-                                <Clock className="h-5 w-5 text-lime-500" />
-                              ) : (
-                                <Pause className="h-5 w-5 text-orange-500" />
-                              )}
+                              {session.status === 'completed' ? <Clock className="h-5 w-5 text-lime-500" /> : <Pause className="h-5 w-5 text-orange-500" />}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center justify-between">
                                 <h3 className="font-semibold text-foreground">
-                                  {session.status === 'completed' 
-                                    ? `Jejum de ${session.target_hours}h concluído`
-                                    : `Jejum de ${formatPausedTime(session)} pausado`
-                                  }
+                                  {session.status === 'completed' ? `Jejum de ${session.target_hours}h concluído` : `Jejum de ${formatPausedTime(session)} pausado`}
                                 </h3>
                               </div>
                               <p className="text-sm text-muted-foreground/70 mt-1">
-                                {new Date(session.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                {session.end_time && ` → ${new Date(session.end_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
+                                {new Date(session.start_time).toLocaleTimeString('pt-BR', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                                {session.end_time && ` → ${new Date(session.end_time).toLocaleTimeString('pt-BR', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}`}
                               </p>
                             </div>
                           </div>
                         </div>
-                      </SwipeableRow>
-                    ))
-                  ) : (
-                    <div className="text-center py-12">
+                      </SwipeableRow>) : <div className="text-center py-12">
                       <p className="text-muted-foreground">Nenhum jejum registrado hoje</p>
                       <Link to="/fasting" className="mt-4 text-lime-500 font-medium block">
                         Iniciar jejum
                       </Link>
-                    </div>
-                  )}
-                </div>
-              )}
+                    </div>}
+                </div>}
             </div>
           </main>
         </div>
@@ -363,21 +340,8 @@ export default function Dashboard() {
       
       <MealInputDialog open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={() => {}} onPhotoSubmitted={handleCloseModal} />
       
-      <DeleteConfirmationDrawer
-        open={!!mealToDelete}
-        onOpenChange={(open) => !open && setMealToDelete(null)}
-        onConfirm={handleDeleteMeal}
-        title="Deletar refeição?"
-        description="Você perderá todos os dados e macros desta refeição."
-      />
+      <DeleteConfirmationDrawer open={!!mealToDelete} onOpenChange={open => !open && setMealToDelete(null)} onConfirm={handleDeleteMeal} title="Deletar refeição?" description="Você perderá todos os dados e macros desta refeição." />
       
-      <DeleteConfirmationDrawer
-        open={!!sessionToDelete}
-        onOpenChange={(open) => !open && setSessionToDelete(null)}
-        onConfirm={handleDeleteSession}
-        title="Deletar jejum?"
-        description="Você perderá o registro deste jejum."
-      />
-    </div>
-  );
+      <DeleteConfirmationDrawer open={!!sessionToDelete} onOpenChange={open => !open && setSessionToDelete(null)} onConfirm={handleDeleteSession} title="Deletar jejum?" description="Você perderá o registro deste jejum." />
+    </div>;
 }
