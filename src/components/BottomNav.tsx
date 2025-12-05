@@ -13,8 +13,8 @@ const NAV_ITEMS = [
 export const BottomNav = memo(function BottomNav() {
   return (
     <>
-      {/* Spacer to prevent content from being hidden */}
-      <div className="h-24" />
+      {/* Spacer - matches nav height */}
+      <div className="h-[88px]" />
       
       {/* Fixed navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe-bottom">

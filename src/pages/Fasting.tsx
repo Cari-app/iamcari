@@ -304,7 +304,7 @@ export default function Fasting() {
     return `${hours}h${mins}min`;
   };
   const isLoading = loading || timerLoading;
-  return <div className="min-h-[100dvh] pb-20 bg-background relative">
+  return <div className="min-h-[100dvh] bg-background relative">
       {/* Green Gradient Background */}
       <div className="absolute inset-x-0 -top-[100px] h-[520px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
       <div className="mx-auto max-w-lg relative">
