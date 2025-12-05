@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { motion } from 'framer-motion';
 import { Beef, Wheat, Droplets } from 'lucide-react';
 
 interface MacroCardsProps {
@@ -33,9 +34,12 @@ export const MacroCards = memo(function MacroCards({
 
   return (
     <div className={`grid grid-cols-3 gap-3 px-4 ${className || ''}`}>
-      {MACROS_CONFIG.map(({ key, label, icon: Icon }) => (
-        <div
+      {MACROS_CONFIG.map(({ key, label, icon: Icon }, index) => (
+        <motion.div
           key={key}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
           className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center shadow-sm dark:hover:border-primary/20 transition-colors"
         >
           <p className="text-xs text-muted-foreground mb-1">{label}</p>
@@ -43,7 +47,7 @@ export const MacroCards = memo(function MacroCards({
             {macros[key].value}g
           </p>
           <Icon className="h-5 w-5 mx-auto mt-2 text-lime-500" />
-        </div>
+        </motion.div>
       ))}
     </div>
   );

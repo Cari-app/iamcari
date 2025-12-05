@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { BrainCircuit, Droplet, Scale, Utensils } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -57,10 +58,18 @@ export function QuickAssessmentBar({
   };
 
   return (
-    <div className="grid grid-cols-4 gap-2">
-      {actions.map((action) => (
-        <button
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.15 }}
+      className="grid grid-cols-4 gap-2"
+    >
+      {actions.map((action, index) => (
+        <motion.button
           key={action.id}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 + index * 0.05 }}
           onClick={handlers[action.id]}
           className={cn(
             'flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl',
@@ -75,8 +84,8 @@ export function QuickAssessmentBar({
           <span className="text-xs font-medium text-muted-foreground">
             {action.label}
           </span>
-        </button>
+        </motion.button>
       ))}
-    </div>
+    </motion.div>
   );
 }
