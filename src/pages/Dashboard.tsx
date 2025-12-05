@@ -262,24 +262,20 @@ export default function Dashboard() {
             <MacroCards {...macroProps} className="mb-12" />
 
             {/* Tab Navigation */}
-            <div className="flex mx-4 mt-6 border-b border-border/30">
+            <div className="flex mx-4 mt-6">
               <button 
                 onClick={() => setActiveTab('dieta')}
                 className={`flex-1 pb-3 text-center font-medium relative transition-colors ${activeTab === 'dieta' ? 'text-foreground' : 'text-muted-foreground'}`}
               >
                 Dieta
-                {activeTab === 'dieta' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 rounded-full bg-lime-500 dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]" />
-                )}
+                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'dieta' ? 'bg-lime-500 dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]' : 'bg-muted'}`} />
               </button>
               <button 
                 onClick={() => setActiveTab('jejum')}
                 className={`flex-1 pb-3 text-center font-medium relative transition-colors ${activeTab === 'jejum' ? 'text-foreground' : 'text-muted-foreground'}`}
               >
                 Jejum
-                {activeTab === 'jejum' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 rounded-full bg-lime-500 dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]" />
-                )}
+                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'jejum' ? 'bg-lime-500 dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]' : 'bg-muted'}`} />
               </button>
             </div>
 
