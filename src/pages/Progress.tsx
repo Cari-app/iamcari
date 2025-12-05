@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { DateRange } from 'react-day-picker';
 
 import { BottomNav } from '@/components/BottomNav';
-import { DateRangePicker } from '@/components/dashboard/DateRangePicker';
+import { DateRangePicker, DateRangeType } from '@/components/dashboard/DateRangePicker';
 import { DatePickerButton } from '@/components/dashboard/DatePickerButton';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
@@ -39,7 +38,7 @@ export default function Progress() {
   const [loading, setLoading] = useState(true);
   
   // Date range for progress analysis (defaults to last 7 days)
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+  const [dateRange, setDateRange] = useState<DateRangeType | undefined>(() => {
     const end = new Date();
     const start = new Date();
     start.setDate(start.getDate() - 6);
