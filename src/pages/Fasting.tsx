@@ -473,8 +473,8 @@ export default function Fasting() {
                   >
                     <div className="p-4 rounded-2xl bg-card border border-border">
                       <div className="flex items-start gap-3">
-                        <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-[#84cc16]/20' : 'bg-orange-500/20'}`}>
-                          <Pause className={`h-5 w-5 ${session.status === 'completed' ? 'text-[#84cc16]' : 'text-orange-500'}`} />
+                        <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-green-500/20' : 'bg-orange-500/20'}`}>
+                          <Pause className={`h-5 w-5 ${session.status === 'completed' ? 'text-green-500' : 'text-orange-500'}`} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-muted-foreground">
@@ -488,7 +488,7 @@ export default function Fasting() {
                           </p>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className={`text-sm font-medium ${session.progress >= 100 ? 'text-[#84cc16]' : 'text-orange-500'}`}>
+                          <p className={`text-sm font-medium ${session.progress >= 100 ? 'text-green-500' : 'text-orange-500'}`}>
                             {session.progress}% reach
                           </p>
                         </div>
