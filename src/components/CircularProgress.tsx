@@ -56,7 +56,7 @@ export function CircularProgress({
         <defs>
           <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#22c55e" />
-            <stop offset="100%" stopColor="#84cc16" />
+            <stop offset="100%" stopColor="#22c55e" />
           </linearGradient>
         </defs>
       </svg>
