@@ -14,33 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      achievements: {
-        Row: {
-          code: string
-          description: string | null
-          icon: string | null
-          id: number
-          name: string
-          xp_reward: number | null
-        }
-        Insert: {
-          code: string
-          description?: string | null
-          icon?: string | null
-          id?: number
-          name: string
-          xp_reward?: number | null
-        }
-        Update: {
-          code?: string
-          description?: string | null
-          icon?: string | null
-          id?: number
-          name?: string
-          xp_reward?: number | null
-        }
-        Relationships: []
-      }
       assessments: {
         Row: {
           activity_level: string | null
@@ -548,42 +521,6 @@ export type Database = {
           },
         ]
       }
-      user_achievements: {
-        Row: {
-          achievement_code: string | null
-          id: string
-          unlocked_at: string | null
-          user_id: string
-        }
-        Insert: {
-          achievement_code?: string | null
-          id?: string
-          unlocked_at?: string | null
-          user_id: string
-        }
-        Update: {
-          achievement_code?: string | null
-          id?: string
-          unlocked_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_achievements_achievement_code_fkey"
-            columns: ["achievement_code"]
-            isOneToOne: false
-            referencedRelation: "achievements"
-            referencedColumns: ["code"]
-          },
-          {
-            foreignKeyName: "user_achievements_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_roles: {
         Row: {
           created_at: string
@@ -604,47 +541,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      user_stats: {
-        Row: {
-          current_cycle_xp: number | null
-          current_level: number | null
-          current_streak: number | null
-          game_coins: number | null
-          longest_streak: number | null
-          total_xp: number | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          current_cycle_xp?: number | null
-          current_level?: number | null
-          current_streak?: number | null
-          game_coins?: number | null
-          longest_streak?: number | null
-          total_xp?: number | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          current_cycle_xp?: number | null
-          current_level?: number | null
-          current_streak?: number | null
-          game_coins?: number | null
-          longest_streak?: number | null
-          total_xp?: number | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_stats_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {
