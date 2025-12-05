@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 
 interface CalorieHeaderProps {
@@ -15,11 +14,7 @@ export function CalorieHeader({
   const formattedTarget = useMemo(() => target.toLocaleString('pt-BR'), [target]);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }} 
-      animate={{ opacity: 1, y: 0 }} 
-      className="text-center px-4 pt-4 pb-6"
-    >
+    <div className="text-center px-4 pt-4 pb-6">
       <div className="mb-2">
         <span className="text-6xl font-extrabold text-white tabular-nums">
           {formattedConsumed}
@@ -29,11 +24,9 @@ export function CalorieHeader({
       
       <div className="mt-4 space-y-2">
         <div className="h-3 bg-lime-500/20 rounded-full overflow-hidden">
-          <motion.div 
-            initial={{ width: 0 }} 
-            animate={{ width: `${percentage}%` }} 
-            transition={{ duration: 0.8, ease: 'easeOut' }} 
-            className="h-full bg-lime-500 rounded-full" 
+          <div 
+            style={{ width: `${percentage}%` }} 
+            className="h-full bg-lime-500 rounded-full transition-all duration-300" 
           />
         </div>
         <div className="flex justify-between text-sm">
@@ -41,6 +34,6 @@ export function CalorieHeader({
           <span className="font-bold text-white">{formattedTarget} kcal</span>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
