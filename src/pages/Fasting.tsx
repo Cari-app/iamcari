@@ -345,7 +345,7 @@ export default function Fasting() {
                   {time.hours}
                 </span>
                 <span className="text-4xl font-bold mx-1 text-green-700">:</span>
-                <span className="text-6xl font-black tabular-nums text-green-500">
+                <span className="text-6xl font-black tabular-nums text-green-700">
                   {time.minutes}
                 </span>
                 <span className="text-2xl font-semibold tabular-nums text-green-500 ml-1">
