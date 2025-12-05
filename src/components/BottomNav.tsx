@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { UtensilsCrossed, Clock, ChartBar, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+
 const NAV_ITEMS = [{
   icon: UtensilsCrossed,
   label: 'Dieta',
@@ -20,18 +20,14 @@ const NAV_ITEMS = [{
   label: 'Perfil',
   path: '/profile'
 }] as const;
+
 export const BottomNav = memo(function BottomNav() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50">
       {/* Background gradient: transparent to white (top to bottom) */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/70 to-white dark:via-background/70 dark:to-background pointer-events-none" />
       
-      <motion.nav 
-        initial={{ y: 100 }} 
-        animate={{ y: 0 }} 
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }} 
-        className="relative px-4 pb-safe-bottom pt-3 mb-3.5"
-      >
+      <nav className="relative px-4 pb-safe-bottom pt-3 mb-3.5">
         <div className="mx-auto max-w-lg">
           <div className="rounded-2xl shadow-xl bg-white/95 dark:bg-card/95 backdrop-blur-xl border border-border/30 dark:border-primary/10 dark:shadow-[0_4px_20px_-5px_rgba(132,204,22,0.2)]">
             <div className="flex items-center justify-around py-2">
@@ -66,7 +62,7 @@ export const BottomNav = memo(function BottomNav() {
             </div>
           </div>
         </div>
-      </motion.nav>
+      </nav>
     </div>
   );
 });
