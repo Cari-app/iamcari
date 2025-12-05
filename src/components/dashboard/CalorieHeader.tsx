@@ -25,7 +25,7 @@ export function CalorieHeader({
         </span>
         <span className="absolute -right-12 top-2 text-lg font-bold text-lime-400 drop-shadow-[0_0_10px_rgba(163,230,53,0.5)]">kcal</span>
       </div>
-      <p className="text-sm font-medium mt-2 tracking-widest uppercase text-lime-900">consumidas hoje</p>
+      <p className="text-sm font-medium mt-2 tracking-widest uppercase text-lime-800 dark:text-lime-500">consumidas hoje</p>
       
       {/* Progress section */}
       <div className="mt-6 mx-auto max-w-xs">
