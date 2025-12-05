@@ -253,7 +253,9 @@ export default function Dashboard() {
             </Link>
           </header>
 
-          <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+          <div className="mt-4">
+            <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+          </div>
           <CalorieHeader consumed={totalCalories} target={caloriesTarget} />
 
           <main>

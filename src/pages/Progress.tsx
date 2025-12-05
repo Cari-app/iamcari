@@ -414,7 +414,9 @@ export default function Progress() {
             </Link>
           </header>
 
-          <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+          <div className="mt-4">
+            <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+          </div>
 
           <main className="px-4 pt-4 space-y-4">
             {/* Quick Stats Row */}
