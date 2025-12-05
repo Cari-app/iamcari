@@ -416,7 +416,7 @@ export default function Fasting() {
             {!isActive ? (
               <Button
                 onClick={handleStartFasting}
-                className="w-full h-14 rounded-2xl bg-green-500 hover:bg-green-600 text-white font-bold text-base shadow-lg"
+                className="w-full h-14 rounded-2xl bg-gradient-to-r from-lime-900 to-lime-500 hover:from-lime-800 hover:to-lime-400 text-white font-bold text-base shadow-lg"
               >
                 <Play className="mr-2 h-5 w-5" />
                 Iniciar Jejum {selectedProtocol}h
