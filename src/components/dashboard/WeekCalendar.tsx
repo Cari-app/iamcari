@@ -157,7 +157,7 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
               className={cn(
                 'font-semibold tracking-wider transition-all duration-200 ease-out',
                 isSelected 
-                  ? 'text-[13px] mb-1 text-green-500' 
+                  ? 'text-[13px] mb-1 text-lime-500' 
                   : 'text-[10px] mb-0.5 text-white/50'
               )}
             >
@@ -167,7 +167,7 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
               className={cn(
                 'font-bold transition-all duration-200 ease-out',
                 isSelected 
-                  ? 'text-[28px] text-green-500' 
+                  ? 'text-[28px] text-lime-500' 
                   : 'text-lg text-white/60'
               )}
             >
