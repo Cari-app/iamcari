@@ -367,7 +367,7 @@ export default function Fasting() {
             </motion.div>
           </div>
 
-          <main className="px-4 space-y-4">
+          <main className="px-4 space-y-4 pb-[20px]">
             {/* Action Button */}
             {!isActive ? <Button onClick={handleStartFasting} className="w-full h-14 rounded-2xl text-white font-bold text-base shadow-lg bg-green-700 hover:bg-green-600">
                 <Play className="mr-2 h-5 w-5" />
