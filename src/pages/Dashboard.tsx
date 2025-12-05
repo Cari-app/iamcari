@@ -268,14 +268,14 @@ export default function Dashboard() {
                 className={`flex-1 pb-3 text-center font-medium relative transition-colors ${activeTab === 'dieta' ? 'text-foreground' : 'text-muted-foreground'}`}
               >
                 Dieta
-                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'dieta' ? 'bg-primary dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]' : 'bg-muted'}`} />
+                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'dieta' ? 'bg-lime-500 dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]' : 'bg-muted'}`} />
               </button>
               <button 
                 onClick={() => setActiveTab('jejum')}
                 className={`flex-1 pb-3 text-center font-medium relative transition-colors ${activeTab === 'jejum' ? 'text-foreground' : 'text-muted-foreground'}`}
               >
                 Jejum
-                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'jejum' ? 'bg-primary dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]' : 'bg-muted'}`} />
+                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'jejum' ? 'bg-lime-500 dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]' : 'bg-muted'}`} />
               </button>
             </div>
 
@@ -304,7 +304,7 @@ export default function Dashboard() {
                     ) : (
                       <div className="text-center py-12">
                         <p className="text-muted-foreground">Nenhuma refeição registrada hoje</p>
-                        <button onClick={handleOpenModal} className="mt-4 text-primary font-medium">
+                        <button onClick={handleOpenModal} className="mt-4 text-lime-500 font-medium">
                           Adicionar primeira refeição
                         </button>
                       </div>
@@ -323,9 +323,9 @@ export default function Dashboard() {
                         <SwipeableRow key={session.id} onDelete={() => setSessionToDelete(session.id)}>
                           <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 dark:hover:border-primary/20 transition-colors">
                             <div className="flex items-start gap-3">
-                              <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-primary/20 dark:bg-primary/15' : 'bg-orange-500/20'}`}>
+                              <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-lime-500/20' : 'bg-orange-500/20'}`}>
                                 {session.status === 'completed' ? (
-                                  <Clock className="h-5 w-5 text-primary" />
+                                  <Clock className="h-5 w-5 text-lime-500" />
                                 ) : (
                                   <Pause className="h-5 w-5 text-orange-500" />
                                 )}
@@ -351,7 +351,7 @@ export default function Dashboard() {
                     ) : (
                       <div className="text-center py-12">
                         <p className="text-muted-foreground">Nenhum jejum registrado hoje</p>
-                        <Link to="/fasting" className="mt-4 text-primary font-medium block">
+                        <Link to="/fasting" className="mt-4 text-lime-500 font-medium block">
                           Iniciar jejum
                         </Link>
                       </div>
