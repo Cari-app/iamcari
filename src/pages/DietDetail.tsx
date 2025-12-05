@@ -111,9 +111,13 @@ export default function DietDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-[100dvh] pb-32 bg-background">
+      <div className="min-h-[100dvh] pb-32 bg-background relative">
+        <div className="absolute inset-x-0 -top-[100px] h-[580px]">
+          <div className="absolute inset-0 bg-gradient-to-b from-green-900 via-green-800 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(132,204,22,0.15),transparent)]" />
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+        </div>
         <div className="mx-auto max-w-lg relative">
-          <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
           <div className="relative z-10 pt-20 px-4 space-y-4">
             <Skeleton className="h-32 w-full rounded-2xl" />
             <Skeleton className="h-64 w-full rounded-2xl" />
@@ -128,10 +132,14 @@ export default function DietDetail() {
   if (!diet) return null;
 
   return (
-    <div className="min-h-[100dvh] pb-32 bg-background">
+    <div className="min-h-[100dvh] pb-32 bg-background relative">
+      {/* Premium gradient header with depth */}
+      <div className="absolute inset-x-0 -top-[100px] h-[580px]">
+        <div className="absolute inset-0 bg-gradient-to-b from-green-900 via-green-800 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(132,204,22,0.15),transparent)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+      </div>
       <div className="mx-auto max-w-lg relative">
-        {/* Green Gradient Background */}
-        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
         
         <div className="relative z-10">
           {/* Top Bar */}

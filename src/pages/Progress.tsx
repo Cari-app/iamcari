@@ -514,7 +514,12 @@ export default function Progress() {
     return timeB[0] * 60 + timeB[1] - (timeA[0] * 60 + timeA[1]);
   });
   return <div className="min-h-[100dvh] bg-background relative">
-      <div className="absolute inset-x-0 -top-[100px] h-[520px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+      {/* Premium gradient header with depth */}
+      <div className="absolute inset-x-0 -top-[100px] h-[580px]">
+        <div className="absolute inset-0 bg-gradient-to-b from-green-900 via-green-800 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(132,204,22,0.15),transparent)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+      </div>
       <div className="mx-auto max-w-lg relative">
         
         <div className="relative z-10">
