@@ -544,25 +544,26 @@ export default function Progress() {
             <div className="grid grid-cols-4 gap-2">
               {loading ? Array.from({
               length: 4
-            }).map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />) : stats.map((stat) => <div key={stat.label} className="p-3 rounded-2xl bg-card border border-border text-center">
-                    <p className="text-[10px] text-muted-foreground mb-0.5">{stat.label}</p>
+            }).map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />) : stats.map((stat) => <div key={stat.label} className="relative p-3 rounded-2xl bg-white dark:bg-card text-center shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] hover:shadow-[0_8px_30px_-4px_rgba(132,204,22,0.2)] transition-shadow duration-300 overflow-hidden">
+                    <div className="absolute top-0 left-2 right-2 h-0.5 rounded-b-full bg-gradient-to-r from-green-500 via-lime-400 to-green-500" />
+                    <p className="text-[10px] text-muted-foreground mb-0.5 mt-1">{stat.label}</p>
                     <p className="text-lg font-bold text-foreground">{stat.value}</p>
-                    <stat.icon className="h-4 w-4 mx-auto mt-1 text-[#84cc16]" />
+                    <stat.icon className="h-4 w-4 mx-auto mt-1 text-lime-500" />
                   </div>)}
             </div>
 
             {/* Tabs */}
             <Tabs defaultValue="hoje" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-card p-1.5 rounded-full h-14 border border-border">
-                <TabsTrigger value="hoje" className="rounded-full data-[state=active]:bg-[#84cc16] data-[state=active]:text-white data-[state=active]:shadow-md gap-2 h-full text-muted-foreground">
+              <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-card p-1.5 rounded-full h-14 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)]">
+                <TabsTrigger value="hoje" className="rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-lime-500 data-[state=active]:to-green-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-lime-500/30 gap-2 h-full text-muted-foreground transition-all duration-300">
                   <ListTodo className="h-4 w-4" />
                   <span className="text-sm font-medium">Hoje</span>
                 </TabsTrigger>
-                <TabsTrigger value="progresso" className="rounded-full data-[state=active]:bg-[#84cc16] data-[state=active]:text-white data-[state=active]:shadow-md gap-2 h-full text-muted-foreground">
+                <TabsTrigger value="progresso" className="rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-lime-500 data-[state=active]:to-green-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-lime-500/30 gap-2 h-full text-muted-foreground transition-all duration-300">
                   <ChartBar className="h-4 w-4" />
                   <span className="text-sm font-medium">90 dias</span>
                 </TabsTrigger>
-                <TabsTrigger value="conquistas" className="rounded-full data-[state=active]:bg-[#84cc16] data-[state=active]:text-white data-[state=active]:shadow-md gap-2 h-full text-muted-foreground">
+                <TabsTrigger value="conquistas" className="rounded-full data-[state=active]:bg-gradient-to-r data-[state=active]:from-lime-500 data-[state=active]:to-green-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-lime-500/30 gap-2 h-full text-muted-foreground transition-all duration-300">
                   <Trophy className="h-4 w-4" />
                   <span className="text-sm font-medium">Jejuns</span>
                 </TabsTrigger>
@@ -571,8 +572,9 @@ export default function Progress() {
               {/* Tab: Hoje */}
               <TabsContent value="hoje" className="mt-4 space-y-4">
                 {/* Today Summary */}
-                <div className="p-4 rounded-2xl bg-card border border-border">
-                  <div className="grid grid-cols-4 gap-2 text-center">
+                <div className="relative p-4 rounded-2xl bg-white dark:bg-card shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] overflow-hidden">
+                  <div className="absolute top-0 left-4 right-4 h-1 rounded-b-full bg-gradient-to-r from-green-500 via-lime-400 to-green-500" />
+                  <div className="grid grid-cols-4 gap-2 text-center mt-2">
                     <div>
                       <p className="text-xs text-muted-foreground">Calorias</p>
                       <p className="text-lg font-bold text-foreground tabular-nums">
@@ -582,19 +584,19 @@ export default function Progress() {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Refeições</p>
-                      <p className="text-lg font-bold text-[#84cc16] tabular-nums">{todayMeals}</p>
+                      <p className="text-lg font-bold text-lime-600 dark:text-lime-400 tabular-nums">{todayMeals}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Água</p>
-                      <p className="text-lg font-bold text-[#84cc16] tabular-nums">{waterTotal}<span className="text-[10px]">ml</span></p>
+                      <p className="text-lg font-bold text-lime-600 dark:text-lime-400 tabular-nums">{waterTotal}<span className="text-[10px]">ml</span></p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Peso</p>
-                      <p className="text-lg font-bold text-[#84cc16] tabular-nums">{lastWeight > 0 ? lastWeight : '--'}<span className="text-[10px]">kg</span></p>
+                      <p className="text-lg font-bold text-lime-600 dark:text-lime-400 tabular-nums">{lastWeight > 0 ? lastWeight : '--'}<span className="text-[10px]">kg</span></p>
                     </div>
                   </div>
                   <div className="mt-3 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div style={{ width: `${Math.min(todayCalories / (profile?.daily_calories_target || 2000) * 100, 100)}%` }} className="h-full rounded-full bg-[#84cc16]" />
+                    <div style={{ width: `${Math.min(todayCalories / (profile?.daily_calories_target || 2000) * 100, 100)}%` }} className="h-full rounded-full bg-gradient-to-r from-lime-500 to-green-500" />
                   </div>
                 </div>
 
@@ -602,15 +604,15 @@ export default function Progress() {
 
                 {/* Timeline */}
                 <div className="space-y-2 pb-0">
-                  <h3 className="text-xs font-medium text-muted-foreground">Linha do tempo</h3>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Linha do tempo</h3>
                   {loading ? Array.from({
                   length: 3
                 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />) : sortedTimeline.length > 0 ? sortedTimeline.map((entry) => <div key={entry.id}>
                         <SwipeableRow onDelete={() => setEntryToDelete(entry)}>
                           <TimelineEntryCard entry={entry} onEdit={entry.type === 'meal' ? () => handleEditMeal(entry) : undefined} />
                         </SwipeableRow>
-                      </div>) : <div className="text-center py-8 rounded-xl bg-card border border-border">
-                      <Coffee className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      </div>) : <div className="text-center py-8 rounded-2xl bg-white dark:bg-card shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)]">
+                      <Coffee className="h-8 w-8 mx-auto mb-2 text-lime-500" />
                       <p className="text-sm text-muted-foreground">Nenhum registro hoje</p>
                     </div>}
                 </div>
@@ -618,26 +620,27 @@ export default function Progress() {
 
               {/* Tab: Progresso */}
               <TabsContent value="progresso" className="mt-4 space-y-4">
-                <div className="p-4 rounded-2xl bg-card border border-border">
-                  <div className="flex items-center gap-2 mb-3">
-                    <CalendarDays className="h-4 w-4 text-[#84cc16]" />
+                <div className="relative p-4 rounded-2xl bg-white dark:bg-card shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] overflow-hidden">
+                  <div className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-gradient-to-b from-lime-400 to-green-500" />
+                  <div className="flex items-center gap-2 mb-3 pl-2">
+                    <CalendarDays className="h-4 w-4 text-lime-500" />
                     <h3 className="text-sm font-semibold text-foreground">Atividade dos últimos 90 dias</h3>
                   </div>
                   
                   {loading ? <Skeleton className="h-28 rounded-xl" /> : <>
-                      <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-2">
+                      <div className="flex gap-1 overflow-x-auto scrollbar-hide pb-2 pl-2">
                         {weeks.map((week, weekIndex) => <div key={weekIndex} className="flex flex-col gap-1">
-                            {week.map((day, dayIndex) => <div key={`${weekIndex}-${dayIndex}`} className={cn("w-3.5 h-3.5 rounded-sm", day.intensity === 0 && "bg-muted", day.intensity === 1 && "bg-[#84cc16]/30", day.intensity === 2 && "bg-[#84cc16]/50", day.intensity === 3 && "bg-[#84cc16]/70", day.intensity === 4 && "bg-[#84cc16]")} title={`${day.date.toLocaleDateString('pt-BR')} - ${day.count} atividades`} />)}
+                            {week.map((day, dayIndex) => <div key={`${weekIndex}-${dayIndex}`} className={cn("w-3.5 h-3.5 rounded-sm transition-colors", day.intensity === 0 && "bg-muted", day.intensity === 1 && "bg-lime-500/30", day.intensity === 2 && "bg-lime-500/50", day.intensity === 3 && "bg-lime-500/70", day.intensity === 4 && "bg-lime-500")} title={`${day.date.toLocaleDateString('pt-BR')} - ${day.count} atividades`} />)}
                           </div>)}
                       </div>
                       <div className="flex items-center justify-end gap-2 mt-3 text-[10px] text-muted-foreground">
                         <span>Menos</span>
                         <div className="flex gap-0.5">
                           <div className="w-2.5 h-2.5 rounded-sm bg-muted" />
-                          <div className="w-2.5 h-2.5 rounded-sm bg-[#84cc16]/30" />
-                          <div className="w-2.5 h-2.5 rounded-sm bg-[#84cc16]/50" />
-                          <div className="w-2.5 h-2.5 rounded-sm bg-[#84cc16]/70" />
-                          <div className="w-2.5 h-2.5 rounded-sm bg-[#84cc16]" />
+                          <div className="w-2.5 h-2.5 rounded-sm bg-lime-500/30" />
+                          <div className="w-2.5 h-2.5 rounded-sm bg-lime-500/50" />
+                          <div className="w-2.5 h-2.5 rounded-sm bg-lime-500/70" />
+                          <div className="w-2.5 h-2.5 rounded-sm bg-lime-500" />
                         </div>
                         <span>Mais</span>
                       </div>
@@ -646,40 +649,42 @@ export default function Progress() {
 
                 {/* Stats detail */}
                 <div className="grid grid-cols-2 gap-3">
-                  {stats.map((stat) => <div key={stat.label} className="p-4 rounded-2xl bg-card border border-border text-center">
-                      <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
-                      <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                      <stat.icon className="h-5 w-5 mx-auto mt-2 text-[#84cc16]" />
+                  {stats.map((stat) => <div key={stat.label} className="relative p-4 rounded-2xl bg-white dark:bg-card text-center shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] hover:shadow-[0_8px_30px_-4px_rgba(132,204,22,0.2)] transition-shadow duration-300 overflow-hidden">
+                      <div className="absolute top-0 left-3 right-3 h-0.5 rounded-b-full bg-gradient-to-r from-green-500 via-lime-400 to-green-500" />
+                      <p className="text-xs text-muted-foreground mb-1 mt-1">{stat.label}</p>
+                      <p className="text-2xl font-black text-foreground">{stat.value}</p>
+                      <stat.icon className="h-5 w-5 mx-auto mt-2 text-lime-500" />
                     </div>)}
                 </div>
               </TabsContent>
 
               {/* Tab: Conquistas */}
               <TabsContent value="conquistas" className="mt-4 space-y-4">
-                <div className="p-4 rounded-2xl bg-card border border-border">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Trophy className="h-4 w-4 text-[#84cc16]" />
+                <div className="relative p-4 rounded-2xl bg-white dark:bg-card shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] overflow-hidden">
+                  <div className="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-gradient-to-b from-lime-400 to-green-500" />
+                  <div className="flex items-center gap-2 mb-3 pl-2">
+                    <Trophy className="h-4 w-4 text-lime-500" />
                     <h3 className="text-sm font-semibold text-foreground">Histórico de Jejuns</h3>
                   </div>
                   
                   {loading ? Array.from({
                   length: 3
-                }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl mb-2" />) : achievements.length > 0 ? <div className="space-y-2">
+                }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl mb-2" />) : achievements.length > 0 ? <div className="space-y-2 pl-2">
                       {achievements.map((achievement) => <div key={achievement.id}>
                           <SwipeableRow onDelete={() => setAchievementToDelete(achievement.id)}>
-                            <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                              <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", achievement.iconType === 'completed' ? "bg-[#84cc16]/20" : "bg-muted")}>
-                                <Flame className={cn("h-4 w-4", achievement.iconType === 'completed' ? "text-[#84cc16]" : "text-muted-foreground")} />
+                            <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-lime-500/10 to-green-500/10 dark:from-lime-500/15 dark:to-green-500/15 border border-lime-500/20">
+                              <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", achievement.iconType === 'completed' ? "bg-gradient-to-br from-lime-400/30 to-green-500/30" : "bg-muted")}>
+                                <Flame className={cn("h-4 w-4", achievement.iconType === 'completed' ? "text-lime-500" : "text-muted-foreground")} />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium text-foreground text-sm truncate">{achievement.title}</p>
+                                <p className="font-semibold text-foreground text-sm truncate">{achievement.title}</p>
                                 <p className="text-xs text-muted-foreground">{achievement.description}</p>
                               </div>
                             </div>
                           </SwipeableRow>
                         </div>)}
-                    </div> : <div className="text-center py-8">
-                      <Trophy className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                    </div> : <div className="text-center py-8 pl-2">
+                      <Trophy className="h-8 w-8 mx-auto mb-2 text-lime-500/50" />
                       <p className="text-sm text-foreground font-medium">Comece sua jornada</p>
                       <p className="text-xs text-muted-foreground">Complete jejuns para ver seu histórico</p>
                     </div>}
