@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
+import { DatePickerButton } from '@/components/dashboard/DatePickerButton';
 import { CircularProgress } from '@/components/CircularProgress';
 import { ProtocolSelector } from '@/components/dashboard/ProtocolSelector';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
@@ -318,14 +319,17 @@ export default function Fasting() {
           {/* Top Bar */}
           <header className="flex items-center justify-between px-4 pb-2 pt-safe-top mt-4">
             <img src={logoImage} alt="Cari" className="h-6" />
-            <Link to="/profile">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback className="bg-white/20 text-white">
-                  {profile?.full_name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
+            <div className="flex items-center gap-3">
+              <DatePickerButton selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+              <Link to="/profile">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={profile?.avatar_url || ''} />
+                  <AvatarFallback className="bg-white/20 text-white">
+                    {profile?.full_name?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            </div>
           </header>
 
           <div className="mt-4">
