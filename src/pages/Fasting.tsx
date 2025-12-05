@@ -367,7 +367,7 @@ export default function Fasting() {
             <h2 className="text-2xl text-white font-semibold">
               {isActive ? 'Jejum em andamento' : 'Pronto pra começar'}
             </h2>
-            <p className="text-green-300 text-sm mt-1">
+            <p className="text-green-500 text-sm mt-1">
               {isActive ? `Meta: ${targetHours}h de jejum` : 'Inicie seu jejum quando estiver pronto'}
             </p>
           </div>
@@ -376,14 +376,14 @@ export default function Fasting() {
           <div className="flex flex-col items-center py-6 px-4">
             <CircularProgress progress={isActive ? progress : 0} size={260} strokeWidth={14}>
               <div className="flex items-baseline justify-center">
-                <span className="text-6xl font-black tabular-nums bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent">
+                <span className="text-6xl font-black tabular-nums text-green-500">
                   {time.hours}
                 </span>
-                <span className="text-4xl font-bold bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent mx-1">:</span>
-                <span className="text-6xl font-black tabular-nums bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent">
+                <span className="text-4xl font-bold text-green-500 mx-1">:</span>
+                <span className="text-6xl font-black tabular-nums text-green-500">
                   {time.minutes}
                 </span>
-                <span className="text-2xl font-semibold tabular-nums bg-gradient-to-b from-green-900 to-green-600 bg-clip-text text-transparent ml-1">
+                <span className="text-2xl font-semibold tabular-nums text-green-500 ml-1">
                   :{time.seconds}
                 </span>
               </div>
@@ -396,9 +396,9 @@ export default function Fasting() {
               whileTap={{ scale: 0.95 }}
             >
               {isActive ? (
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-green-400/20 border border-green-400/40">
-                  <Clock className="h-4 w-4 text-green-300" />
-                  <span className="text-sm font-semibold text-green-200">Meta: {targetHours}h</span>
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-green-500/20 border border-green-500/40">
+                  <Clock className="h-4 w-4 text-green-500" />
+                  <span className="text-sm font-semibold text-green-500">Meta: {targetHours}h</span>
                 </div>
               ) : (
                 <ProtocolSelector
@@ -416,7 +416,7 @@ export default function Fasting() {
             {!isActive ? (
               <Button
                 onClick={handleStartFasting}
-                className="w-full h-14 rounded-2xl bg-gradient-to-r from-green-900 to-green-500 hover:from-green-800 hover:to-green-400 text-white font-bold text-base shadow-lg"
+                className="w-full h-14 rounded-2xl bg-green-500 hover:bg-green-600 text-white font-bold text-base shadow-lg"
               >
                 <Play className="mr-2 h-5 w-5" />
                 Iniciar Jejum {selectedProtocol}h
