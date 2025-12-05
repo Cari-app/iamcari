@@ -34,10 +34,13 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
     }, [entry.calories, entry.ai_analysis, entry.macros, dailyTarget, entry.status]);
 
     return (
-      <div className="p-4 rounded-2xl bg-card border border-border group">
-        <div className="flex gap-4">
+      <div className="relative p-4 rounded-2xl bg-white dark:bg-card shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08),0_0_0_1px_rgba(132,204,22,0.08)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.12)] hover:shadow-[0_8px_30px_-4px_rgba(132,204,22,0.15),0_0_0_1px_rgba(132,204,22,0.15)] transition-shadow duration-300 overflow-hidden group">
+        {/* Left accent border */}
+        <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-gradient-to-b from-lime-400 to-green-500" />
+        
+        <div className="flex gap-4 pl-2">
           {/* Image */}
-          <div className="w-20 h-24 rounded-xl overflow-hidden bg-muted shrink-0">
+          <div className="w-20 h-24 rounded-xl overflow-hidden shrink-0 shadow-md ring-2 ring-lime-500/20">
             {entry.image_url ? (
               <img 
                 src={entry.image_url} 
@@ -46,7 +49,7 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
                 loading="lazy"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#84cc16]/20 to-[#84cc16]/5 flex items-center justify-center">
+              <div className="w-full h-full bg-gradient-to-br from-lime-400/30 to-green-500/30 flex items-center justify-center">
                 <span className="text-2xl">🍽️</span>
               </div>
             )}
@@ -56,40 +59,44 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-muted-foreground">{entry.time}</p>
-                <h3 className="font-semibold text-foreground truncate">
+                <p className="text-[10px] font-bold tracking-widest uppercase text-lime-600 dark:text-lime-400">{entry.time}</p>
+                <h3 className="font-bold text-foreground truncate text-base mt-0.5">
                   {entry.food_name && !entry.food_name.includes('Aguardando') 
                     ? entry.food_name 
                     : (entry.description || 'Refeição')}
                 </h3>
-                <p className="text-sm text-muted-foreground">
-                  {entry.calories || 0}kcal
+                <p className="text-sm text-muted-foreground tabular-nums mt-1">
+                  <span className="font-black text-lg text-foreground">{entry.calories || 0}</span>
+                  <span className="text-xs ml-1 font-medium">kcal</span>
                 </p>
               </div>
               <div className="text-right shrink-0 flex flex-col items-end gap-1">
-                <span className="text-sm font-medium text-[#84cc16]">{reachPercentage}% reach</span>
+                <div className="bg-gradient-to-br from-lime-400/20 to-green-500/20 dark:from-lime-500/25 dark:to-green-600/25 px-3 py-1.5 rounded-xl">
+                  <span className="text-lg font-black text-lime-600 dark:text-lime-400">{reachPercentage}%</span>
+                  <p className="text-[9px] font-bold text-lime-700/70 dark:text-lime-300/70 uppercase tracking-wide">reach</p>
+                </div>
                 {!isPending && onEdit && (
                   <button
                     onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                    className="h-7 w-7 rounded-lg bg-muted/80 hover:bg-muted flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity press-effect"
+                    className="h-7 w-7 rounded-lg bg-lime-500/10 hover:bg-lime-500/20 flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all press-effect"
                     aria-label="Editar refeição"
                   >
-                    <Edit className="h-3.5 w-3.5 text-muted-foreground" />
+                    <Edit className="h-3.5 w-3.5 text-lime-600 dark:text-lime-400" />
                   </button>
                 )}
               </div>
             </div>
             
             {/* Macro badges */}
-            <div className="flex items-center gap-1.5 mt-2">
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
-                Prot: {macros.protein}g
+            <div className="flex items-center gap-2 mt-3">
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-lime-500/15 text-lime-700 dark:text-lime-300 border border-lime-500/25">
+                P {macros.protein}g
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
-                Carb: {macros.carbs}g
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-lime-500/15 text-lime-700 dark:text-lime-300 border border-lime-500/25">
+                C {macros.carbs}g
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#84cc16]/10 text-[#84cc16] border border-[#84cc16]/20">
-                Fat: {macros.fat}g
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-lime-500/15 text-lime-700 dark:text-lime-300 border border-lime-500/25">
+                G {macros.fat}g
               </span>
             </div>
           </div>
@@ -103,25 +110,25 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
     const emotionData = EMOTION_TAGS.find(e => e.value === entry.emotion_tag);
     
     return (
-      <div className="p-3 bg-card border border-border rounded-2xl relative overflow-hidden">
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#84cc16]" />
+      <div className="relative p-3 bg-white dark:bg-card rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08),0_0_0_1px_rgba(132,204,22,0.08)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.12)] overflow-hidden">
+        <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-gradient-to-b from-lime-400 to-green-500" />
         
         <div className="flex items-center gap-3 pl-2">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#84cc16]/20 flex-shrink-0">
-            <BrainCircuit className="h-5 w-5 text-[#84cc16]" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-lime-400/20 to-green-500/20 flex-shrink-0">
+            <BrainCircuit className="h-5 w-5 text-lime-500" />
           </div>
           
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground">{entry.time}</p>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-foreground">
+            <p className="text-[10px] font-bold tracking-widest uppercase text-lime-600 dark:text-lime-400">{entry.time}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-sm font-semibold text-foreground">
                 Sentindo-se
               </span>
-              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[#84cc16]/20 text-[#84cc16]">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-lime-500/15 text-lime-700 dark:text-lime-300 border border-lime-500/25">
                 {emotionData?.label || entry.emotion_tag}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Energia: {entry.mood_score}/10
             </p>
           </div>
@@ -133,14 +140,16 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
   // Water Entry Card
   if (entry.type === 'water') {
     return (
-      <div className="px-4 py-3 bg-[#84cc16]/10 border border-[#84cc16]/20 rounded-2xl">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
-            <Droplet className="h-5 w-5 text-[#84cc16]" />
+      <div className="relative px-4 py-3 bg-gradient-to-r from-lime-500/10 to-green-500/10 dark:from-lime-500/15 dark:to-green-500/15 rounded-2xl shadow-[0_4px_20px_-4px_rgba(132,204,22,0.1),0_0_0_1px_rgba(132,204,22,0.15)] overflow-hidden">
+        <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-gradient-to-b from-lime-400 to-green-500" />
+        
+        <div className="flex items-center gap-3 pl-2">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lime-400/30 to-green-500/30 flex items-center justify-center">
+            <Droplet className="h-5 w-5 text-lime-500" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-[#84cc16]/70">{entry.time}</p>
-            <p className="text-lg font-semibold text-[#84cc16]">+{entry.value}ml</p>
+            <p className="text-[10px] font-bold tracking-widest uppercase text-lime-600 dark:text-lime-400">{entry.time}</p>
+            <p className="text-lg font-black text-lime-600 dark:text-lime-400">+{entry.value}ml</p>
           </div>
         </div>
       </div>
@@ -150,14 +159,16 @@ export const TimelineEntryCard = memo(function TimelineEntryCard({ entry, onEdit
   // Weight Entry Card
   if (entry.type === 'weight') {
     return (
-      <div className="px-4 py-3 bg-[#84cc16]/10 border border-[#84cc16]/20 rounded-2xl">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#84cc16]/20 flex items-center justify-center">
-            <Scale className="h-5 w-5 text-[#84cc16]" />
+      <div className="relative px-4 py-3 bg-gradient-to-r from-lime-500/10 to-green-500/10 dark:from-lime-500/15 dark:to-green-500/15 rounded-2xl shadow-[0_4px_20px_-4px_rgba(132,204,22,0.1),0_0_0_1px_rgba(132,204,22,0.15)] overflow-hidden">
+        <div className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-gradient-to-b from-lime-400 to-green-500" />
+        
+        <div className="flex items-center gap-3 pl-2">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lime-400/30 to-green-500/30 flex items-center justify-center">
+            <Scale className="h-5 w-5 text-lime-500" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-[#84cc16]/70">{entry.time}</p>
-            <p className="text-lg font-semibold text-[#84cc16]">{entry.value}kg</p>
+            <p className="text-[10px] font-bold tracking-widest uppercase text-lime-600 dark:text-lime-400">{entry.time}</p>
+            <p className="text-lg font-black text-lime-600 dark:text-lime-400">{entry.value}kg</p>
           </div>
         </div>
       </div>
