@@ -19,7 +19,7 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
   const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const dragState = useRef({ isDragging: false, startX: 0, scrollLeft: 0 });
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-  const hasInitialScrolled = useRef(false);
+  const isInitialScrolling = useRef(true);
   
   const today = useMemo(() => new Date(), []);
   
@@ -66,6 +66,12 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
   }, []);
 
   const handleScrollEnd = useCallback(() => {
+    // Skip date selection during initial scroll
+    if (isInitialScrolling.current) {
+      isInitialScrolling.current = false;
+      return;
+    }
+    
     const centerIndex = findCenterIndex();
     const centerDay = days[centerIndex];
     
@@ -78,12 +84,11 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
 
   // Center on selected date on mount
   useEffect(() => {
-    if (hasInitialScrolled.current) return;
+    isInitialScrolling.current = true;
     const selectedIndex = days.findIndex(day => isSameDay(day.date, selectedDate));
     if (selectedIndex !== -1) {
       requestAnimationFrame(() => {
         scrollToIndex(selectedIndex, 'auto');
-        hasInitialScrolled.current = true;
       });
     }
   }, [days, selectedDate, scrollToIndex]);
