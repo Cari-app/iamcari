@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { format, subDays } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { DateRange } from 'react-day-picker';
 
 import { BottomNav } from '@/components/BottomNav';
-import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
 import { WeightInputDialog } from '@/components/diary/WeightInputDialog';
@@ -15,11 +17,13 @@ import { DeleteConfirmationDrawer } from '@/components/DeleteConfirmationDrawer'
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Flame, Target, Trophy, TrendingUp, Coffee, CalendarDays, ListTodo, ChartBar } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Flame, Target, Trophy, TrendingUp, Coffee, CalendarDays, ListTodo, ChartBar, CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSelectedDate } from '@/contexts/DateContext';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry, EmotionTag } from '@/types';
 import logoImage from '@/assets/logo-cari.png';
@@ -33,7 +37,10 @@ export default function Progress() {
     user,
     profile
   } = useAuth();
-  const { selectedDate, setSelectedDate } = useSelectedDate();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date()
+  });
   const [loading, setLoading] = useState(true);
 
   // Progress stats
@@ -72,7 +79,7 @@ export default function Progress() {
     }
     const fetchProgressData = async () => {
       try {
-        const referenceDate = new Date(selectedDate);
+        const referenceDate = new Date(dateRange?.to || new Date());
         referenceDate.setHours(23, 59, 59, 999);
         const ninetyDaysAgo = new Date(referenceDate);
         ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
@@ -104,7 +111,7 @@ export default function Progress() {
 
         // Calculate current streak
         let streak = 0;
-        let checkDate = new Date(selectedDate);
+        let checkDate = new Date(dateRange?.to || new Date());
         checkDate.setHours(0, 0, 0, 0);
         while (true) {
           const dateStr = checkDate.toDateString();
@@ -141,7 +148,7 @@ export default function Progress() {
         setBestStreak(maxStreak);
 
         // Calculate weekly goal
-        const startOfWeek = new Date(selectedDate);
+        const startOfWeek = new Date(dateRange?.to || new Date());
         const dayOfWeek = startOfWeek.getDay();
         const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
         startOfWeek.setDate(startOfWeek.getDate() + diff);
@@ -222,21 +229,21 @@ export default function Progress() {
       }
     };
     fetchProgressData();
-  }, [user, selectedDate, refetchTrigger]);
+  }, [user, dateRange, refetchTrigger]);
 
-  // Fetch daily timeline
+  // Fetch timeline for date range
   useEffect(() => {
-    if (!user) return;
-    const fetchLogsForDate = async () => {
+    if (!user || !dateRange?.from) return;
+    const fetchLogsForRange = async () => {
       try {
-        const startOfDay = new Date(selectedDate);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(selectedDate);
-        endOfDay.setHours(23, 59, 59, 999);
+        const startOfRange = new Date(dateRange.from!);
+        startOfRange.setHours(0, 0, 0, 0);
+        const endOfRange = new Date(dateRange.to || dateRange.from!);
+        endOfRange.setHours(23, 59, 59, 999);
         const {
           data,
           error
-        } = await supabase.from('meal_logs').select('*').eq('user_id', user.id).gte('created_at', startOfDay.toISOString()).lte('created_at', endOfDay.toISOString()).order('created_at', {
+        } = await supabase.from('meal_logs').select('*').eq('user_id', user.id).gte('created_at', startOfRange.toISOString()).lte('created_at', endOfRange.toISOString()).order('created_at', {
           ascending: false
         });
         if (error) {
@@ -301,21 +308,21 @@ export default function Progress() {
         console.error('Unexpected error:', error);
       }
     };
-    fetchLogsForDate();
+    fetchLogsForRange();
     const channel = supabase.channel('meal-logs-progress').on('postgres_changes', {
       event: '*',
       schema: 'public',
       table: 'meal_logs',
       filter: `user_id=eq.${user.id}`
     }, () => {
-      fetchLogsForDate();
+      fetchLogsForRange();
     }).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, selectedDate, refetchTrigger]);
-  const todayCalories = timeline.filter(e => e.type === 'meal').reduce((sum, e) => sum + (e.calories || 0), 0);
-  const todayMeals = timeline.filter(e => e.type === 'meal').length;
+  }, [user, dateRange, refetchTrigger]);
+  const rangeCalories = timeline.filter(e => e.type === 'meal').reduce((sum, e) => sum + (e.calories || 0), 0);
+  const rangeMeals = timeline.filter(e => e.type === 'meal').length;
   const waterTotal = timeline.filter(e => e.type === 'water').reduce((sum, e) => sum + (e.value || 0), 0);
   const lastWeight = timeline.filter(e => e.type === 'weight').sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.value || 0;
 
@@ -530,8 +537,44 @@ export default function Progress() {
             </Link>
           </header>
 
-          <div className="mt-4">
-            <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+          <div className="mt-4 px-4">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal h-12 rounded-xl bg-card border-border",
+                    !dateRange && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4 text-lime-500" />
+                  {dateRange?.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "dd MMM", { locale: ptBR })} - {format(dateRange.to, "dd MMM yyyy", { locale: ptBR })}
+                      </>
+                    ) : (
+                      format(dateRange.from, "dd MMM yyyy", { locale: ptBR })
+                    )
+                  ) : (
+                    <span>Selecione um período</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="center">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={dateRange?.from}
+                  selected={dateRange}
+                  onSelect={setDateRange}
+                  numberOfMonths={1}
+                  locale={ptBR}
+                  className={cn("p-3 pointer-events-auto")}
+                  disabled={(date) => date > new Date()}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <main className="px-4 pt-4 space-y-4 pb-[20px]">
@@ -565,19 +608,19 @@ export default function Progress() {
 
               {/* Tab: Hoje */}
               <TabsContent value="hoje" className="mt-4 space-y-4">
-                {/* Today Summary */}
+                {/* Summary */}
                 <div className="p-4 rounded-2xl bg-card border border-border">
                   <div className="grid grid-cols-4 gap-2 text-center">
                     <div>
                       <p className="text-xs text-muted-foreground">Calorias</p>
                       <p className="text-lg font-bold text-foreground tabular-nums">
-                        {todayCalories.toLocaleString('pt-BR')}
+                        {rangeCalories.toLocaleString('pt-BR')}
                         <span className="text-[10px] font-medium text-foreground/60">/{(profile?.daily_calories_target || 2000).toLocaleString('pt-BR')}</span>
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Refeições</p>
-                      <p className="text-lg font-bold text-[#84cc16] tabular-nums">{todayMeals}</p>
+                      <p className="text-lg font-bold text-[#84cc16] tabular-nums">{rangeMeals}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Água</p>
@@ -589,7 +632,7 @@ export default function Progress() {
                     </div>
                   </div>
                   <div className="mt-3 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div style={{ width: `${Math.min(todayCalories / (profile?.daily_calories_target || 2000) * 100, 100)}%` }} className="h-full rounded-full bg-[#84cc16]" />
+                    <div style={{ width: `${Math.min(rangeCalories / (profile?.daily_calories_target || 2000) * 100, 100)}%` }} className="h-full rounded-full bg-[#84cc16]" />
                   </div>
                 </div>
 
