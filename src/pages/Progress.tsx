@@ -611,7 +611,7 @@ export default function Progress() {
                 <QuickAssessmentBar onMoodClick={() => setMoodDrawerOpen(true)} onWaterClick={() => setWaterDialogOpen(true)} onWeightClick={() => setWeightDialogOpen(true)} onMealClick={() => setMealDialogOpen(true)} />
 
                 {/* Timeline */}
-                <div className="space-y-2 pb-[20px]">
+                <div className="space-y-2 pb-0">
                   <h3 className="text-xs font-medium text-muted-foreground">Linha do tempo</h3>
                   {loading ? Array.from({
                   length: 3
