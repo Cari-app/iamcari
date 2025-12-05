@@ -30,7 +30,7 @@ export const BottomNav = memo(function BottomNav() {
         initial={{ y: 100 }} 
         animate={{ y: 0 }} 
         transition={{ type: 'spring', stiffness: 300, damping: 30 }} 
-        className="relative px-4 pb-safe-bottom pt-3"
+        className="relative px-4 pb-safe-bottom pt-3 mb-1"
       >
         <div className="mx-auto max-w-lg">
           <div className="rounded-2xl shadow-xl bg-white/95 dark:bg-card/95 backdrop-blur-xl border border-border/30 dark:border-primary/10 dark:shadow-[0_4px_20px_-5px_rgba(132,204,22,0.2)]">
