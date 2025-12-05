@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Play, Pause, Clock, Flame, Target, Trophy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSelectedDate } from '@/contexts/DateContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import logoImage from '@/assets/logo-cari.png';
 import { toast } from '@/hooks/use-toast';
@@ -38,8 +39,8 @@ export default function Fasting() {
     profile,
     refreshProfile
   } = useAuth();
+  const { selectedDate, setSelectedDate } = useSelectedDate();
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [selectedProtocol, setSelectedProtocol] = useState(16);
   const [isCustomProtocol, setIsCustomProtocol] = useState(false);
   const [isProtocolOpen, setIsProtocolOpen] = useState(false);

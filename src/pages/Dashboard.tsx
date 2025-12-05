@@ -12,6 +12,7 @@ import { DeleteConfirmationDrawer } from '@/components/DeleteConfirmationDrawer'
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSelectedDate } from '@/contexts/DateContext';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -34,7 +35,7 @@ interface FastingSession {
 
 export default function Dashboard() {
   const { user, profile } = useAuth();
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const { selectedDate, setSelectedDate } = useSelectedDate();
   const [activeTab, setActiveTab] = useState<'dieta' | 'jejum'>('dieta');
   const [meals, setMeals] = useState<TimelineEntry[]>([]);
   const [fastingSessions, setFastingSessions] = useState<FastingSession[]>([]);
