@@ -358,7 +358,9 @@ export default function Fasting() {
             </Link>
           </header>
 
-          <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+          <div className="mt-4">
+            <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+          </div>
 
           {/* Status Text */}
           <div className="text-center px-4 mt-4">
