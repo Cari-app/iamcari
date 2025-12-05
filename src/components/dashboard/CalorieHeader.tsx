@@ -28,12 +28,12 @@ export function CalorieHeader({
       </div>
       
       <div className="mt-4 space-y-2">
-        <div className="h-3 bg-green-500/20 rounded-full overflow-hidden">
+        <div className="h-3 bg-lime-500/20 rounded-full overflow-hidden">
           <motion.div 
             initial={{ width: 0 }} 
             animate={{ width: `${percentage}%` }} 
             transition={{ duration: 0.8, ease: 'easeOut' }} 
-            className="h-full bg-green-500 rounded-full" 
+            className="h-full bg-lime-500 rounded-full" 
           />
         </div>
         <div className="flex justify-between text-sm">
