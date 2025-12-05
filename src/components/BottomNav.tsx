@@ -32,7 +32,7 @@ export const BottomNav = memo(function BottomNav() {
       damping: 30
     }} className="px-4 pb-safe-bottom pt-2 bg-background mb-[13px]">
         <div className="mx-auto max-w-lg">
-          <div className="rounded-3xl shadow-lg backdrop-blur-2xl bg-card/90 border border-border/50 dark:border-primary/10 dark:shadow-[0_-8px_30px_-10px_rgba(132,204,22,0.15)]">
+          <div className="rounded-3xl shadow-lg backdrop-blur-2xl bg-gradient-to-t from-white via-white/95 to-white/80 dark:from-card dark:via-card/95 dark:to-card/80 border border-border/50 dark:border-primary/10 dark:shadow-[0_-8px_30px_-10px_rgba(132,204,22,0.15)]">
             <div className="flex items-center justify-around py-3 mb-[15px]">
               {NAV_ITEMS.map(item => <NavLink key={item.path} to={item.path} className={({
               isActive
