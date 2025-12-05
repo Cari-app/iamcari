@@ -69,19 +69,19 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
               </p>
             </div>
             <div className="text-right shrink-0">
-              <span className="text-sm font-medium text-primary">{reachPercentage}% reach</span>
+              <span className="text-sm font-medium text-lime-500">{reachPercentage}% reach</span>
             </div>
           </div>
           
           {/* Macro badges */}
           <div className="flex items-center gap-1.5 mt-2">
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-lime-500/10 text-lime-500 border border-lime-500/20">
               Prot: {macros.protein}g
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-lime-500/10 text-lime-500 border border-lime-500/20">
               Carb: {macros.carbs}g
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-lime-500/10 text-lime-500 border border-lime-500/20">
               Fat: {macros.fat}g
             </span>
           </div>
