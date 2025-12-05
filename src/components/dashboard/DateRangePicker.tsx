@@ -10,11 +10,15 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { DateRange } from 'react-day-picker';
+
+export interface DateRangeType {
+  from: Date | undefined;
+  to?: Date | undefined;
+}
 
 interface DateRangePickerProps {
-  dateRange: DateRange | undefined;
-  onDateRangeChange: (range: DateRange | undefined) => void;
+  dateRange: DateRangeType | undefined;
+  onDateRangeChange: (range: DateRangeType | undefined) => void;
 }
 
 export function DateRangePicker({ dateRange, onDateRangeChange }: DateRangePickerProps) {
@@ -44,8 +48,8 @@ export function DateRangePicker({ dateRange, onDateRangeChange }: DateRangePicke
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="range"
-          selected={dateRange}
-          onSelect={onDateRangeChange}
+          selected={dateRange as any}
+          onSelect={onDateRangeChange as any}
           locale={ptBR}
           numberOfMonths={1}
           initialFocus
