@@ -2,7 +2,6 @@ import { memo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { UtensilsCrossed, Clock, ChartBar, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 const NAV_ITEMS = [{
   icon: UtensilsCrossed,
   label: 'Dieta',
@@ -21,36 +20,35 @@ const NAV_ITEMS = [{
   path: '/profile'
 }] as const;
 export const BottomNav = memo(function BottomNav() {
-  return <div className="fixed bottom-0 left-0 right-0 z-50 safe-area-inset-bottom bg-background">
-      <div className="h-12 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+  return <>
+      {/* Spacer to prevent content from being hidden behind the nav */}
+      <div className="h-28" />
       
-      <motion.nav initial={{
-      y: 100
-    }} animate={{
-      y: 0
-    }} transition={{
-      type: 'spring',
-      stiffness: 300,
-      damping: 30
-    }} className="px-4 pb-safe-bottom bg-background pb-[16px]">
-        <div className="mx-auto max-w-lg">
-          <div className="rounded-3xl shadow-lg backdrop-blur-2xl bg-card/90 border border-border/50 dark:border-primary/10 dark:shadow-[0_-8px_30px_-10px_rgba(132,204,22,0.15)]">
-            <div className="flex items-center justify-around py-2">
-              {NAV_ITEMS.map(item => <NavLink key={item.path} to={item.path} className={({
-              isActive
-            }) => cn('flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200 press-effect min-w-[64px]', isActive ? 'text-lime-500' : 'text-muted-foreground hover:text-foreground')}>
-                  {({
+      {/* Fixed bottom navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+        {/* Gradient overlay - transparent to white (top to bottom) */}
+        <div className="h-8 bg-gradient-to-b from-transparent to-background pointer-events-none" />
+        
+        <div className="bg-background px-4 pb-safe-bottom pb-4">
+          <div className="mx-auto max-w-lg">
+            <div className="rounded-3xl shadow-lg backdrop-blur-2xl bg-card/90 border border-border/50 dark:border-primary/10 dark:shadow-[0_-8px_30px_-10px_rgba(132,204,22,0.15)]">
+              <div className="flex items-center justify-around py-2">
+                {NAV_ITEMS.map(item => <NavLink key={item.path} to={item.path} className={({
                 isActive
-              }) => <>
-                      <item.icon className={cn("h-6 w-6", isActive && "dark:drop-shadow-[0_0_8px_rgba(132,204,22,0.5)]")} strokeWidth={isActive ? 2.5 : 2} />
-                      <span className={cn('text-xs font-medium', isActive ? 'opacity-100' : 'opacity-70')}>
-                        {item.label}
-                      </span>
-                    </>}
-                </NavLink>)}
+              }) => cn('flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200 press-effect min-w-[64px]', isActive ? 'text-lime-500' : 'text-muted-foreground hover:text-foreground')}>
+                    {({
+                  isActive
+                }) => <>
+                        <item.icon className={cn("h-6 w-6", isActive && "dark:drop-shadow-[0_0_8px_rgba(132,204,22,0.5)]")} strokeWidth={isActive ? 2.5 : 2} />
+                        <span className={cn('text-xs font-medium', isActive ? 'opacity-100' : 'opacity-70')}>
+                          {item.label}
+                        </span>
+                      </>}
+                  </NavLink>)}
+              </div>
             </div>
           </div>
         </div>
-      </motion.nav>
-    </div>;
+      </div>
+    </>;
 });
