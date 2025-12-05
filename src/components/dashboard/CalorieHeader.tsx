@@ -43,9 +43,9 @@ export function CalorieHeader({
         
         {/* Labels */}
         <div className="flex justify-between mt-2">
-          <span className="text-xs font-bold text-green-700">0</span>
-          <span className="text-sm font-bold text-lime-700">{Math.round(percentage)}%</span>
-          <span className="text-xs font-bold text-green-700">{formattedTarget}</span>
+          <span className="text-xs font-bold text-lime-800 dark:text-lime-500">0</span>
+          <span className="text-sm font-bold text-lime-800 dark:text-lime-500">{Math.round(percentage)}%</span>
+          <span className="text-xs font-bold text-lime-800 dark:text-lime-500">{formattedTarget}</span>
         </div>
       </div>
     </motion.div>;
