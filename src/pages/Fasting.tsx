@@ -305,8 +305,12 @@ export default function Fasting() {
   };
   const isLoading = loading || timerLoading;
   return <div className="min-h-[100dvh] bg-background relative">
-      {/* Green Gradient Background */}
-      <div className="absolute inset-x-0 -top-[100px] h-[520px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+      {/* Premium gradient header with depth */}
+      <div className="absolute inset-x-0 -top-[100px] h-[580px]">
+        <div className="absolute inset-0 bg-gradient-to-b from-green-900 via-green-800 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(132,204,22,0.15),transparent)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+      </div>
       <div className="mx-auto max-w-lg relative">
         
         <div className="relative z-10">
@@ -376,39 +380,39 @@ export default function Fasting() {
             {/* Stats Cards */}
             <div className="grid grid-cols-3 gap-3">
               {isLoading ? <>
-                  <Skeleton className="h-24 rounded-2xl" />
-                  <Skeleton className="h-24 rounded-2xl" />
-                  <Skeleton className="h-24 rounded-2xl" />
+                  <Skeleton className="h-28 rounded-2xl" />
+                  <Skeleton className="h-28 rounded-2xl" />
+                  <Skeleton className="h-28 rounded-2xl" />
                 </> : <>
-                  <div className="group relative p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/60 dark:border-primary/10 text-center overflow-hidden hover:shadow-md dark:hover:border-primary/25 transition-all duration-300">
-                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-                    <p className="text-[11px] font-medium tracking-wide uppercase text-muted-foreground/80 mb-1.5">Melhor sequência</p>
-                    <p className="text-2xl font-bold text-foreground tabular-nums">{bestStreak}</p>
-                    <div className="mt-2.5 flex justify-center">
-                      <div className="p-1.5 rounded-full bg-primary/10 dark:bg-primary/15">
-                        <Flame className="h-4 w-4 text-primary dark:drop-shadow-[0_0_6px_rgba(132,204,22,0.4)]" />
+                  <div className="relative p-4 rounded-2xl bg-white dark:bg-card text-center shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)]">
+                    <div className="absolute top-0 left-4 right-4 h-1 rounded-b-full bg-gradient-to-r from-orange-400 via-orange-300 to-orange-400" />
+                    <p className="text-[11px] font-semibold tracking-wider uppercase text-muted-foreground mt-2 mb-2">Melhor sequência</p>
+                    <p className="text-3xl font-black text-foreground tabular-nums">{bestStreak}</p>
+                    <div className="mt-3 flex justify-center">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-orange-400/20 to-red-500/20">
+                        <Flame className="h-5 w-5 text-orange-500" />
                       </div>
                     </div>
                   </div>
                   
-                  <div className="group relative p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/60 dark:border-primary/10 text-center overflow-hidden hover:shadow-md dark:hover:border-primary/25 transition-all duration-300">
-                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-                    <p className="text-[11px] font-medium tracking-wide uppercase text-muted-foreground/80 mb-1.5">Sequência atual</p>
-                    <p className="text-2xl font-bold text-foreground tabular-nums">{currentStreak}</p>
-                    <div className="mt-2.5 flex justify-center">
-                      <div className="p-1.5 rounded-full bg-primary/10 dark:bg-primary/15">
-                        <Trophy className="h-4 w-4 text-primary dark:drop-shadow-[0_0_6px_rgba(132,204,22,0.4)]" />
+                  <div className="relative p-4 rounded-2xl bg-white dark:bg-card text-center shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)]">
+                    <div className="absolute top-0 left-4 right-4 h-1 rounded-b-full bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400" />
+                    <p className="text-[11px] font-semibold tracking-wider uppercase text-muted-foreground mt-2 mb-2">Sequência atual</p>
+                    <p className="text-3xl font-black text-foreground tabular-nums">{currentStreak}</p>
+                    <div className="mt-3 flex justify-center">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-yellow-400/20 to-amber-500/20">
+                        <Trophy className="h-5 w-5 text-yellow-500" />
                       </div>
                     </div>
                   </div>
                   
-                  <div className="group relative p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/60 dark:border-primary/10 text-center overflow-hidden hover:shadow-md dark:hover:border-primary/25 transition-all duration-300">
-                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-                    <p className="text-[11px] font-medium tracking-wide uppercase text-muted-foreground/80 mb-1.5">Meta Semanal</p>
-                    <p className="text-2xl font-bold text-foreground tabular-nums">{weeklyGoal.completed}<span className="text-lg font-semibold text-muted-foreground">/{weeklyGoal.target}</span></p>
-                    <div className="mt-2.5 flex justify-center">
-                      <div className="p-1.5 rounded-full bg-primary/10 dark:bg-primary/15">
-                        <Target className="h-4 w-4 text-primary dark:drop-shadow-[0_0_6px_rgba(132,204,22,0.4)]" />
+                  <div className="relative p-4 rounded-2xl bg-white dark:bg-card text-center shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)]">
+                    <div className="absolute top-0 left-4 right-4 h-1 rounded-b-full bg-gradient-to-r from-lime-400 via-lime-300 to-lime-400" />
+                    <p className="text-[11px] font-semibold tracking-wider uppercase text-muted-foreground mt-2 mb-2">Meta Semanal</p>
+                    <p className="text-3xl font-black text-foreground tabular-nums">{weeklyGoal.completed}<span className="text-lg font-bold text-lime-500">/{weeklyGoal.target}</span></p>
+                    <div className="mt-3 flex justify-center">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-lime-400/20 to-green-500/20">
+                        <Target className="h-5 w-5 text-lime-500" />
                       </div>
                     </div>
                   </div>
