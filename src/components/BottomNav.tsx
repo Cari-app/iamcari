@@ -13,45 +13,44 @@ const NAV_ITEMS = [
 export const BottomNav = memo(function BottomNav() {
   return (
     <>
-      {/* Spacer - matches nav height */}
-      <div className="h-20" />
+      {/* Spacer */}
+      <div className="h-24" />
       
       {/* Fixed navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe-bottom">
-        {/* Fade gradient - taller and smoother */}
-        <div className="h-6 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
-        <nav className="bg-background/80 backdrop-blur-md px-4 pb-3.5">
-          <div className="mx-auto max-w-lg rounded-[1.75rem] bg-card/95 backdrop-blur-xl border border-border/40 shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.08),0_0_0_1px_rgba(255,255,255,0.5)_inset] dark:border-lime-500/10 dark:shadow-[0_-8px_32px_-8px_rgba(0,0,0,0.5),0_0_0_1px_rgba(132,204,22,0.05)_inset,0_-4px_24px_-8px_rgba(132,204,22,0.1)]">
-            <div className="flex items-center justify-around py-2.5">
+        <div className="h-8 bg-gradient-to-b from-transparent via-background/80 to-background pointer-events-none" />
+        <nav className="bg-background px-4 pb-4">
+          <div className="mx-auto max-w-lg rounded-[1.75rem] bg-white dark:bg-card shadow-[0_-8px_30px_-8px_rgba(0,0,0,0.12),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_-8px_40px_-8px_rgba(0,0,0,0.5),0_0_0_1px_rgba(132,204,22,0.15),0_0_30px_-10px_rgba(132,204,22,0.1)]">
+            <div className="flex items-center justify-around py-3">
               {NAV_ITEMS.map(item => (
                 <NavLink
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) =>
                     cn(
-                      'relative flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200 min-w-[64px]',
+                      'relative flex flex-col items-center gap-1.5 px-4 py-2 rounded-2xl transition-all duration-200 min-w-[64px]',
                       isActive 
-                        ? 'text-lime-500' 
-                        : 'text-muted-foreground hover:text-foreground active:scale-95'
+                        ? 'text-lime-600 dark:text-lime-400' 
+                        : 'text-muted-foreground hover:text-foreground'
                     )
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      {/* Active indicator dot */}
+                      {/* Active background pill */}
                       {isActive && (
-                        <span className="absolute -top-0.5 w-1 h-1 rounded-full bg-lime-500 dark:shadow-[0_0_8px_2px_rgba(132,204,22,0.5)]" />
+                        <span className="absolute inset-0 bg-gradient-to-br from-lime-400/15 to-green-500/15 dark:from-lime-500/20 dark:to-green-500/25 rounded-2xl" />
                       )}
                       <item.icon
                         className={cn(
-                          'h-6 w-6 transition-transform duration-200',
-                          isActive && 'dark:drop-shadow-[0_0_8px_rgba(132,204,22,0.5)]'
+                          'relative h-6 w-6',
+                          isActive && 'text-lime-500'
                         )}
                         strokeWidth={isActive ? 2.5 : 1.75}
                       />
                       <span className={cn(
-                        'text-[11px] font-medium tracking-tight transition-opacity duration-200',
-                        isActive ? 'opacity-100' : 'opacity-60'
+                        'relative text-[11px] font-semibold tracking-tight',
+                        isActive ? 'text-lime-600 dark:text-lime-400' : 'opacity-60'
                       )}>
                         {item.label}
                       </span>

@@ -18,36 +18,34 @@ export function CalorieHeader({
     <motion.div 
       initial={{ opacity: 0, y: 20 }} 
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="text-center px-4 pt-4 pb-6"
+      className="text-center px-4 pt-6 pb-8"
     >
-      <div className="mb-2">
-        <span className="text-6xl font-extrabold text-white tabular-nums tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]">
+      {/* Big calorie display */}
+      <div className="relative inline-block">
+        <span className="text-7xl font-black text-white tabular-nums tracking-tight drop-shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
           {formattedConsumed}
         </span>
-        <p className="text-white/60 text-base font-medium mt-1 mb-4 tracking-wide">calorias consumidas</p>
+        <span className="absolute -right-12 top-2 text-lg font-bold text-lime-400 drop-shadow-[0_0_10px_rgba(163,230,53,0.5)]">kcal</span>
       </div>
+      <p className="text-white/50 text-sm font-medium mt-2 tracking-widest uppercase">consumidas hoje</p>
       
-      <div className="mt-4 space-y-2.5">
-        {/* Enhanced progress bar with glow effect */}
-        <div className="relative h-3 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
+      {/* Progress section */}
+      <div className="mt-6 mx-auto max-w-xs">
+        {/* Progress bar with glow */}
+        <div className="relative h-4 bg-white/10 rounded-full overflow-hidden border border-white/10">
           <motion.div 
             initial={{ width: 0 }} 
             animate={{ width: `${percentage}%` }} 
-            transition={{ duration: 1, ease: [0.25, 0.46, 0.45, 0.94] }} 
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-400 to-green-500 rounded-full shadow-[0_0_12px_rgba(34,197,94,0.4)]" 
-          />
-          {/* Shimmer effect */}
-          <motion.div
-            initial={{ x: '-100%' }}
-            animate={{ x: '200%' }}
-            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: 'easeInOut' }}
-            className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+            transition={{ duration: 0.8, ease: 'easeOut' }} 
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-lime-400 via-lime-300 to-green-400 rounded-full shadow-[0_0_20px_rgba(163,230,53,0.6)]" 
           />
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="font-semibold text-white/70">0</span>
-          <span className="font-semibold text-white/90">{formattedTarget} kcal</span>
+        
+        {/* Labels */}
+        <div className="flex justify-between mt-2">
+          <span className="text-xs font-bold text-white/40">0</span>
+          <span className="text-sm font-bold text-lime-300">{Math.round(percentage)}%</span>
+          <span className="text-xs font-bold text-white/60">{formattedTarget}</span>
         </div>
       </div>
     </motion.div>

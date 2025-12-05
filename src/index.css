@@ -6,71 +6,74 @@
 
 @layer base {
   :root {
-    /* Cari Light Mode - Pure White Base */
-    --background: 0 0% 100%;
-    --foreground: 150 10% 10%;
+    /* Cari Light Mode - Fresh & Vibrant */
+    --background: 150 30% 98%;
+    --foreground: 150 15% 8%;
 
-    --card: 150 20% 98%;
-    --card-foreground: 150 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 150 15% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 150 10% 10%;
+    --popover-foreground: 150 15% 8%;
 
-    /* Green Primary - Fresh/Health */
-    --primary: 142 76% 36%;
+    /* Green Primary - Vibrant & Fresh */
+    --primary: 142 70% 35%;
     --primary-foreground: 0 0% 100%;
 
-    /* Green Secondary - Lighter variant */
-    --secondary: 158 64% 52%;
+    /* Lime Accent - Eye-catching */
+    --secondary: 84 80% 45%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 150 20% 96%;
-    --muted-foreground: 150 16% 40%;
+    --muted: 150 25% 94%;
+    --muted-foreground: 150 12% 45%;
 
-    --accent: 150 20% 96%;
-    --accent-foreground: 150 10% 10%;
+    --accent: 84 60% 92%;
+    --accent-foreground: 142 70% 30%;
 
     /* Rose - Compassion/Alert */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 150 20% 90%;
-    --input: 150 20% 90%;
-    --ring: 142 76% 36%;
+    --border: 150 25% 88%;
+    --input: 150 20% 92%;
+    --ring: 84 80% 45%;
 
     --radius: 1rem;
 
-    /* Custom Brand Colors - Green Palette */
-    --green: 142 76% 36%;
-    --green-glow: 142 76% 36%;
-    --green-light: 158 64% 52%;
-    --green-light-glow: 158 64% 52%;
+    /* Custom Brand Colors - Vibrant Green Palette */
+    --green: 142 70% 35%;
+    --green-glow: 142 80% 40%;
+    --green-light: 84 80% 45%;
+    --green-light-glow: 84 90% 50%;
+    --lime: 84 80% 45%;
 
     /* Glassmorphism */
     --glass-bg: 0 0% 100%;
-    --glass-opacity: 0.7;
-    --glass-border: 0 0% 100%;
+    --glass-opacity: 0.85;
+    --glass-border: 150 30% 95%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(158 64% 52%) 100%);
-    --gradient-warm: linear-gradient(135deg, hsl(158 64% 52%) 0%, hsl(142 76% 36%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(142 70% 35%) 0%, hsl(84 80% 45%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(84 80% 50%) 0%, hsl(142 70% 40%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(150 30% 98%) 100%);
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-green: 0 8px 32px -8px hsl(142 76% 36% / 0.3);
-    --shadow-green-light: 0 8px 32px -8px hsl(158 64% 52% / 0.3);
+    /* Shadows - More Prominent */
+    --shadow-sm: 0 2px 4px -1px hsl(150 20% 20% / 0.08);
+    --shadow-md: 0 6px 16px -4px hsl(150 20% 20% / 0.12), 0 2px 6px -2px hsl(150 20% 20% / 0.08);
+    --shadow-lg: 0 12px 32px -8px hsl(150 20% 20% / 0.15), 0 4px 12px -4px hsl(150 20% 20% / 0.1);
+    --shadow-green: 0 8px 24px -6px hsl(142 70% 35% / 0.35);
+    --shadow-lime: 0 8px 24px -6px hsl(84 80% 45% / 0.4);
+    --shadow-card: 0 4px 20px -4px hsl(150 20% 20% / 0.1), 0 0 0 1px hsl(150 25% 90% / 0.8);
 
     /* Sidebar */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 150 10% 26%;
-    --sidebar-primary: 150 10% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 150 20% 96%;
-    --sidebar-accent-foreground: 150 10% 10%;
-    --sidebar-border: 150 20% 91%;
-    --sidebar-ring: 142 76% 36%;
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 150 15% 20%;
+    --sidebar-primary: 142 70% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 84 60% 95%;
+    --sidebar-accent-foreground: 142 70% 30%;
+    --sidebar-border: 150 25% 90%;
+    --sidebar-ring: 84 80% 45%;
   }
 
   .dark {
