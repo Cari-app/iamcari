@@ -12,12 +12,14 @@ const NAV_ITEMS = [
 
 export const BottomNav = memo(function BottomNav() {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe-bottom">
-      {/* Gradient fade */}
-      <div className="h-3 bg-gradient-to-b from-transparent via-background/70 to-background pointer-events-none" />
+    <>
+      {/* Spacer to prevent content from being hidden */}
+      <div className="h-24" />
       
-      {/* Nav bar */}
-      <nav className="bg-background px-4 pb-3.5 pt-1">
+      {/* Fixed navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe-bottom">
+        <div className="h-3 bg-gradient-to-b from-transparent via-background/70 to-background pointer-events-none" />
+        <nav className="bg-background px-4 pb-3.5">
           <div className="mx-auto max-w-lg rounded-3xl shadow-lg bg-card/90 border border-border/50 backdrop-blur-xl dark:border-lime-500/10 dark:shadow-[0_-8px_30px_-10px_rgba(132,204,22,0.15)]">
             <div className="flex items-center justify-around py-2">
               {NAV_ITEMS.map(item => (
@@ -47,6 +49,7 @@ export const BottomNav = memo(function BottomNav() {
             </div>
           </div>
         </nav>
-    </div>
+      </div>
+    </>
   );
 });
