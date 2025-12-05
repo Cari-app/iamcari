@@ -212,7 +212,7 @@ export default function FastingResult() {
               >
                 <ArrowLeft className="w-5 h-5" />
               </Button>
-              <img src={logoImage} alt="Cari" className="h-8" />
+              <img src={logoImage} alt="Cari" className="h-6" />
             </div>
             <Link to="/profile">
               <Avatar className="h-10 w-10">
