@@ -33,7 +33,7 @@ export const BottomNav = memo(function BottomNav() {
                     cn(
                       'flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200 press-effect min-w-[64px]',
                       isActive 
-                        ? 'text-primary dark:text-primary' 
+                        ? 'text-green-500' 
                         : 'text-muted-foreground hover:text-foreground'
                     )
                   }
