@@ -241,7 +241,7 @@ export default function Dashboard() {
       <div className="mx-auto max-w-lg relative">
         
         <div className="relative z-10">
-          <header className="flex items-center justify-between px-4 pb-2 pt-safe-top">
+          <header className="flex items-center justify-between px-4 pb-2 pt-safe-top mt-4">
             <img src={logoImage} alt="Cari" className="h-6" />
             <Link to="/profile">
               <Avatar className="h-10 w-10">
