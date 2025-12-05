@@ -20,7 +20,7 @@ export const BottomNav = memo(function BottomNav() {
       <div className="fixed bottom-0 left-0 right-0 z-50 pb-safe-bottom">
         <div className="h-4 bg-gradient-to-b from-transparent via-background/80 to-background pointer-events-none" />
         <nav className="bg-background px-4 pb-2">
-          <div className="mx-auto max-w-lg rounded-[1.75rem] bg-white dark:bg-card shadow-[0_-8px_30px_-8px_rgba(0,0,0,0.12),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_-8px_40px_-8px_rgba(0,0,0,0.5),0_0_0_1px_rgba(132,204,22,0.15),0_0_30px_-10px_rgba(132,204,22,0.1)] !-mt-4">
+          <div className="mx-auto max-w-lg rounded-[1.75rem] bg-white dark:bg-card shadow-[0_-8px_30px_-8px_rgba(0,0,0,0.12),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_-8px_40px_-8px_rgba(0,0,0,0.5),0_0_0_1px_rgba(132,204,22,0.15),0_0_30px_-10px_rgba(132,204,22,0.1)] !-mt-8">
             <div className="flex items-center justify-around py-3">
               {NAV_ITEMS.map(item => (
                 <NavLink
