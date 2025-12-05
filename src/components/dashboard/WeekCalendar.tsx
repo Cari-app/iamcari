@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import { format, isSameDay, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,9 @@ interface DayItem {
 }
 
 export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) {
+  const [visibleMonth, setVisibleMonth] = useState(() => 
+    format(selectedDate, 'MMMM yyyy', { locale: ptBR })
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const dragState = useRef({ isDragging: false, startX: 0, scrollLeft: 0 });
@@ -66,14 +69,19 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
   }, []);
 
   const handleScrollEnd = useCallback(() => {
+    const centerIndex = findCenterIndex();
+    const centerDay = days[centerIndex];
+    
+    // Always update visible month
+    if (centerDay) {
+      setVisibleMonth(format(centerDay.date, 'MMMM yyyy', { locale: ptBR }));
+    }
+    
     // Skip date selection during initial scroll
     if (isInitialScrolling.current) {
       isInitialScrolling.current = false;
       return;
     }
-    
-    const centerIndex = findCenterIndex();
-    const centerDay = days[centerIndex];
     
     if (centerDay && !isSameDay(centerDay.date, selectedDate)) {
       onDateSelect(centerDay.date);
@@ -139,19 +147,23 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
   };
 
   return (
-    <div 
-      ref={scrollRef}
-      className="flex items-end gap-0 overflow-x-auto scrollbar-hide py-4 px-12 cursor-grab active:cursor-grabbing select-none touch-pan-x"
-      style={{
-        maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
-        WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
-      }}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
-      onPointerCancel={handlePointerUp}
-    >
+    <div className="flex flex-col">
+      <span className="text-center text-sm text-white/70 capitalize mb-1">
+        {visibleMonth}
+      </span>
+      <div 
+        ref={scrollRef}
+        className="flex items-end gap-0 overflow-x-auto scrollbar-hide py-4 px-12 cursor-grab active:cursor-grabbing select-none touch-pan-x"
+        style={{
+          maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
+          WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
+        }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+      >
       {days.map((day, index) => {
         const isSelected = isSameDay(day.date, selectedDate);
         
@@ -186,6 +198,7 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
