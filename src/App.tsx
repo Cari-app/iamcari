@@ -2,12 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { InstallPWAButton } from "@/components/InstallPWAButton";
-import { StickyHeader } from "@/components/StickyHeader";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Fasting from "./pages/Fasting";
@@ -26,40 +25,6 @@ import DietDetail from "./pages/DietDetail";
 import NotFound from "./pages/NotFound";
 import Help from "./pages/Help";
 
-const MAIN_PAGES = ['/dashboard', '/fasting', '/progress', '/profile'];
-
-function AppContent() {
-  const location = useLocation();
-  const showStickyHeader = MAIN_PAGES.includes(location.pathname);
-
-  return (
-    <>
-      {showStickyHeader && <StickyHeader />}
-      <InstallPWAButton />
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-        <Route path="/assessment" element={<ProtectedRoute><Assessment /></ProtectedRoute>} />
-        <Route path="/nutrition-quiz" element={<ProtectedRoute><NutritionQuiz /></ProtectedRoute>} />
-        <Route path="/fasting-quiz" element={<ProtectedRoute><FastingQuiz /></ProtectedRoute>} />
-        <Route path="/fasting-result" element={<ProtectedRoute><FastingResult /></ProtectedRoute>} />
-        <Route path="/diet-result" element={<ProtectedRoute><DietResult /></ProtectedRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/fasting" element={<ProtectedRoute><Fasting /></ProtectedRoute>} />
-        <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/diets" element={<ProtectedRoute><ExploreDiets /></ProtectedRoute>} />
-        <Route path="/diet-detail" element={<ProtectedRoute><DietDetail /></ProtectedRoute>} />
-        <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </>
-  );
-}
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -70,8 +35,28 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <AppContent />
-          </BrowserRouter>
+            <InstallPWAButton />
+            <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+            <Route path="/assessment" element={<ProtectedRoute><Assessment /></ProtectedRoute>} />
+            <Route path="/nutrition-quiz" element={<ProtectedRoute><NutritionQuiz /></ProtectedRoute>} />
+            <Route path="/fasting-quiz" element={<ProtectedRoute><FastingQuiz /></ProtectedRoute>} />
+            <Route path="/fasting-result" element={<ProtectedRoute><FastingResult /></ProtectedRoute>} />
+            <Route path="/diet-result" element={<ProtectedRoute><DietResult /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/fasting" element={<ProtectedRoute><Fasting /></ProtectedRoute>} />
+            <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/diets" element={<ProtectedRoute><ExploreDiets /></ProtectedRoute>} />
+            <Route path="/diet-detail" element={<ProtectedRoute><DietDetail /></ProtectedRoute>} />
+            <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
     </ThemeProvider>
