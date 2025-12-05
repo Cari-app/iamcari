@@ -236,9 +236,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-[100dvh] pb-24 bg-background">
+    <div className="min-h-[100dvh] pb-24 bg-background relative">
+      <div className="absolute inset-x-0 -top-[100px] h-[520px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
       <div className="mx-auto max-w-lg relative">
-        <div className="absolute inset-x-0 -top-[100px] h-[520px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
         
         <div className="relative z-10">
           <header className="flex items-center justify-between px-4 pb-2 pt-safe-top">
