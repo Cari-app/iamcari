@@ -46,7 +46,7 @@ export const MacroCards = memo(function MacroCards({
           <p className="text-2xl font-bold text-foreground">
             {macros[key].value}g
           </p>
-          <Icon className="h-5 w-5 mx-auto mt-2 text-primary" />
+          <Icon className="h-5 w-5 mx-auto mt-2 text-lime-500" />
         </motion.div>
       ))}
     </div>
