@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-
 import { useNavigate } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -406,7 +405,7 @@ export default function Profile() {
             </div>}
 
           {/* Settings Menu */}
-          <main className="px-4 pt-4 space-y-4 pb-[20px]">
+          <main className="px-4 pt-4 space-y-4 pb-[20px] mb-[13px]">
             {/* Group 1: Biometria */}
             <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
