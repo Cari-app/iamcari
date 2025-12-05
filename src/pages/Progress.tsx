@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
@@ -33,7 +32,10 @@ export default function Progress() {
     user,
     profile
   } = useAuth();
-  const { selectedDate, setSelectedDate } = useSelectedDate();
+  const {
+    selectedDate,
+    setSelectedDate
+  } = useSelectedDate();
   const [loading, setLoading] = useState(true);
 
   // Progress stats
@@ -539,12 +541,12 @@ export default function Progress() {
             <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
           </div>
 
-          <main className="px-4 pt-4 space-y-4 pb-[20px]">
+          <main className="px-4 pt-4 space-y-4 pb-[20px] mb-[20px]">
             {/* Quick Stats Row */}
             <div className="grid grid-cols-4 gap-2">
               {loading ? Array.from({
               length: 4
-            }).map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />) : stats.map((stat) => <div key={stat.label} className="relative p-3 rounded-2xl bg-white dark:bg-card text-center shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] hover:shadow-[0_8px_30px_-4px_rgba(132,204,22,0.2)] transition-shadow duration-300 overflow-hidden">
+            }).map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />) : stats.map(stat => <div key={stat.label} className="relative p-3 rounded-2xl bg-white dark:bg-card text-center shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] hover:shadow-[0_8px_30px_-4px_rgba(132,204,22,0.2)] transition-shadow duration-300 overflow-hidden">
                     <div className="absolute top-0 left-2 right-2 h-0.5 rounded-b-full bg-gradient-to-r from-green-500 via-lime-400 to-green-500" />
                     <p className="text-[10px] text-muted-foreground mb-0.5 mt-1">{stat.label}</p>
                     <p className="text-lg font-bold text-foreground">{stat.value}</p>
@@ -596,7 +598,9 @@ export default function Progress() {
                     </div>
                   </div>
                   <div className="mt-3 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div style={{ width: `${Math.min(todayCalories / (profile?.daily_calories_target || 2000) * 100, 100)}%` }} className="h-full rounded-full bg-gradient-to-r from-lime-500 to-green-500" />
+                    <div style={{
+                    width: `${Math.min(todayCalories / (profile?.daily_calories_target || 2000) * 100, 100)}%`
+                  }} className="h-full rounded-full bg-gradient-to-r from-lime-500 to-green-500" />
                   </div>
                 </div>
 
@@ -607,7 +611,7 @@ export default function Progress() {
                   <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Linha do tempo</h3>
                   {loading ? Array.from({
                   length: 3
-                }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />) : sortedTimeline.length > 0 ? sortedTimeline.map((entry) => <div key={entry.id}>
+                }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />) : sortedTimeline.length > 0 ? sortedTimeline.map(entry => <div key={entry.id}>
                         <SwipeableRow onDelete={() => setEntryToDelete(entry)}>
                           <TimelineEntryCard entry={entry} onEdit={entry.type === 'meal' ? () => handleEditMeal(entry) : undefined} />
                         </SwipeableRow>
@@ -649,7 +653,7 @@ export default function Progress() {
 
                 {/* Stats detail */}
                 <div className="grid grid-cols-2 gap-3">
-                  {stats.map((stat) => <div key={stat.label} className="relative p-4 rounded-2xl bg-white dark:bg-card text-center shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] hover:shadow-[0_8px_30px_-4px_rgba(132,204,22,0.2)] transition-shadow duration-300 overflow-hidden">
+                  {stats.map(stat => <div key={stat.label} className="relative p-4 rounded-2xl bg-white dark:bg-card text-center shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] hover:shadow-[0_8px_30px_-4px_rgba(132,204,22,0.2)] transition-shadow duration-300 overflow-hidden">
                       <div className="absolute top-0 left-3 right-3 h-0.5 rounded-b-full bg-gradient-to-r from-green-500 via-lime-400 to-green-500" />
                       <p className="text-xs text-muted-foreground mb-1 mt-1">{stat.label}</p>
                       <p className="text-2xl font-black text-foreground">{stat.value}</p>
@@ -670,7 +674,7 @@ export default function Progress() {
                   {loading ? Array.from({
                   length: 3
                 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl mb-2" />) : achievements.length > 0 ? <div className="space-y-2 pl-2">
-                      {achievements.map((achievement) => <div key={achievement.id}>
+                      {achievements.map(achievement => <div key={achievement.id}>
                           <SwipeableRow onDelete={() => setAchievementToDelete(achievement.id)}>
                             <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-lime-500/10 to-green-500/10 dark:from-lime-500/15 dark:to-green-500/15 border border-lime-500/20">
                               <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", achievement.iconType === 'completed' ? "bg-gradient-to-br from-lime-400/30 to-green-500/30" : "bg-muted")}>
