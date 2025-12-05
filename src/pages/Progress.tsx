@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import { BottomNav } from '@/components/BottomNav';
-import { DateRangePicker, DateRangeType } from '@/components/dashboard/DateRangePicker';
-import { DatePickerButton } from '@/components/dashboard/DatePickerButton';
+import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
 import { WeightInputDialog } from '@/components/diary/WeightInputDialog';
@@ -36,14 +35,6 @@ export default function Progress() {
   } = useAuth();
   const { selectedDate, setSelectedDate } = useSelectedDate();
   const [loading, setLoading] = useState(true);
-  
-  // Date range for progress analysis (defaults to last 7 days)
-  const [dateRange, setDateRange] = useState<DateRangeType | undefined>(() => {
-    const end = new Date();
-    const start = new Date();
-    start.setDate(start.getDate() - 6);
-    return { from: start, to: end };
-  });
 
   // Progress stats
   const [currentStreak, setCurrentStreak] = useState(0);
@@ -73,7 +64,7 @@ export default function Progress() {
   const [refetchTrigger, setRefetchTrigger] = useState(0);
   const [entryToDelete, setEntryToDelete] = useState<TimelineEntry | null>(null);
 
-  // Fetch progress data based on date range
+  // Fetch progress data (90 days)
   useEffect(() => {
     if (!user) {
       setLoading(false);
@@ -81,29 +72,20 @@ export default function Progress() {
     }
     const fetchProgressData = async () => {
       try {
-        // Use dateRange if available, otherwise default to 90 days
-        const endDate = dateRange?.to || new Date();
-        const startDate = dateRange?.from || (() => {
-          const d = new Date(endDate);
-          d.setDate(d.getDate() - 90);
-          return d;
-        })();
-        
-        const startOfRange = new Date(startDate);
-        startOfRange.setHours(0, 0, 0, 0);
-        const endOfRange = new Date(endDate);
-        endOfRange.setHours(23, 59, 59, 999);
-        
+        const referenceDate = new Date(selectedDate);
+        referenceDate.setHours(23, 59, 59, 999);
+        const ninetyDaysAgo = new Date(referenceDate);
+        ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
         const {
           data: fastingSessions,
           error: fastingError
-        } = await supabase.from('fasting_sessions').select('*').eq('user_id', user.id).gte('created_at', startOfRange.toISOString()).lte('created_at', endOfRange.toISOString()).order('created_at', {
+        } = await supabase.from('fasting_sessions').select('*').eq('user_id', user.id).gte('created_at', ninetyDaysAgo.toISOString()).order('created_at', {
           ascending: true
         });
         const {
           data: mealLogs,
           error: mealError
-        } = await supabase.from('meal_logs').select('*').eq('user_id', user.id).gte('created_at', startOfRange.toISOString()).lte('created_at', endOfRange.toISOString()).order('created_at', {
+        } = await supabase.from('meal_logs').select('*').eq('user_id', user.id).gte('created_at', ninetyDaysAgo.toISOString()).order('created_at', {
           ascending: true
         });
         if (fastingError || mealError) {
@@ -183,12 +165,11 @@ export default function Progress() {
         const rate = totalFasts > 0 ? Math.round(completedFasts / totalFasts * 100) : 0;
         setSuccessRate(totalFasts > 0 ? `${rate}%` : '--');
 
-        // Generate heatmap data based on date range
+        // Generate heatmap data
         const heatmap: DayActivity[] = [];
-        const daysDiff = Math.ceil((endOfRange.getTime() - startOfRange.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-        for (let i = 0; i < daysDiff; i++) {
-          const date = new Date(startOfRange);
-          date.setDate(date.getDate() + i);
+        for (let i = 0; i < 91; i++) {
+          const date = new Date(referenceDate);
+          date.setDate(date.getDate() - (90 - i));
           date.setHours(0, 0, 0, 0);
           const dateStr = date.toDateString();
           const count = activeDays.get(dateStr) || 0;
@@ -241,7 +222,7 @@ export default function Progress() {
       }
     };
     fetchProgressData();
-  }, [user, dateRange, refetchTrigger]);
+  }, [user, selectedDate, refetchTrigger]);
 
   // Fetch daily timeline
   useEffect(() => {
@@ -539,22 +520,18 @@ export default function Progress() {
         <div className="relative z-10">
           <header className="flex items-center justify-between px-4 pb-2 pt-safe-top mt-4">
             <img src={logoImage} alt="Cari" className="h-6" />
-            <div className="flex items-center gap-3">
-              <DatePickerButton selectedDate={selectedDate} onDateSelect={setSelectedDate} />
-              <Link to="/profile">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={profile?.avatar_url || ''} />
-                  <AvatarFallback className="bg-white/20 text-white">
-                    {profile?.full_name?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </Link>
-            </div>
+            <Link to="/profile">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={profile?.avatar_url || ''} />
+                <AvatarFallback className="bg-white/20 text-white">
+                  {profile?.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
           </header>
 
-          {/* Date Range Picker for Progress Analysis */}
-          <div className="px-4 mt-4">
-            <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} />
+          <div className="mt-4">
+            <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
           </div>
 
           <main className="px-4 pt-4 space-y-4 pb-[20px]">
