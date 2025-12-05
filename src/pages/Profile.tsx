@@ -360,7 +360,7 @@ export default function Profile() {
         <div className="relative z-10">
           {/* Top Bar */}
           <header className="flex items-center justify-center px-4 pb-2 pt-safe-top mt-6">
-            <img src={logoImage} alt="Cari" className="h-8" />
+            <img src={logoImage} alt="Cari" className="h-6" />
           </header>
 
           {/* Profile Header */}
