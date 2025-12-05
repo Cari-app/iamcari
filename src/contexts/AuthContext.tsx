@@ -38,8 +38,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // TEMPORARY: Mock data for preview testing
 const BYPASS_AUTH = true;
+const MOCK_USER_ID = 'mock-user-id-preview';
+const MOCK_USER = {
+  id: MOCK_USER_ID,
+  email: 'demo@example.com',
+  app_metadata: {},
+  user_metadata: {},
+  aud: 'authenticated',
+  created_at: new Date().toISOString(),
+} as User;
 const MOCK_PROFILE: Profile = {
-  id: 'mock-user-id',
+  id: MOCK_USER_ID,
   whatsapp_number: '+5511999999999',
   token_balance: 30,
   tier: 'free',
@@ -60,7 +69,7 @@ const MOCK_PROFILE: Profile = {
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(BYPASS_AUTH ? MOCK_USER : null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(BYPASS_AUTH ? MOCK_PROFILE : null);
   const [loading, setLoading] = useState(BYPASS_AUTH ? false : true);
@@ -103,6 +112,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    // Skip auth setup if bypassing for preview
+    if (BYPASS_AUTH) {
+      return;
+    }
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
