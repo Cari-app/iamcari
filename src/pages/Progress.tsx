@@ -19,6 +19,7 @@ import { Flame, Target, Trophy, TrendingUp, Coffee, CalendarDays, ListTodo, Char
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSelectedDate } from '@/contexts/DateContext';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry, EmotionTag } from '@/types';
 import logoImage from '@/assets/logo-cari.png';
@@ -32,8 +33,8 @@ export default function Progress() {
     user,
     profile
   } = useAuth();
+  const { selectedDate, setSelectedDate } = useSelectedDate();
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   // Progress stats
   const [currentStreak, setCurrentStreak] = useState(0);
