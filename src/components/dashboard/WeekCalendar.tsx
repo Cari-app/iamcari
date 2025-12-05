@@ -19,6 +19,7 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
   const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const dragState = useRef({ isDragging: false, startX: 0, scrollLeft: 0 });
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const hasInitialScrolled = useRef(false);
   
   const today = useMemo(() => new Date(), []);
   
@@ -75,13 +76,17 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
     scrollToIndex(centerIndex, 'smooth');
   }, [findCenterIndex, days, selectedDate, onDateSelect, scrollToIndex]);
 
-  // Center today on mount
+  // Center on selected date on mount
   useEffect(() => {
-    const todayIndex = days.findIndex(day => isSameDay(day.date, today));
-    if (todayIndex !== -1) {
-      requestAnimationFrame(() => scrollToIndex(todayIndex, 'auto'));
+    if (hasInitialScrolled.current) return;
+    const selectedIndex = days.findIndex(day => isSameDay(day.date, selectedDate));
+    if (selectedIndex !== -1) {
+      requestAnimationFrame(() => {
+        scrollToIndex(selectedIndex, 'auto');
+        hasInitialScrolled.current = true;
+      });
     }
-  }, [days, today, scrollToIndex]);
+  }, [days, selectedDate, scrollToIndex]);
 
   // Scroll listener with debounce
   useEffect(() => {
