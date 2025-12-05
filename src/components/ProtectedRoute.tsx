@@ -1,8 +1,16 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
+// TEMPORARY: Set to true to bypass auth for preview testing
+const BYPASS_AUTH = true;
+
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useAuth();
+
+  // Bypass all auth checks for preview testing
+  if (BYPASS_AUTH) {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (
