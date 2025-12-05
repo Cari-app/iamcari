@@ -342,7 +342,7 @@ export default function Fasting() {
     <div className="min-h-[100dvh] pb-32 bg-background">
       <div className="mx-auto max-w-lg relative">
         {/* Green Gradient Background */}
-        <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
+        <div className="absolute inset-x-0 -top-[100px] h-[520px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
         
         <div className="relative z-10">
           {/* Top Bar */}
