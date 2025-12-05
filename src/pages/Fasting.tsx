@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { CircularProgress } from '@/components/CircularProgress';
@@ -39,7 +38,10 @@ export default function Fasting() {
     profile,
     refreshProfile
   } = useAuth();
-  const { selectedDate, setSelectedDate } = useSelectedDate();
+  const {
+    selectedDate,
+    setSelectedDate
+  } = useSelectedDate();
   const navigate = useNavigate();
   const [selectedProtocol, setSelectedProtocol] = useState(16);
   const [isCustomProtocol, setIsCustomProtocol] = useState(false);
@@ -337,7 +339,7 @@ export default function Fasting() {
             <h2 className="text-2xl text-white font-semibold">
               {isActive ? 'Jejum em andamento' : 'Pronto pra começar'}
             </h2>
-            <p className="mt-1 text-lime-800 dark:text-lime-500">
+            <p className="mt-1 text-lime-800 dark:text-lime-500 font-bold">
               {isActive ? `Meta: ${targetHours}h de jejum` : 'Inicie seu jejum quando estiver pronto'}
             </p>
           </div>
