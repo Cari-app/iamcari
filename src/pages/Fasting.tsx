@@ -332,7 +332,7 @@ export default function Fasting() {
             <h2 className="text-2xl text-white font-semibold">
               {isActive ? 'Jejum em andamento' : 'Pronto pra começar'}
             </h2>
-            <p className="text-green-500 text-sm mt-1">
+            <p className="mt-1 text-[sidebar-primary-foreground] text-black">
               {isActive ? `Meta: ${targetHours}h de jejum` : 'Inicie seu jejum quando estiver pronto'}
             </p>
           </div>
