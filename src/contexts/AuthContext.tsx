@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase';
-import { useNavigate } from 'react-router-dom';
 
 interface Profile {
   id: string;
@@ -36,43 +35,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// TEMPORARY: Mock data for preview testing
-const BYPASS_AUTH = true;
-const MOCK_USER_ID = 'mock-user-id-preview';
-const MOCK_USER = {
-  id: MOCK_USER_ID,
-  email: 'demo@example.com',
-  app_metadata: {},
-  user_metadata: {},
-  aud: 'authenticated',
-  created_at: new Date().toISOString(),
-} as User;
-const MOCK_PROFILE: Profile = {
-  id: MOCK_USER_ID,
-  whatsapp_number: '+5511999999999',
-  token_balance: 30,
-  tier: 'free',
-  onboarding_completed: true,
-  created_at: new Date().toISOString(),
-  daily_calories_target: 2000,
-  full_name: 'Usuário Demo',
-  nickname: 'Demo',
-  active_diet: 'balanced',
-  avatar_url: null,
-  fasting_protocol: '16:8',
-  weight: 75,
-  height: 175,
-  age: 30,
-  gender: 'male',
-  activity_level: 'moderate',
-  email: 'demo@example.com'
-};
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(BYPASS_AUTH ? MOCK_USER : null);
+  const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(BYPASS_AUTH ? MOCK_PROFILE : null);
-  const [loading, setLoading] = useState(BYPASS_AUTH ? false : true);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
     const { data, error } = await supabase
@@ -89,7 +56,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (data) {
       setProfile(data as Profile);
     } else {
-      // Profile doesn't exist, create it
       const { data: newProfile, error: insertError } = await supabase
         .from('profiles')
         .insert([{ 
@@ -112,12 +78,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Skip auth setup if bypassing for preview
-    if (BYPASS_AUTH) {
-      return;
-    }
-
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
@@ -130,10 +90,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           setProfile(null);
         }
+        setLoading(false);
       }
     );
 
-    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
