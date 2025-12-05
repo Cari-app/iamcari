@@ -21,34 +21,52 @@ const NAV_ITEMS = [{
   path: '/profile'
 }] as const;
 export const BottomNav = memo(function BottomNav() {
-  return <div className="fixed bottom-0 left-0 right-0 z-50 safe-area-inset-bottom bg-background">
-      <motion.nav initial={{
-      y: 100
-    }} animate={{
-      y: 0
-    }} transition={{
-      type: 'spring',
-      stiffness: 300,
-      damping: 30
-    }} className="px-4 pb-safe-bottom pt-2 bg-background mb-[13px] mt-0">
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-50">
+      {/* Background gradient: transparent to white (top to bottom) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/70 to-white dark:via-background/70 dark:to-background pointer-events-none" />
+      
+      <motion.nav 
+        initial={{ y: 100 }} 
+        animate={{ y: 0 }} 
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }} 
+        className="relative px-4 pb-safe-bottom pt-3"
+      >
         <div className="mx-auto max-w-lg">
-          <div className="rounded-3xl shadow-lg backdrop-blur-2xl bg-gradient-to-t from-white via-white/95 to-white/80 dark:from-card dark:via-card/95 dark:to-card/80 border border-border/50 dark:border-primary/10 dark:shadow-[0_-8px_30px_-10px_rgba(132,204,22,0.15)]">
-            <div className="flex items-center justify-around py-3 mb-[15px] pt-px">
-              {NAV_ITEMS.map(item => <NavLink key={item.path} to={item.path} className={({
-              isActive
-            }) => cn('flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200 press-effect min-w-[64px]', isActive ? 'text-lime-500' : 'text-muted-foreground hover:text-foreground')}>
-                  {({
-                isActive
-              }) => <>
-                      <item.icon className={cn("h-6 w-6", isActive && "dark:drop-shadow-[0_0_8px_rgba(132,204,22,0.5)]")} strokeWidth={isActive ? 2.5 : 2} />
-                      <span className={cn('text-xs font-medium', isActive ? 'opacity-100' : 'opacity-70')}>
+          <div className="rounded-2xl shadow-xl bg-white/95 dark:bg-card/95 backdrop-blur-xl border border-border/30 dark:border-primary/10 dark:shadow-[0_4px_20px_-5px_rgba(132,204,22,0.2)]">
+            <div className="flex items-center justify-around py-2">
+              {NAV_ITEMS.map(item => (
+                <NavLink 
+                  key={item.path} 
+                  to={item.path} 
+                  className={({ isActive }) => cn(
+                    'flex flex-col items-center gap-0.5 px-5 py-2 rounded-xl transition-all duration-200 press-effect min-w-[60px]',
+                    isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {({ isActive }) => (
+                    <>
+                      <item.icon 
+                        className={cn(
+                          "h-5 w-5 transition-transform",
+                          isActive && "scale-110 dark:drop-shadow-[0_0_8px_rgba(132,204,22,0.5)]"
+                        )} 
+                        strokeWidth={isActive ? 2.5 : 2} 
+                      />
+                      <span className={cn(
+                        'text-[11px] font-medium',
+                        isActive ? 'opacity-100' : 'opacity-60'
+                      )}>
                         {item.label}
                       </span>
-                    </>}
-                </NavLink>)}
+                    </>
+                  )}
+                </NavLink>
+              ))}
             </div>
           </div>
         </div>
       </motion.nav>
-    </div>;
+    </div>
+  );
 });
