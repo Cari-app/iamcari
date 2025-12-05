@@ -18,11 +18,8 @@ export const BottomNav = memo(function BottomNav() {
 
       {/* Fixed navigation container */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-safe-bottom">
-        {/* Fade gradient overlay */}
-        <div className="absolute inset-x-0 -top-6 h-8 bg-gradient-to-t from-background to-transparent pointer-events-none" />
-        
         {/* Navigation card */}
-        <div className="relative mx-auto max-w-lg mb-2">
+        <div className="relative mx-auto max-w-lg mb-4">
           <div className="rounded-[1.75rem] bg-white dark:bg-card shadow-lg dark:shadow-xl border border-border/5">
             <div className="flex items-center justify-around py-2.5 px-2">
               {NAV_ITEMS.map((item) => (
