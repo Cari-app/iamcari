@@ -184,9 +184,9 @@
 }
 
 /* Safe Area Utilities for iOS notch devices */
-/* pt-safe-top: adds ONLY safe-area-inset-top padding (for notched devices) */
+/* pt-safe-top: adds base padding + safe-area-inset-top for notched devices */
 .pt-safe-top {
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: calc(1rem + env(safe-area-inset-top, 0px));
 }
 
 @supports (padding-top: env(safe-area-inset-top)) {

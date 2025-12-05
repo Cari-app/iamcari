@@ -176,7 +176,7 @@ export default function NutritionQuiz() {
         
         <div className="relative z-10">
           {/* Top Bar */}
-          <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
+          <header className="flex items-center justify-between px-4 pb-2 pt-safe-top">
             <img src={logoImage} alt="Cari" className="h-8" />
             <div className="flex items-center gap-2">
               <Button

@@ -241,7 +241,7 @@ export default function Dashboard() {
         <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-green-950 via-green-900 to-transparent" />
         
         <div className="relative z-10">
-          <header className="flex items-center justify-between px-4 pt-4 pb-2 pt-safe-top">
+          <header className="flex items-center justify-between px-4 pb-2 pt-safe-top">
             <img src={logoImage} alt="Cari" className="h-8" />
             <Link to="/profile">
               <Avatar className="h-10 w-10">
