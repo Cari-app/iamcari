@@ -1,6 +1,6 @@
 import { useTheme } from '@/contexts/ThemeContext';
-import logoLight from '@/assets/logo-light.png';
-import logoDark from '@/assets/logo-dark.png';
+import logoCariGreen from '@/assets/logo-cari-green.png';
+import logoCariWhite from '@/assets/logo-cari-white.png';
 import { cn } from '@/lib/utils';
 
 export interface LogoProps {
@@ -20,9 +20,9 @@ const sizeClasses = {
 export function Logo({ className, size = 'md', forceDark = false }: LogoProps) {
   const { theme } = useTheme();
   
-  // Use logo-light for light mode (black text), logo-dark for dark mode (white text)
-  // forceDark forces the dark logo (white text) for use on colored backgrounds
-  const logo = forceDark || theme === 'dark' ? logoDark : logoLight;
+  // Use green logo for light mode, white logo for dark mode
+  // forceDark forces the white logo for use on colored backgrounds
+  const logo = forceDark || theme === 'dark' ? logoCariWhite : logoCariGreen;
   
   return (
     <img 
