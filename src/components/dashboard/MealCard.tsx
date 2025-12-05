@@ -35,21 +35,25 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 dark:hover:border-primary/20 transition-colors"
+      transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="group relative p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/60 dark:border-primary/10 dark:hover:border-primary/20 transition-all duration-300 overflow-hidden hover:shadow-md"
     >
-      <div className="flex gap-4">
-        {/* Image */}
-        <div className="w-20 h-24 rounded-xl overflow-hidden bg-muted shrink-0">
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-lime-500/[0.02] dark:to-lime-500/[0.03] pointer-events-none" />
+      
+      <div className="relative flex gap-4">
+        {/* Image with enhanced styling */}
+        <div className="w-20 h-24 rounded-xl overflow-hidden bg-muted shrink-0 ring-1 ring-border/50 dark:ring-primary/10">
           {meal.image_url ? (
             <img 
               src={meal.image_url} 
               alt={meal.food_name} 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <span className="text-2xl">🍽️</span>
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 flex items-center justify-center">
+              <span className="text-2xl drop-shadow-sm">🍽️</span>
             </div>
           )}
         </div>
@@ -58,31 +62,35 @@ export const MealCard = memo(function MealCard({ meal, dailyTarget }: MealCardPr
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground">{meal.time}</p>
-              <h3 className="font-semibold text-foreground truncate">
+              <p className="text-[11px] font-medium tracking-wide text-muted-foreground/70">{meal.time}</p>
+              <h3 className="font-semibold text-foreground truncate mt-0.5">
                 {meal.food_name && !meal.food_name.includes('Aguardando') 
                   ? meal.food_name 
                   : (meal.description || 'Refeição')}
               </h3>
-              <p className="text-sm text-muted-foreground">
-                {meal.calories || 0}kcal
+              <p className="text-sm text-muted-foreground tabular-nums mt-0.5">
+                <span className="font-semibold text-foreground">{meal.calories || 0}</span>
+                <span className="text-xs ml-0.5">kcal</span>
               </p>
             </div>
             <div className="text-right shrink-0">
-              <span className="text-sm font-medium text-lime-500">{reachPercentage}% reach</span>
+              <span className="text-sm font-semibold text-lime-500 dark:drop-shadow-[0_0_8px_rgba(132,204,22,0.3)]">
+                {reachPercentage}%
+              </span>
+              <p className="text-[10px] text-muted-foreground/60">da meta</p>
             </div>
           </div>
           
-          {/* Macro badges */}
-          <div className="flex items-center gap-1.5 mt-2">
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-lime-500/10 text-lime-500 border border-lime-500/20">
-              Prot: {macros.protein}g
+          {/* Macro badges with refined styling */}
+          <div className="flex items-center gap-1.5 mt-3">
+            <span className="text-[10px] font-medium px-2 py-1 rounded-lg bg-lime-500/8 text-lime-600 dark:text-lime-400 border border-lime-500/15 dark:border-lime-500/20">
+              P: {macros.protein}g
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-lime-500/10 text-lime-500 border border-lime-500/20">
-              Carb: {macros.carbs}g
+            <span className="text-[10px] font-medium px-2 py-1 rounded-lg bg-lime-500/8 text-lime-600 dark:text-lime-400 border border-lime-500/15 dark:border-lime-500/20">
+              C: {macros.carbs}g
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-lime-500/10 text-lime-500 border border-lime-500/20">
-              Fat: {macros.fat}g
+            <span className="text-[10px] font-medium px-2 py-1 rounded-lg bg-lime-500/8 text-lime-600 dark:text-lime-400 border border-lime-500/15 dark:border-lime-500/20">
+              G: {macros.fat}g
             </span>
           </div>
         </div>

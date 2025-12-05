@@ -380,22 +380,37 @@ export default function Fasting() {
                   <Skeleton className="h-24 rounded-2xl" />
                   <Skeleton className="h-24 rounded-2xl" />
                 </> : <>
-                  <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center dark:hover:border-primary/20 transition-colors">
-                    <p className="text-xs text-muted-foreground mb-1">Melhor sequência</p>
-                    <p className="text-2xl font-bold text-foreground">{bestStreak} Dias</p>
-                    <Flame className="h-5 w-5 mx-auto mt-2 text-primary" />
+                  <div className="group relative p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/60 dark:border-primary/10 text-center overflow-hidden hover:shadow-md dark:hover:border-primary/25 transition-all duration-300">
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                    <p className="text-[11px] font-medium tracking-wide uppercase text-muted-foreground/80 mb-1.5">Melhor sequência</p>
+                    <p className="text-2xl font-bold text-foreground tabular-nums">{bestStreak}</p>
+                    <div className="mt-2.5 flex justify-center">
+                      <div className="p-1.5 rounded-full bg-primary/10 dark:bg-primary/15">
+                        <Flame className="h-4 w-4 text-primary dark:drop-shadow-[0_0_6px_rgba(132,204,22,0.4)]" />
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center dark:hover:border-primary/20 transition-colors">
-                    <p className="text-xs text-muted-foreground mb-1">Sequência atual</p>
-                    <p className="text-2xl font-bold text-foreground">{currentStreak} Dias</p>
-                    <Trophy className="h-5 w-5 mx-auto mt-2 text-primary" />
+                  <div className="group relative p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/60 dark:border-primary/10 text-center overflow-hidden hover:shadow-md dark:hover:border-primary/25 transition-all duration-300">
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                    <p className="text-[11px] font-medium tracking-wide uppercase text-muted-foreground/80 mb-1.5">Sequência atual</p>
+                    <p className="text-2xl font-bold text-foreground tabular-nums">{currentStreak}</p>
+                    <div className="mt-2.5 flex justify-center">
+                      <div className="p-1.5 rounded-full bg-primary/10 dark:bg-primary/15">
+                        <Trophy className="h-4 w-4 text-primary dark:drop-shadow-[0_0_6px_rgba(132,204,22,0.4)]" />
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 text-center dark:hover:border-primary/20 transition-colors">
-                    <p className="text-xs text-muted-foreground mb-1">Meta Semanal</p>
-                    <p className="text-2xl font-bold text-foreground">{weeklyGoal.completed}/{weeklyGoal.target}</p>
-                    <Target className="h-5 w-5 mx-auto mt-2 text-primary" />
+                  <div className="group relative p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/60 dark:border-primary/10 text-center overflow-hidden hover:shadow-md dark:hover:border-primary/25 transition-all duration-300">
+                    <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                    <p className="text-[11px] font-medium tracking-wide uppercase text-muted-foreground/80 mb-1.5">Meta Semanal</p>
+                    <p className="text-2xl font-bold text-foreground tabular-nums">{weeklyGoal.completed}<span className="text-lg font-semibold text-muted-foreground">/{weeklyGoal.target}</span></p>
+                    <div className="mt-2.5 flex justify-center">
+                      <div className="p-1.5 rounded-full bg-primary/10 dark:bg-primary/15">
+                        <Target className="h-4 w-4 text-primary dark:drop-shadow-[0_0_6px_rgba(132,204,22,0.4)]" />
+                      </div>
+                    </div>
                   </div>
                 </>}
             </div>

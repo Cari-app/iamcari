@@ -261,20 +261,23 @@ export default function Dashboard() {
             <MacroCards {...macroProps} className="mb-12" />
 
             {/* Tab Navigation */}
-            <div className="flex mx-4 mt-6">
+            <div className="flex mx-4 mt-6 relative">
+              {/* Tab indicator background */}
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-muted/50 rounded-full" />
+              
               <button 
                 onClick={() => setActiveTab('dieta')}
-                className={`flex-1 pb-3 text-center font-medium relative transition-colors ${activeTab === 'dieta' ? 'text-foreground' : 'text-muted-foreground'}`}
+                className={`flex-1 pb-3 text-center font-medium relative transition-all duration-200 ${activeTab === 'dieta' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'}`}
               >
                 Dieta
-                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'dieta' ? 'bg-lime-500 dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]' : 'bg-muted'}`} />
+                <div className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300 ${activeTab === 'dieta' ? 'bg-lime-500 shadow-[0_0_8px_rgba(132,204,22,0.4)]' : 'bg-transparent'}`} />
               </button>
               <button 
                 onClick={() => setActiveTab('jejum')}
-                className={`flex-1 pb-3 text-center font-medium relative transition-colors ${activeTab === 'jejum' ? 'text-foreground' : 'text-muted-foreground'}`}
+                className={`flex-1 pb-3 text-center font-medium relative transition-all duration-200 ${activeTab === 'jejum' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'}`}
               >
                 Jejum
-                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-full transition-colors ${activeTab === 'jejum' ? 'bg-lime-500 dark:shadow-[0_0_10px_rgba(132,204,22,0.5)]' : 'bg-muted'}`} />
+                <div className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-all duration-300 ${activeTab === 'jejum' ? 'bg-lime-500 shadow-[0_0_8px_rgba(132,204,22,0.4)]' : 'bg-transparent'}`} />
               </button>
             </div>
 
@@ -307,9 +310,9 @@ export default function Dashboard() {
                   {fastingSessions.length > 0 ? (
                     fastingSessions.map(session => (
                       <SwipeableRow key={session.id} onDelete={() => setSessionToDelete(session.id)}>
-                        <div className="p-4 rounded-2xl bg-card border border-border dark:border-primary/10 dark:hover:border-primary/20 transition-colors">
+                        <div className="p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/60 dark:border-primary/10 dark:hover:border-primary/20 transition-all duration-300">
                           <div className="flex items-start gap-3">
-                            <div className={`p-2 rounded-full mt-1 ${session.status === 'completed' ? 'bg-lime-500/20' : 'bg-orange-500/20'}`}>
+                            <div className={`p-2.5 rounded-xl mt-0.5 ${session.status === 'completed' ? 'bg-lime-500/15 ring-1 ring-lime-500/20' : 'bg-orange-500/15 ring-1 ring-orange-500/20'}`}>
                               {session.status === 'completed' ? (
                                 <Clock className="h-5 w-5 text-lime-500" />
                               ) : (
@@ -325,9 +328,9 @@ export default function Dashboard() {
                                   }
                                 </h3>
                               </div>
-                              <p className="text-sm text-muted-foreground mt-1">
+                              <p className="text-sm text-muted-foreground/70 mt-1">
                                 {new Date(session.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                {session.end_time && ` - ${new Date(session.end_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
+                                {session.end_time && ` → ${new Date(session.end_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
                               </p>
                             </div>
                           </div>
