@@ -335,7 +335,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {activeTab === 'dieta' && <FloatingActionButton onClick={handleOpenModal} />}
+      {activeTab === 'dieta' && <FloatingActionButton onClick={handleOpenModal} visible={!isModalOpen} />}
       <BottomNav />
       
       <MealInputDialog open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={() => {}} onPhotoSubmitted={handleCloseModal} />
