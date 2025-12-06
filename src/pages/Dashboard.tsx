@@ -15,9 +15,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSelectedDate } from '@/contexts/DateContext';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry } from '@/types';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Pause, Clock } from 'lucide-react';
-import logoImage from '@/assets/logo-cari.png';
+import { AppHeader } from '@/components/AppHeader';
 const MACRO_TARGETS = {
   protein: 150,
   carbs: 250,
@@ -248,17 +247,7 @@ export default function Dashboard() {
       <div className="mx-auto max-w-lg relative">
         
         <div className="relative z-10">
-          <header className="flex items-center justify-between px-4 pb-2 pt-safe-top mt-6 my-[10px]">
-            <img src={logoImage} alt="Cari" className="h-6" />
-            <Link to="/profile">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback className="bg-white/20 text-white">
-                  {profile?.full_name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
-          </header>
+          <AppHeader />
 
           <div className="mt-4">
             <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
