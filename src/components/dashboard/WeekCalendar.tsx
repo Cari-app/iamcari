@@ -2,7 +2,6 @@ import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import { format, isSameDay, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface WeekCalendarProps {
   selectedDate: Date;
@@ -147,89 +146,58 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
     handleScrollEnd();
   };
 
-  const navigateDays = useCallback((direction: 'prev' | 'next') => {
-    const currentIndex = findCenterIndex();
-    const newIndex = direction === 'prev' 
-      ? Math.max(0, currentIndex - 1) 
-      : Math.min(days.length - 1, currentIndex + 1);
-    
-    scrollToIndex(newIndex, 'smooth');
-    
-    const newDay = days[newIndex];
-    if (newDay) {
-      onDateSelect(newDay.date);
-      setVisibleMonth(format(newDay.date, 'MMMM yyyy', { locale: ptBR }));
-    }
-  }, [findCenterIndex, days, scrollToIndex, onDateSelect]);
-
   return (
     <div className="flex flex-col">
       <span className="text-center text-sm text-white/70 capitalize mb-1">
         {visibleMonth}
       </span>
-      <div className="relative flex items-center">
-        <button 
-          onClick={() => navigateDays('prev')}
-          className="absolute left-0 z-10 p-1 text-white/40 hover:text-white/70 transition-colors"
-        >
-          <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
-        </button>
+      <div 
+        ref={scrollRef}
+        className="flex items-end gap-0 overflow-x-auto scrollbar-hide py-4 px-12 cursor-grab active:cursor-grabbing select-none touch-pan-x"
+        style={{
+          maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
+          WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
+        }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+      >
+      {days.map((day, index) => {
+        const isSelected = isSameDay(day.date, selectedDate);
         
-        <div 
-          ref={scrollRef}
-          className="flex items-end gap-0 overflow-x-auto scrollbar-hide py-4 px-12 cursor-grab active:cursor-grabbing select-none touch-pan-x flex-1"
-          style={{
-            maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
-            WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
-          }}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-        >
-        {days.map((day, index) => {
-          const isSelected = isSameDay(day.date, selectedDate);
-          
-          return (
-            <div
-              key={index}
-              ref={(el) => {
-                if (el) itemRefs.current.set(index, el);
-              }}
-              className="flex flex-col items-center shrink-0 w-11"
+        return (
+          <div
+            key={index}
+            ref={(el) => {
+              if (el) itemRefs.current.set(index, el);
+            }}
+            className="flex flex-col items-center shrink-0 w-11"
+          >
+            <span 
+              className={cn(
+                'font-semibold tracking-wider transition-all duration-200 ease-out',
+                isSelected 
+                  ? 'text-[13px] mb-1 text-lime-500' 
+                  : 'text-[10px] mb-0.5 text-white/50'
+              )}
             >
-              <span 
-                className={cn(
-                  'font-semibold tracking-wider transition-all duration-200 ease-out',
-                  isSelected 
-                    ? 'text-[13px] mb-1 text-lime-500' 
-                    : 'text-[10px] mb-0.5 text-white/50'
-                )}
-              >
-                {day.dayName}
-              </span>
-              <span 
-                className={cn(
-                  'font-bold transition-all duration-200 ease-out',
-                  isSelected 
-                    ? 'text-[28px] text-lime-500' 
-                    : 'text-lg text-white/60'
-                )}
-              >
-                {day.dayNumber}
-              </span>
-            </div>
-          );
-        })}
-        </div>
-        
-        <button 
-          onClick={() => navigateDays('next')}
-          className="absolute right-0 z-10 p-1 text-white/40 hover:text-white/70 transition-colors"
-        >
-          <ChevronRight className="w-5 h-5" strokeWidth={1.5} />
-        </button>
+              {day.dayName}
+            </span>
+            <span 
+              className={cn(
+                'font-bold transition-all duration-200 ease-out',
+                isSelected 
+                  ? 'text-[28px] text-lime-500' 
+                  : 'text-lg text-white/60'
+              )}
+            >
+              {day.dayNumber}
+            </span>
+          </div>
+        );
+      })}
       </div>
     </div>
   );
