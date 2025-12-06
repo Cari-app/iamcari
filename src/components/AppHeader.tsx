@@ -6,13 +6,14 @@ import logoImage from '@/assets/logo-cari.png';
 interface AppHeaderProps {
   showAvatar?: boolean;
   centered?: boolean;
+  className?: string;
 }
 
-export function AppHeader({ showAvatar = true, centered = false }: AppHeaderProps) {
+export function AppHeader({ showAvatar = true, centered = false, className = '' }: AppHeaderProps) {
   const { profile } = useAuth();
 
   return (
-    <header className={`flex items-center px-4 pb-2 pt-safe-top mt-4 ${centered ? 'justify-center' : 'justify-between'}`}>
+    <header className={`flex items-center px-4 pb-2 pt-safe-top ${centered ? 'justify-center' : 'justify-between'} ${className}`}>
       <img src={logoImage} alt="Cari" className="h-6" />
       {showAvatar && !centered && (
         <Link to="/profile">
