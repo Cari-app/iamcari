@@ -351,7 +351,7 @@ export default function Fasting() {
 
             {/* Meta Badge */}
             <div className="mt-5">
-              {isActive ? <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-green-500/20 border border-green-500/40">
+              {isActive ? <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-transparent border border-green-500/40">
                   <Clock className="h-4 w-4 text-green-500" />
                   <span className="text-sm font-semibold text-green-500">Meta: {targetHours}h</span>
                 </div> : <ProtocolSelector selectedHours={selectedProtocol} onSelect={handleProtocolSelect} isOpen={isProtocolOpen} onOpenChange={setIsProtocolOpen} />}
