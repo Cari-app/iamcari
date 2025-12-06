@@ -568,9 +568,9 @@ export default function Progress() {
                   <div className="grid grid-cols-4 gap-2 text-center mt-2">
                     <div>
                       <p className="text-xs text-muted-foreground">Calorias</p>
-                      <p className="text-lg font-bold text-foreground tabular-nums">
+                      <p className="text-lg font-bold text-lime-600 dark:text-lime-400 tabular-nums">
                         {todayCalories.toLocaleString('pt-BR')}
-                        <span className="text-[10px] font-medium text-foreground/60">/{(profile?.daily_calories_target || 2000).toLocaleString('pt-BR')}</span>
+                        <span className="text-[10px] font-medium text-lime-600/60 dark:text-lime-400/60">/{(profile?.daily_calories_target || 2000).toLocaleString('pt-BR')}</span>
                       </p>
                     </div>
                     <div>
