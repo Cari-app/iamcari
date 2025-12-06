@@ -524,7 +524,7 @@ export default function Progress() {
       <div className="mx-auto max-w-lg relative">
         
         <div className="relative z-10">
-          <AppHeader />
+          <AppHeader className="pt-[10px]" />
 
           <div className="mt-4">
             <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
