@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import { format, isSameDay, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -19,12 +19,14 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
     format(selectedDate, 'MMMM yyyy', { locale: ptBR })
   );
   const scrollRef = useRef<HTMLDivElement>(null);
-  const scrollEndTimer = useRef<number | null>(null);
-  const isInitialMount = useRef(true);
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const dragState = useRef({ isDragging: false, startX: 0, scrollLeft: 0 });
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const isInitialScrolling = useRef(true);
   
   const today = useMemo(() => new Date(), []);
-  const itemWidth = 44; // w-11 = 44px
   
+  // Pre-calculate all day data to avoid recalculation on render
   const days = useMemo<DayItem[]>(() => 
     Array.from({ length: 31 }, (_, i) => {
       const date = subDays(today, 15 - i);
@@ -36,85 +38,112 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
     }), [today]
   );
 
-  const scrollToIndex = useCallback((index: number, smooth = true) => {
-    const container = scrollRef.current;
-    if (!container) return;
+  const findCenterIndex = useCallback((): number => {
+    if (!scrollRef.current) return 15;
     
-    const scrollPosition = (index * itemWidth) - (container.offsetWidth / 2) + (itemWidth / 2);
-    container.scrollTo({ 
-      left: scrollPosition, 
-      behavior: smooth ? 'smooth' : 'auto' 
+    const container = scrollRef.current;
+    const containerCenter = container.scrollLeft + container.offsetWidth / 2;
+    
+    let closestIndex = 0;
+    let closestDistance = Infinity;
+    
+    itemRefs.current.forEach((element, index) => {
+      const elementCenter = element.offsetLeft + element.offsetWidth / 2;
+      const distance = Math.abs(containerCenter - elementCenter);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = index;
+      }
     });
+    
+    return closestIndex;
   }, []);
 
-  const getCenterIndex = useCallback(() => {
-    const container = scrollRef.current;
-    if (!container) return 15;
+  const scrollToIndex = useCallback((index: number, behavior: ScrollBehavior = 'smooth') => {
+    const element = itemRefs.current.get(index);
+    if (element && scrollRef.current) {
+      const container = scrollRef.current;
+      const scrollPosition = element.offsetLeft - (container.offsetWidth / 2) + (element.offsetWidth / 2);
+      container.scrollTo({ left: scrollPosition, behavior });
+    }
+  }, []);
+
+  const handleScrollEnd = useCallback(() => {
+    const centerIndex = findCenterIndex();
+    const centerDay = days[centerIndex];
     
-    const centerScroll = container.scrollLeft + container.offsetWidth / 2;
-    const centerIndex = Math.round(centerScroll / itemWidth);
-    return Math.max(0, Math.min(days.length - 1, centerIndex));
-  }, [days.length]);
+    // Always update visible month
+    if (centerDay) {
+      setVisibleMonth(format(centerDay.date, 'MMMM yyyy', { locale: ptBR }));
+    }
+    
+    // Skip date selection during initial scroll
+    if (isInitialScrolling.current) {
+      isInitialScrolling.current = false;
+      return;
+    }
+    
+    if (centerDay && !isSameDay(centerDay.date, selectedDate)) {
+      onDateSelect(centerDay.date);
+    }
+    
+    scrollToIndex(centerIndex, 'smooth');
+  }, [findCenterIndex, days, selectedDate, onDateSelect, scrollToIndex]);
 
   // Center on selected date on mount
   useEffect(() => {
+    isInitialScrolling.current = true;
     const selectedIndex = days.findIndex(day => isSameDay(day.date, selectedDate));
     if (selectedIndex !== -1) {
-      // Use requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
-        scrollToIndex(selectedIndex, false);
-        isInitialMount.current = false;
+        scrollToIndex(selectedIndex, 'auto');
       });
     }
-  }, []);
+  }, [days, selectedDate, scrollToIndex]);
 
-  // Handle scroll with debounced update
+  // Scroll listener with debounce
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
-
+    
     const handleScroll = () => {
-      // Clear previous timer
-      if (scrollEndTimer.current) {
-        window.clearTimeout(scrollEndTimer.current);
-      }
-      
-      // Debounce: wait 250ms after scroll stops
-      scrollEndTimer.current = window.setTimeout(() => {
-        if (isInitialMount.current) return;
-        
-        const centerIndex = getCenterIndex();
-        const centerDay = days[centerIndex];
-        
-        if (centerDay) {
-          // Update month display
-          setVisibleMonth(format(centerDay.date, 'MMMM yyyy', { locale: ptBR }));
-          
-          // Snap to center
-          scrollToIndex(centerIndex, true);
-          
-          // Update selected date
-          if (!isSameDay(centerDay.date, selectedDate)) {
-            onDateSelect(centerDay.date);
-          }
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+      scrollTimeout.current = setTimeout(() => {
+        if (!dragState.current.isDragging) {
+          handleScrollEnd();
         }
-      }, 250);
+      }, 100);
     };
-
+    
     container.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       container.removeEventListener('scroll', handleScroll);
-      if (scrollEndTimer.current) window.clearTimeout(scrollEndTimer.current);
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
     };
-  }, [days, selectedDate, onDateSelect, getCenterIndex, scrollToIndex]);
+  }, [handleScrollEnd]);
 
-  const handleDayClick = (index: number) => {
-    scrollToIndex(index, true);
-    const day = days[index];
-    if (day && !isSameDay(day.date, selectedDate)) {
-      onDateSelect(day.date);
-      setVisibleMonth(format(day.date, 'MMMM yyyy', { locale: ptBR }));
+  const handlePointerDown = (e: React.PointerEvent) => {
+    dragState.current = {
+      isDragging: true,
+      startX: e.pageX - (scrollRef.current?.offsetLeft || 0),
+      scrollLeft: scrollRef.current?.scrollLeft || 0,
+    };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!dragState.current.isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - (scrollRef.current?.offsetLeft || 0);
+    const walk = (x - dragState.current.startX) * 1.5;
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = dragState.current.scrollLeft - walk;
     }
+  };
+
+  const handlePointerUp = () => {
+    dragState.current.isDragging = false;
+    handleScrollEnd();
   };
 
   return (
@@ -124,45 +153,51 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
       </span>
       <div 
         ref={scrollRef}
-        className="flex items-end overflow-x-auto scrollbar-hide py-4 px-12 overscroll-x-contain"
+        className="flex items-end gap-0 overflow-x-auto scrollbar-hide py-4 px-12 cursor-grab active:cursor-grabbing select-none touch-pan-x"
         style={{
           maskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
           WebkitMaskImage: 'linear-gradient(to right, transparent, black 15%, black 85%, transparent)',
-          WebkitOverflowScrolling: 'touch',
         }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+        onPointerCancel={handlePointerUp}
       >
-        {days.map((day, index) => {
-          const isSelected = isSameDay(day.date, selectedDate);
-          
-          return (
-            <div
-              key={index}
-              onClick={() => handleDayClick(index)}
-              className="flex flex-col items-center shrink-0 w-11 cursor-pointer"
+      {days.map((day, index) => {
+        const isSelected = isSameDay(day.date, selectedDate);
+        
+        return (
+          <div
+            key={index}
+            ref={(el) => {
+              if (el) itemRefs.current.set(index, el);
+            }}
+            className="flex flex-col items-center shrink-0 w-11"
+          >
+            <span 
+              className={cn(
+                'font-semibold tracking-wider transition-all duration-200 ease-out',
+                isSelected 
+                  ? 'text-[13px] mb-1 text-lime-500' 
+                  : 'text-[10px] mb-0.5 text-white/50'
+              )}
             >
-              <span 
-                className={cn(
-                  'font-semibold tracking-wider transition-all duration-200',
-                  isSelected 
-                    ? 'text-[13px] mb-1 text-lime-500' 
-                    : 'text-[10px] mb-0.5 text-white/50'
-                )}
-              >
-                {day.dayName}
-              </span>
-              <span 
-                className={cn(
-                  'font-bold transition-all duration-200',
-                  isSelected 
-                    ? 'text-[28px] text-lime-500' 
-                    : 'text-lg text-white/60'
-                )}
-              >
-                {day.dayNumber}
-              </span>
-            </div>
-          );
-        })}
+              {day.dayName}
+            </span>
+            <span 
+              className={cn(
+                'font-bold transition-all duration-200 ease-out',
+                isSelected 
+                  ? 'text-[28px] text-lime-500' 
+                  : 'text-lg text-white/60'
+              )}
+            >
+              {day.dayNumber}
+            </span>
+          </div>
+        );
+      })}
       </div>
     </div>
   );
