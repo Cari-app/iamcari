@@ -247,7 +247,7 @@ export default function Dashboard() {
       <div className="mx-auto max-w-lg relative">
         
         <div className="relative z-10">
-          <AppHeader />
+          <AppHeader className="pt-[5px]" />
 
           <div className="mt-4">
             <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
