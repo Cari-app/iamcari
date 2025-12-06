@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from '@/components/ui/drawer';
-import logoImage from '@/assets/logo-cari.png';
+import { AppHeader } from '@/components/AppHeader';
 export default function Profile() {
   const {
     theme,
@@ -284,10 +284,7 @@ export default function Profile() {
       <div className="mx-auto max-w-lg relative">
         
         <div className="relative z-10">
-          {/* Top Bar */}
-          <header className="flex items-center justify-center px-4 pb-2 pt-safe-top mt-6">
-            <img src={logoImage} alt="Cari" className="h-6" />
-          </header>
+          <AppHeader showAvatar={false} centered />
 
           {/* Profile Header */}
           <div className="text-center px-4 mt-4">

@@ -12,7 +12,6 @@ import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { DeleteConfirmationDrawer } from '@/components/DeleteConfirmationDrawer';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Flame, Target, Trophy, TrendingUp, Coffee, CalendarDays, ListTodo, ChartBar } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -21,7 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSelectedDate } from '@/contexts/DateContext';
 import { toast } from '@/hooks/use-toast';
 import { TimelineEntry, EmotionTag } from '@/types';
-import logoImage from '@/assets/logo-cari.png';
+import { AppHeader } from '@/components/AppHeader';
 interface DayActivity {
   date: Date;
   count: number;
@@ -525,17 +524,7 @@ export default function Progress() {
       <div className="mx-auto max-w-lg relative">
         
         <div className="relative z-10">
-          <header className="flex items-center justify-between px-4 pb-2 pt-safe-top mt-4">
-            <img src={logoImage} alt="Cari" className="h-6" />
-            <Link to="/profile">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={profile?.avatar_url || ''} />
-                <AvatarFallback className="bg-white/20 text-white">
-                  {profile?.full_name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
-          </header>
+          <AppHeader />
 
           <div className="mt-4">
             <WeekCalendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
