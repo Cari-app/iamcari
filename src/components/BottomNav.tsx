@@ -19,7 +19,7 @@ export const BottomNav = memo(function BottomNav() {
       {/* Fixed navigation container */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-safe-bottom">
         {/* Navigation card */}
-        <div className="relative mx-auto max-w-lg mb-6">
+        <div className="relative mx-auto max-w-lg mb-8">
           <div className="rounded-[1.75rem] bg-white dark:bg-card shadow-lg dark:shadow-xl border border-border/5">
             <div className="flex items-center justify-around py-2.5 px-2">
               {NAV_ITEMS.map((item) => (
