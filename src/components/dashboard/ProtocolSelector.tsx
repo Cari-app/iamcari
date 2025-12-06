@@ -67,8 +67,10 @@ export function ProtocolSelector({
       <Badge
         variant="outline"
         className={cn(
-          "cursor-pointer transition-all hover:bg-green-100 px-4 py-2 text-sm",
-          "border-green-600 text-green-700 bg-green-50",
+          "cursor-pointer transition-all px-4 py-2 text-sm border",
+          "bg-transparent border-green-600/60 dark:border-green-500/50",
+          "text-green-700 dark:text-green-400",
+          "hover:border-green-600 dark:hover:border-green-400",
           disabled && "opacity-50 cursor-not-allowed"
         )}
         onClick={() => !disabled && onOpenChange(true)}
