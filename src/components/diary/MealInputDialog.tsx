@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Pencil, Utensils, Sparkles, Heart, Star } from 'lucide-react';
+import { Camera, Pencil, Utensils, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -24,7 +24,6 @@ interface MealInputDialogProps {
     description: string;
     calories?: number;
     imageUrl?: string;
-    isEmotional?: boolean;
   }) => void;
   onPhotoSubmitted?: () => void;
 }
@@ -41,7 +40,6 @@ export function MealInputDialog({
   const [method, setMethod] = useState<InputMethod>('select');
   const [description, setDescription] = useState('');
   const [calories, setCalories] = useState('');
-  const [isEmotional, setIsEmotional] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -70,7 +68,6 @@ export function MealInputDialog({
     setMethod('select');
     setDescription('');
     setCalories('');
-    setIsEmotional(false);
     setSelectedImage(null);
     setImagePreview(null);
     setUploading(false);
@@ -134,10 +131,9 @@ export function MealInputDialog({
         .insert({
           user_id: user.id,
           image_url: publicUrl,
-          food_name: 'Analisando refeição...',
-          is_emotional: isEmotional,
-          status: 'pending',
-          entry_type: 'meal',
+          description: 'Analisando refeição...',
+          meal_type: 'meal',
+          analysis_status: 'pending',
         })
         .select('id')
         .single();
@@ -153,7 +149,6 @@ export function MealInputDialog({
 
       if (analyzeError) {
         console.error('AI analysis error:', analyzeError);
-        // Não bloqueia o fluxo, apenas loga o erro
         toast({
           title: '⚠️ Análise pendente',
           description: 'A foto foi salva. A análise será feita em breve.',
@@ -201,11 +196,10 @@ export function MealInputDialog({
         .from('meal_logs')
         .insert({
           user_id: user.id,
-          food_name: description.trim(),
+          description: description.trim(),
           calories: numCalories,
-          is_emotional: isEmotional,
-          status: 'manual',
-          entry_type: 'meal',
+          meal_type: 'meal',
+          analysis_status: 'manual',
         });
 
       if (error) throw error;
@@ -219,7 +213,6 @@ export function MealInputDialog({
         method: 'manual',
         description: description.trim(),
         calories: numCalories,
-        isEmotional,
       });
       handleClose();
     } catch (error) {
@@ -418,37 +411,6 @@ export function MealInputDialog({
                       max="5000"
                     />
                   </div>
-
-                  {/* Emotional Toggle */}
-                  <button
-                    type="button"
-                    onClick={() => setIsEmotional(!isEmotional)}
-                    className={cn(
-                      'w-full p-3 rounded-xl border-2 transition-all flex items-center gap-3',
-                      isEmotional
-                        ? 'border-[#84cc16]/50 bg-[#84cc16]/10'
-                        : 'border-secondary/50 bg-secondary/10'
-                    )}
-                  >
-                    <div className={cn(
-                      'h-10 w-10 rounded-lg flex items-center justify-center transition-colors',
-                      isEmotional ? 'bg-[#84cc16]/20' : 'bg-secondary/20'
-                    )}>
-                      {isEmotional ? (
-                        <Heart className="h-5 w-5 text-[#84cc16] fill-[#84cc16] transition-colors" />
-                      ) : (
-                        <Star className="h-5 w-5 text-secondary transition-colors" />
-                      )}
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-medium text-foreground">
-                        {isEmotional ? 'Refeição Emocional' : 'Refeição Normal'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {isEmotional ? 'Identificada como emocional' : 'Toque para marcar como emocional'}
-                      </p>
-                    </div>
-                  </button>
 
                   <div className="flex gap-2">
                     <Button variant="ghost" onClick={handleBack} className="flex-1">

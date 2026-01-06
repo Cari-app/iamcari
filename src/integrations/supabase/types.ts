@@ -10,61 +10,58 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
       assessments: {
         Row: {
-          activity_level: string | null
-          age: number | null
+          activity_level: string
+          age: number
           bmr: number | null
           created_at: string
-          daily_calories_target: number | null
-          gender: string | null
+          gender: string
           goal_speed: string | null
-          goal_type: string | null
-          height_cm: number | null
+          goal_type: string
+          height_cm: number
           id: string
-          protein_target_g: number | null
           target_weight_kg: number | null
           tdee: number | null
+          updated_at: string
           user_id: string
-          weight_kg: number | null
+          weight_kg: number
         }
         Insert: {
-          activity_level?: string | null
-          age?: number | null
+          activity_level: string
+          age: number
           bmr?: number | null
           created_at?: string
-          daily_calories_target?: number | null
-          gender?: string | null
+          gender: string
           goal_speed?: string | null
-          goal_type?: string | null
-          height_cm?: number | null
+          goal_type: string
+          height_cm: number
           id?: string
-          protein_target_g?: number | null
           target_weight_kg?: number | null
           tdee?: number | null
+          updated_at?: string
           user_id: string
-          weight_kg?: number | null
+          weight_kg: number
         }
         Update: {
-          activity_level?: string | null
-          age?: number | null
+          activity_level?: string
+          age?: number
           bmr?: number | null
           created_at?: string
-          daily_calories_target?: number | null
-          gender?: string | null
+          gender?: string
           goal_speed?: string | null
-          goal_type?: string | null
-          height_cm?: number | null
+          goal_type?: string
+          height_cm?: number
           id?: string
-          protein_target_g?: number | null
           target_weight_kg?: number | null
           tdee?: number | null
+          updated_at?: string
           user_id?: string
-          weight_kg?: number | null
+          weight_kg?: number
         }
         Relationships: [
           {
@@ -78,103 +75,105 @@ export type Database = {
       }
       diet_types: {
         Row: {
-          color_theme: string | null
-          full_description: string | null
-          icon: string | null
+          benefits: Json | null
+          color_theme: string
+          created_at: string
+          full_description: string
+          icon: string
           id: string
-          ideal_for: string | null
           name: string
-          short_description: string | null
+          restrictions: Json | null
+          short_description: string
         }
         Insert: {
-          color_theme?: string | null
-          full_description?: string | null
-          icon?: string | null
-          id: string
-          ideal_for?: string | null
+          benefits?: Json | null
+          color_theme?: string
+          created_at?: string
+          full_description: string
+          icon?: string
+          id?: string
           name: string
-          short_description?: string | null
+          restrictions?: Json | null
+          short_description: string
         }
         Update: {
-          color_theme?: string | null
-          full_description?: string | null
-          icon?: string | null
+          benefits?: Json | null
+          color_theme?: string
+          created_at?: string
+          full_description?: string
+          icon?: string
           id?: string
-          ideal_for?: string | null
           name?: string
-          short_description?: string | null
+          restrictions?: Json | null
+          short_description?: string
         }
         Relationships: []
       }
       fasting_assessments: {
         Row: {
-          anxiety_level: string | null
+          answers: Json
           created_at: string
-          eating_pattern: string | null
-          emotional_eating: string | null
-          fasting_experience: string | null
-          hunger_tolerance: string | null
           id: string
-          main_goals: string | null
-          meals_per_day: string | null
-          morning_energy: string | null
-          morning_routine: string | null
-          night_hunger: string | null
           readiness_score: number | null
-          rules_tolerance: string | null
-          scores: Json | null
-          snacking_habit: string | null
           suggested_protocol: string | null
-          sweet_relationship: string | null
-          twelve_hour_tolerance: string | null
           user_id: string
-          work_schedule: string | null
         }
         Insert: {
-          anxiety_level?: string | null
+          answers: Json
           created_at?: string
-          eating_pattern?: string | null
-          emotional_eating?: string | null
-          fasting_experience?: string | null
-          hunger_tolerance?: string | null
           id?: string
-          main_goals?: string | null
-          meals_per_day?: string | null
-          morning_energy?: string | null
-          morning_routine?: string | null
-          night_hunger?: string | null
           readiness_score?: number | null
-          rules_tolerance?: string | null
-          scores?: Json | null
-          snacking_habit?: string | null
           suggested_protocol?: string | null
-          sweet_relationship?: string | null
-          twelve_hour_tolerance?: string | null
           user_id: string
-          work_schedule?: string | null
         }
         Update: {
-          anxiety_level?: string | null
+          answers?: Json
           created_at?: string
-          eating_pattern?: string | null
-          emotional_eating?: string | null
-          fasting_experience?: string | null
-          hunger_tolerance?: string | null
           id?: string
-          main_goals?: string | null
-          meals_per_day?: string | null
-          morning_energy?: string | null
-          morning_routine?: string | null
-          night_hunger?: string | null
           readiness_score?: number | null
-          rules_tolerance?: string | null
-          scores?: Json | null
-          snacking_habit?: string | null
           suggested_protocol?: string | null
-          sweet_relationship?: string | null
-          twelve_hour_tolerance?: string | null
           user_id?: string
-          work_schedule?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fasting_assessments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fasting_logs: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          ended_at: string | null
+          id: string
+          notes: string | null
+          protocol: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          protocol: string
+          started_at: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          protocol?: string
+          started_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -183,33 +182,27 @@ export type Database = {
           created_at: string
           end_time: string | null
           id: string
-          potential_xp: number | null
-          protocol_type: string | null
           start_time: string
-          status: string | null
-          target_hours: number | null
+          status: string
+          target_hours: number
           user_id: string
         }
         Insert: {
           created_at?: string
           end_time?: string | null
           id?: string
-          potential_xp?: number | null
-          protocol_type?: string | null
           start_time: string
-          status?: string | null
-          target_hours?: number | null
+          status?: string
+          target_hours?: number
           user_id: string
         }
         Update: {
           created_at?: string
           end_time?: string | null
           id?: string
-          potential_xp?: number | null
-          protocol_type?: string | null
           start_time?: string
-          status?: string | null
-          target_hours?: number | null
+          status?: string
+          target_hours?: number
           user_id?: string
         }
         Relationships: [
@@ -224,121 +217,107 @@ export type Database = {
       }
       meal_logs: {
         Row: {
-          ai_analysis: Json | null
+          analysis_result: Json | null
+          analysis_status: string | null
           calories: number | null
+          carbs: number | null
           created_at: string
           description: string | null
-          entry_type: string | null
-          food_name: string | null
-          hunger_level: number | null
+          fat: number | null
+          fiber: number | null
           id: string
           image_url: string | null
-          is_emotional: boolean | null
-          macros: Json | null
-          metric_value: number | null
-          mood_tag: string | null
-          status: Database["public"]["Enums"]["meal_status"]
+          logged_at: string
+          meal_type: string
+          protein: number | null
+          updated_at: string
           user_id: string
         }
         Insert: {
-          ai_analysis?: Json | null
+          analysis_result?: Json | null
+          analysis_status?: string | null
           calories?: number | null
+          carbs?: number | null
           created_at?: string
           description?: string | null
-          entry_type?: string | null
-          food_name?: string | null
-          hunger_level?: number | null
+          fat?: number | null
+          fiber?: number | null
           id?: string
           image_url?: string | null
-          is_emotional?: boolean | null
-          macros?: Json | null
-          metric_value?: number | null
-          mood_tag?: string | null
-          status?: Database["public"]["Enums"]["meal_status"]
+          logged_at?: string
+          meal_type: string
+          protein?: number | null
+          updated_at?: string
           user_id: string
         }
         Update: {
-          ai_analysis?: Json | null
+          analysis_result?: Json | null
+          analysis_status?: string | null
           calories?: number | null
+          carbs?: number | null
           created_at?: string
           description?: string | null
-          entry_type?: string | null
-          food_name?: string | null
-          hunger_level?: number | null
+          fat?: number | null
+          fiber?: number | null
           id?: string
           image_url?: string | null
-          is_emotional?: boolean | null
-          macros?: Json | null
-          metric_value?: number | null
-          mood_tag?: string | null
-          status?: Database["public"]["Enums"]["meal_status"]
+          logged_at?: string
+          meal_type?: string
+          protein?: number | null
+          updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "meal_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      mood_logs: {
+        Row: {
+          created_at: string
+          energy_level: number | null
+          id: string
+          logged_at: string
+          mood: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          energy_level?: number | null
+          id?: string
+          logged_at?: string
+          mood: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          energy_level?: number | null
+          id?: string
+          logged_at?: string
+          mood?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       nutrition_assessments: {
         Row: {
-          carb_preference: string | null
-          cooking_time: string | null
+          answers: Json
           created_at: string
-          dietary_restrictions: string | null
-          discipline_level: string | null
-          eating_habit: string | null
-          eating_trigger: string | null
-          fasting_history: string | null
           id: string
-          main_goal: string | null
-          meals_per_day: string | null
-          meat_consumption: string | null
-          night_hunger: string | null
-          scores: Json | null
-          structure_preference: string | null
           suggested_diet: string | null
           user_id: string
         }
         Insert: {
-          carb_preference?: string | null
-          cooking_time?: string | null
+          answers: Json
           created_at?: string
-          dietary_restrictions?: string | null
-          discipline_level?: string | null
-          eating_habit?: string | null
-          eating_trigger?: string | null
-          fasting_history?: string | null
           id?: string
-          main_goal?: string | null
-          meals_per_day?: string | null
-          meat_consumption?: string | null
-          night_hunger?: string | null
-          scores?: Json | null
-          structure_preference?: string | null
           suggested_diet?: string | null
           user_id: string
         }
         Update: {
-          carb_preference?: string | null
-          cooking_time?: string | null
+          answers?: Json
           created_at?: string
-          dietary_restrictions?: string | null
-          discipline_level?: string | null
-          eating_habit?: string | null
-          eating_trigger?: string | null
-          fasting_history?: string | null
           id?: string
-          main_goal?: string | null
-          meals_per_day?: string | null
-          meat_consumption?: string | null
-          night_hunger?: string | null
-          scores?: Json | null
-          structure_preference?: string | null
           suggested_diet?: string | null
           user_id?: string
         }
@@ -367,9 +346,10 @@ export type Database = {
           height: number | null
           id: string
           nickname: string | null
-          onboarding_completed: boolean | null
-          tier: string | null
-          token_balance: number | null
+          onboarding_completed: boolean
+          tier: string
+          token_balance: number
+          updated_at: string
           weight: number | null
           whatsapp_number: string | null
         }
@@ -387,9 +367,10 @@ export type Database = {
           height?: number | null
           id: string
           nickname?: string | null
-          onboarding_completed?: boolean | null
-          tier?: string | null
-          token_balance?: number | null
+          onboarding_completed?: boolean
+          tier?: string
+          token_balance?: number
+          updated_at?: string
           weight?: number | null
           whatsapp_number?: string | null
         }
@@ -407,45 +388,14 @@ export type Database = {
           height?: number | null
           id?: string
           nickname?: string | null
-          onboarding_completed?: boolean | null
-          tier?: string | null
-          token_balance?: number | null
+          onboarding_completed?: boolean
+          tier?: string
+          token_balance?: number
+          updated_at?: string
           weight?: number | null
           whatsapp_number?: string | null
         }
         Relationships: []
-      }
-      token_transactions: {
-        Row: {
-          amount: number
-          created_at: string
-          description: string | null
-          id: string
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          description?: string | null
-          id?: string
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          description?: string | null
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "token_transactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_roles: {
         Row: {
@@ -466,6 +416,62 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      water_logs: {
+        Row: {
+          amount_ml: number
+          created_at: string
+          id: string
+          logged_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_ml: number
+          created_at?: string
+          id?: string
+          logged_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_ml?: number
+          created_at?: string
+          id?: string
+          logged_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      weight_logs: {
+        Row: {
+          created_at: string
+          id: string
+          logged_at: string
+          user_id: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logged_at?: string
+          user_id: string
+          weight: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logged_at?: string
+          user_id?: string
+          weight?: number
+        }
         Relationships: []
       }
     }
@@ -480,14 +486,9 @@ export type Database = {
         }
         Returns: boolean
       }
-      renew_subscription_balance: {
-        Args: { target_user_id: string }
-        Returns: undefined
-      }
     }
     Enums: {
-      app_role: "admin" | "user"
-      meal_status: "manual" | "pending" | "analyzed" | "error"
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -615,8 +616,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
-      meal_status: ["manual", "pending", "analyzed", "error"],
+      app_role: ["admin", "moderator", "user"],
     },
   },
 } as const
