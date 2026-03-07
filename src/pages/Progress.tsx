@@ -44,6 +44,7 @@ const WEEKDAY_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
 export default function Progress() {
   const { user, profile } = useAuth();
   const { selectedDate, setSelectedDate } = useSelectedDate();
+  const { unlockedAchievements, achievementData, loading: achievementsLoading, refresh: refreshAchievements } = useAchievements();
   const [loading, setLoading] = useState(true);
   const [heatmapPeriod, setHeatmapPeriod] = useState<number>(30);
 
