@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
