@@ -345,8 +345,8 @@ export default function Progress() {
                   <div className="grid gap-[3px]" style={{ gridTemplateColumns: `auto repeat(${heatmapGrid.length}, 1fr)` }}>
                     {/* Row by row: for each day of week, render label + all weeks */}
                     {WEEKDAY_LABELS.map((label, dayIdx) => (
-                      <>
-                        <div key={`label-${dayIdx}`} className="flex items-center pr-1">
+                      <React.Fragment key={dayIdx}>
+                        <div className="flex items-center pr-1">
                           <span className="text-[9px] font-medium text-muted-foreground leading-none">{label}</span>
                         </div>
                         {heatmapGrid.map((week, weekIdx) => {
@@ -367,7 +367,7 @@ export default function Progress() {
                             />
                           );
                         })}
-                      </>
+                      </React.Fragment>
                     ))}
                   </div>
 
