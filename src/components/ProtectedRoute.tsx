@@ -16,6 +16,11 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
 
+  // Redirect to change password if required
+  if (profile && (profile as any).must_change_password && window.location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />;
+  }
+
   // Redirect to onboarding if not completed
   if (profile && !profile.onboarding_completed && window.location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;

@@ -9,6 +9,7 @@ import { DateProvider } from "@/contexts/DateContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { InstallPWAButton } from "@/components/InstallPWAButton";
 import Login from "./pages/Login";
+import ChangePassword from "./pages/ChangePassword";
 import Fasting from "./pages/Fasting";
 import Progress from "./pages/Progress";
 import Profile from "./pages/Profile";
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="/" element={<Navigate to="/fasting" replace />} />
                 <Route path="/dashboard" element={<Navigate to="/fasting" replace />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
                 <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
                 <Route path="/fasting" element={<ProtectedRoute><Fasting /></ProtectedRoute>} />
                 <Route path="/fasting-quiz" element={<ProtectedRoute><FastingQuiz /></ProtectedRoute>} />
