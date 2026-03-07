@@ -461,9 +461,7 @@ export default function Login() {
                     </motion.div> : <>{isSignUp ? 'Criar Conta' : 'Entrar'}</>}
                 </Button>
 
-                <Button type="button" variant="ghost" onClick={() => setIsSignUp(!isSignUp)} className="w-full text-muted-foreground hover:text-foreground">
-                  {isSignUp ? 'Já tem conta? Entrar' : 'Não tem conta? Criar'}
-                </Button>
+                {/* Signup removed - users are created via Kirvano purchase */}
               </form>
             </TabsContent>
           </Tabs>
