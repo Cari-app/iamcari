@@ -51,7 +51,7 @@ export function QuickAssessmentBar({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.15 }}
-      className="grid grid-cols-4 gap-2"
+      className="grid grid-cols-3 gap-2"
     >
       {actions.map((action, index) => (
         <motion.button
