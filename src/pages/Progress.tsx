@@ -353,26 +353,27 @@ export default function Progress() {
 
                 {/* Heatmap Grid */}
                 <div className="px-4 pb-4 pt-2">
-                  <div className="flex gap-1">
+                  <div className="flex gap-1.5">
                     {/* Weekday labels */}
-                    <div className="flex flex-col gap-[3px] pr-0.5 shrink-0">
+                    <div className="flex flex-col justify-between gap-[3px] pr-0.5 shrink-0">
                       {WEEKDAY_LABELS.map((label, i) => (
-                        <div key={i} className="h-3 w-3 flex items-center justify-center">
+                        <div key={i} className="h-[14px] w-3 flex items-center justify-center">
                           <span className="text-[9px] font-medium text-muted-foreground leading-none">{label}</span>
                         </div>
                       ))}
                     </div>
+
                     {/* Grid columns */}
                     <div className="flex-1">
-                      <div className="flex justify-between gap-[3px]">
-                        {heatmapGrid.map((week, weekIdx) => (
-                          <div key={weekIdx} className="flex-1 flex flex-col gap-[3px]">
+                      <div className="grid w-full gap-[3px]" style={{ gridTemplateColumns: `repeat(${stretchedHeatmapGrid.length}, minmax(0, 1fr))` }}>
+                        {stretchedHeatmapGrid.map((week, weekIdx) => (
+                          <div key={weekIdx} className="flex flex-col gap-[3px]">
                             {week.map((day, dayIdx) => (
                               <div
                                 key={dayIdx}
                                 className={cn(
-                                  'w-full aspect-square rounded-[3px] max-h-3 transition-colors duration-200',
-                                  !day && 'bg-transparent',
+                                  'w-full aspect-square rounded-[3px] transition-colors duration-200',
+                                  !day && 'bg-muted/40 dark:bg-muted/30',
                                   day && day.intensity === 0 && 'bg-muted/80 dark:bg-muted/40',
                                   day && day.intensity === 1 && 'bg-lime-400/40 dark:bg-lime-500/30',
                                   day && day.intensity === 2 && 'bg-lime-400/65 dark:bg-lime-500/55',
