@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BrainCircuit, Droplet, Scale, Utensils } from 'lucide-react';
+import { BrainCircuit, Droplet, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface QuickAssessmentBarProps {
