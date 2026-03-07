@@ -1,19 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
-import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
 import { WeightInputDialog } from '@/components/diary/WeightInputDialog';
 import { WaterInputDialog } from '@/components/diary/WaterInputDialog';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { DeleteConfirmationDrawer } from '@/components/DeleteConfirmationDrawer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Flame, Target, Trophy, TrendingUp, CalendarDays } from 'lucide-react';
+import { Flame, Target, Trophy, TrendingUp, CalendarDays, Droplet, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSelectedDate } from '@/contexts/DateContext';
 import { toast } from '@/hooks/use-toast';
-import { EmotionTag } from '@/types';
 import { AppHeader } from '@/components/AppHeader';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 
@@ -21,6 +19,14 @@ interface DayActivity {
   date: Date;
   count: number;
   intensity: number;
+}
+
+interface HistoryEntry {
+  id: string;
+  type: 'weight' | 'water';
+  value: number;
+  time: string;
+  logged_at: string;
 }
 
 const PERIOD_OPTIONS = [
@@ -55,10 +61,12 @@ export default function Progress() {
   const [achievementToDelete, setAchievementToDelete] = useState<string | null>(null);
 
   // Diary states
-  const [moodDrawerOpen, setMoodDrawerOpen] = useState(false);
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
   const [waterDialogOpen, setWaterDialogOpen] = useState(false);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
+
+  // History
+  const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([]);
 
   // Fetch progress data (always 90 days, filter in UI)
   useEffect(() => {
@@ -177,6 +185,52 @@ export default function Progress() {
     fetchProgressData();
   }, [user, selectedDate, refetchTrigger]);
 
+  // Fetch history entries for selected date
+  useEffect(() => {
+    if (!user) return;
+    const fetchHistory = async () => {
+      const dayStart = new Date(selectedDate);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(selectedDate);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      const [weightRes, waterRes] = await Promise.all([
+        supabase.from('weight_logs').select('*').eq('user_id', user.id)
+          .gte('logged_at', dayStart.toISOString()).lte('logged_at', dayEnd.toISOString())
+          .order('logged_at', { ascending: false }),
+        supabase.from('water_logs').select('*').eq('user_id', user.id)
+          .gte('logged_at', dayStart.toISOString()).lte('logged_at', dayEnd.toISOString())
+          .order('logged_at', { ascending: false }),
+      ]);
+
+      const entries: HistoryEntry[] = [];
+
+      weightRes.data?.forEach(w => {
+        entries.push({
+          id: w.id,
+          type: 'weight',
+          value: w.weight,
+          time: new Date(w.logged_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          logged_at: w.logged_at,
+        });
+      });
+
+      waterRes.data?.forEach(w => {
+        entries.push({
+          id: w.id,
+          type: 'water',
+          value: w.amount_ml,
+          time: new Date(w.logged_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          logged_at: w.logged_at,
+        });
+      });
+
+      entries.sort((a, b) => new Date(b.logged_at).getTime() - new Date(a.logged_at).getTime());
+      setHistoryEntries(entries);
+    };
+    fetchHistory();
+  }, [user, selectedDate, refetchTrigger]);
+
   // Filter heatmap by period
   const filteredHeatmap = useMemo(() => {
     return heatmapData.slice(-heatmapPeriod);
@@ -221,16 +275,6 @@ export default function Progress() {
   }, [filteredHeatmap]);
 
   // Handlers
-  const handleMoodSubmit = async (data: { energyLevel: number; emotion: EmotionTag }) => {
-    if (!user) return;
-    const { error } = await supabase.from('mood_logs').insert({
-      user_id: user.id, mood: data.emotion, energy_level: data.energyLevel
-    });
-    if (error) { toast({ title: '❌ Erro', variant: 'destructive' }); return; }
-    setRefetchTrigger(p => p + 1);
-    toast({ title: '🧠 Check-in registrado' });
-  };
-
   const handleWaterSubmit = async (amount: number) => {
     if (!user) return;
     const { error } = await supabase.from('water_logs').insert({
@@ -260,6 +304,14 @@ export default function Progress() {
     const { error } = await supabase.from('fasting_sessions').delete().eq('id', idToDelete);
     if (error) { toast({ title: '❌ Erro', variant: 'destructive' }); return; }
     toast({ title: '🗑️ Jejum removido' });
+  };
+
+  const handleDeleteHistoryEntry = async (entry: HistoryEntry) => {
+    const table = entry.type === 'weight' ? 'weight_logs' : 'water_logs';
+    const { error } = await supabase.from(table).delete().eq('id', entry.id);
+    if (error) { toast({ title: '❌ Erro', variant: 'destructive' }); return; }
+    setHistoryEntries(prev => prev.filter(e => e.id !== entry.id));
+    toast({ title: '🗑️ Registro removido' });
   };
 
   const stats = [
@@ -311,7 +363,6 @@ export default function Progress() {
             <TabsContent value="heatmap" className="mt-4 space-y-4">
               {/* Quick assessment bar */}
               <QuickAssessmentBar
-                onMoodClick={() => setMoodDrawerOpen(true)}
                 onWeightClick={() => setWeightDialogOpen(true)}
                 onWaterClick={() => setWaterDialogOpen(true)}
               />
@@ -408,6 +459,40 @@ export default function Progress() {
                   </div>
                 </div>
               </div>
+
+              {/* History Timeline */}
+              {historyEntries.length > 0 && (
+                <div className="rounded-2xl bg-white dark:bg-card shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08),0_0_0_1px_rgba(132,204,22,0.08)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.12)] overflow-hidden">
+                  <div className="p-4 pb-2">
+                    <h3 className="font-bold text-foreground text-base">Registros do dia</h3>
+                  </div>
+                  <div className="px-4 pb-4 space-y-2">
+                    {historyEntries.map(entry => (
+                      <SwipeableRow key={entry.id} onDelete={() => handleDeleteHistoryEntry(entry)}>
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/40">
+                          <div className={cn(
+                            'p-2 rounded-lg shrink-0',
+                            entry.type === 'weight' ? 'bg-lime-500/15' : 'bg-sky-500/15'
+                          )}>
+                            {entry.type === 'weight'
+                              ? <Scale className="h-4 w-4 text-lime-500" />
+                              : <Droplet className="h-4 w-4 text-sky-500" />
+                            }
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground">
+                              {entry.type === 'weight' ? `${entry.value}kg` : `${entry.value}ml`}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {entry.type === 'weight' ? 'Peso' : 'Água'} · {entry.time}
+                            </p>
+                          </div>
+                        </div>
+                      </SwipeableRow>
+                    ))}
+                  </div>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="achievements" className="mt-4 space-y-3">
@@ -445,7 +530,6 @@ export default function Progress() {
 
       <BottomNav />
 
-      <MoodCheckInDrawer open={moodDrawerOpen} onOpenChange={setMoodDrawerOpen} onSubmit={handleMoodSubmit} />
       <WeightInputDialog open={weightDialogOpen} onOpenChange={setWeightDialogOpen} onSubmit={handleWeightSubmit} lastWeight={profile?.weight || 70} />
       <WaterInputDialog open={waterDialogOpen} onOpenChange={setWaterDialogOpen} onSubmit={handleWaterSubmit} />
       <DeleteConfirmationDrawer open={!!achievementToDelete} onOpenChange={open => !open && setAchievementToDelete(null)} onConfirm={handleDeleteAchievement} title="Deletar conquista?" description="Esta ação removerá o registro do jejum." />
