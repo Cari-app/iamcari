@@ -8,6 +8,7 @@ interface Profile {
   token_balance: number;
   tier: string;
   onboarding_completed: boolean;
+  must_change_password: boolean;
   created_at: string;
   updated_at?: string;
   daily_calories_target: number | null;
