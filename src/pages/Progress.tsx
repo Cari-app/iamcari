@@ -344,9 +344,9 @@ export default function Progress() {
                 <div className="px-4 pb-4 pt-2">
                   <div className="flex gap-0.5">
                     {/* Weekday labels */}
-                    <div className="flex flex-col gap-[3px] pr-1.5 pt-0">
+                    <div className="flex flex-col gap-[3px] pr-1.5 pt-0 shrink-0">
                       {WEEKDAY_LABELS.map((label, i) => (
-                        <div key={i} className="h-[14px] flex items-center">
+                        <div key={i} className="aspect-square flex items-center" style={{ width: `calc((100% - ${(heatmapGrid.length - 1) * 3}px) / ${heatmapGrid.length})` }}>
                           <span className="text-[9px] font-medium text-muted-foreground leading-none">{label}</span>
                         </div>
                       ))}
