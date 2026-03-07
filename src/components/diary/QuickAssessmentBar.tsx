@@ -1,18 +1,17 @@
 import { motion } from 'framer-motion';
-import { BrainCircuit, Droplet, Scale } from 'lucide-react';
+import { Droplet, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface QuickAssessmentBarProps {
-  onMoodClick: () => void;
   onWaterClick: () => void;
   onWeightClick: () => void;
 }
 
 const actions = [
   {
-    id: 'mood',
-    label: 'Check-in',
-    icon: BrainCircuit,
+    id: 'weight',
+    label: 'Peso',
+    icon: Scale,
     color: 'text-[#84cc16]',
     hoverBg: 'hover:bg-[#84cc16]/10',
     activeBg: 'active:bg-[#84cc16]/20',
@@ -25,23 +24,13 @@ const actions = [
     hoverBg: 'hover:bg-[#84cc16]/10',
     activeBg: 'active:bg-[#84cc16]/20',
   },
-  {
-    id: 'weight',
-    label: 'Peso',
-    icon: Scale,
-    color: 'text-[#84cc16]',
-    hoverBg: 'hover:bg-[#84cc16]/10',
-    activeBg: 'active:bg-[#84cc16]/20',
-  },
 ];
 
 export function QuickAssessmentBar({
-  onMoodClick,
   onWaterClick,
   onWeightClick,
 }: QuickAssessmentBarProps) {
   const handlers: Record<string, () => void> = {
-    mood: onMoodClick,
     water: onWaterClick,
     weight: onWeightClick,
   };
@@ -51,7 +40,7 @@ export function QuickAssessmentBar({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.15 }}
-      className="grid grid-cols-3 gap-2"
+      className="grid grid-cols-2 gap-2"
     >
       {actions.map((action, index) => (
         <motion.button
