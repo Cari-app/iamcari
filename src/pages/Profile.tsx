@@ -6,11 +6,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase';
 import { toast } from '@/hooks/use-toast';
-import { User, Camera, Loader2, Clock, LogOut, Moon, Sun, Scale, Bell, HelpCircle, Shield, ChevronRight, Timer } from 'lucide-react';
+import { User, Camera, Loader2, Clock, LogOut, Moon, Sun, Bell, HelpCircle, Shield, ChevronRight, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from '@/components/ui/drawer';
@@ -30,12 +29,6 @@ export default function Profile() {
 
   // Stats
   const [totalFastingHours, setTotalFastingHours] = useState(0);
-
-  // Body Stats Dialog
-  const [isBodyStatsOpen, setIsBodyStatsOpen] = useState(false);
-  const [bodyWeight, setBodyWeight] = useState<number>(0);
-  const [bodyHeight, setBodyHeight] = useState<number>(0);
-  const [savingBodyStats, setSavingBodyStats] = useState(false);
 
   // Personal Data Dialog
   const [isPersonalDataOpen, setIsPersonalDataOpen] = useState(false);
@@ -61,7 +54,7 @@ export default function Profile() {
     }
     const fetchEssentialData = async () => {
       const [profileResult, fastingResult] = await Promise.all([
-        supabase.from('profiles').select('full_name, nickname, avatar_url, weight, height').eq('id', user.id).single(),
+        supabase.from('profiles').select('full_name, nickname, avatar_url').eq('id', user.id).single(),
         supabase.from('fasting_sessions').select('start_time, end_time').eq('user_id', user.id).not('end_time', 'is', null)
       ]);
       const profileData = profileResult.data;
@@ -69,8 +62,6 @@ export default function Profile() {
         setFullName(profileData.full_name || user.email?.split('@')[0] || 'Usuário');
         setNickname(profileData.nickname || '');
         setAvatarUrl(profileData.avatar_url);
-        setBodyWeight(profileData.weight || 0);
-        setBodyHeight(profileData.height || 0);
       }
       const fastingData = fastingResult.data;
       if (fastingData) {
@@ -124,8 +115,6 @@ export default function Profile() {
     navigate('/login');
   };
 
-  const handleEditBodyStats = () => setIsBodyStatsOpen(true);
-
   const handleEditPersonalData = () => {
     setEditFullName(fullName);
     setEditNickname(nickname);
@@ -160,25 +149,6 @@ export default function Profile() {
       toast({ title: '❌ Erro ao salvar', description: 'Não foi possível atualizar seus dados', variant: 'destructive' });
     } finally {
       setSavingPersonalData(false);
-    }
-  };
-
-  const handleSaveBodyStats = async () => {
-    if (!user) return;
-    setSavingBodyStats(true);
-    try {
-      const { error: profileError } = await supabase.from('profiles').update({
-        weight: bodyWeight,
-        height: bodyHeight
-      }).eq('id', user.id);
-      if (profileError) throw profileError;
-      setIsBodyStatsOpen(false);
-      toast({ title: '✅ Dados atualizados', description: 'Seus dados corporais foram salvos' });
-    } catch (error) {
-      console.error('Error updating body stats:', error);
-      toast({ title: '❌ Erro ao salvar', description: 'Não foi possível atualizar seus dados', variant: 'destructive' });
-    } finally {
-      setSavingBodyStats(false);
     }
   };
 
@@ -241,49 +211,33 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Quick Action Buttons */}
+        {/* Quick Action - Quiz Jejum */}
         <div className="px-4 pt-4">
-          <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => navigate('/fasting-quiz')} className="relative p-4 rounded-2xl bg-white dark:bg-card flex flex-col items-center gap-2 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] hover:shadow-[0_8px_30px_-4px_rgba(132,204,22,0.2)] press-effect transition-all duration-300 overflow-hidden">
-              <div className="absolute top-0 left-2 right-2 h-0.5 rounded-b-full bg-gradient-to-r from-green-500 via-lime-400 to-green-500" />
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-lime-400/20 to-green-500/20 flex items-center justify-center">
-                <Timer className="h-5 w-5 text-lime-500" />
-              </div>
-              <span className="text-xs font-semibold text-foreground text-center">Quiz Jejum</span>
-            </button>
-
-            <button onClick={handleEditBodyStats} className="relative p-4 rounded-2xl bg-white dark:bg-card flex flex-col items-center gap-2 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] hover:shadow-[0_8px_30px_-4px_rgba(132,204,22,0.2)] press-effect transition-all duration-300 overflow-hidden">
-              <div className="absolute top-0 left-2 right-2 h-0.5 rounded-b-full bg-gradient-to-r from-green-500 via-lime-400 to-green-500" />
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-lime-400/20 to-green-500/20 flex items-center justify-center">
-                <Scale className="h-5 w-5 text-lime-500" />
-              </div>
-              <span className="text-xs font-semibold text-foreground text-center">Dados Corporais</span>
-            </button>
-          </div>
+          <button onClick={() => navigate('/fasting-quiz')} className="relative w-full p-4 rounded-2xl bg-white dark:bg-card flex items-center gap-3 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] hover:shadow-[0_8px_30px_-4px_rgba(132,204,22,0.2)] press-effect transition-all duration-300 overflow-hidden">
+            <div className="absolute top-0 left-4 right-4 h-0.5 rounded-b-full bg-gradient-to-r from-green-500 via-lime-400 to-green-500" />
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-lime-400/20 to-green-500/20 flex items-center justify-center">
+              <Timer className="h-5 w-5 text-lime-500" />
+            </div>
+            <div className="text-left">
+              <span className="text-sm font-semibold text-foreground">Quiz de Jejum</span>
+              <p className="text-xs text-muted-foreground">Descubra seu protocolo ideal</p>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground ml-auto" />
+          </button>
         </div>
 
         {/* Settings Menu */}
         <main className="px-4 pt-4 space-y-4 pb-[20px] mb-[13px]">
-          {/* Group 1: Biometria */}
+          {/* Group 1: Conta */}
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">Biometria</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">Conta</p>
             <div className="rounded-2xl bg-white dark:bg-card shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_0_0_1px_rgba(132,204,22,0.1)] dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4),0_0_0_1px_rgba(132,204,22,0.15)] overflow-hidden">
-              <button onClick={handleEditPersonalData} className="w-full flex items-center justify-between p-4 press-effect hover:bg-lime-500/5 transition-colors border-b border-border/50">
+              <button onClick={handleEditPersonalData} className="w-full flex items-center justify-between p-4 press-effect hover:bg-lime-500/5 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-lime-400/20 to-green-500/20 flex items-center justify-center">
                     <User className="h-5 w-5 text-lime-500" />
                   </div>
                   <span className="font-medium text-foreground">Meus Dados</span>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </button>
-
-              <button onClick={handleEditBodyStats} className="w-full flex items-center justify-between p-4 press-effect hover:bg-lime-500/5 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-lime-400/20 to-green-500/20 flex items-center justify-center">
-                    <Scale className="h-5 w-5 text-lime-500" />
-                  </div>
-                  <span className="font-medium text-foreground">Dados Corporais</span>
                 </div>
                 <ChevronRight className="h-5 w-5 text-muted-foreground" />
               </button>
@@ -354,44 +308,6 @@ export default function Profile() {
     </div>
 
     <BottomNav />
-
-    {/* Body Stats Drawer */}
-    <Drawer open={isBodyStatsOpen} onOpenChange={setIsBodyStatsOpen}>
-      <DrawerContent className="bg-transparent border-none">
-        <div className="mx-auto w-full max-w-lg bg-card border border-lime-500/20 rounded-t-3xl shadow-[0_-10px_40px_-10px_rgba(132,204,22,0.2)]">
-          <DrawerHeader className="text-left">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-lime-400/20 to-green-500/20 flex items-center justify-center">
-                <Scale className="h-5 w-5 text-lime-500" />
-              </div>
-              <div>
-                <DrawerTitle className="text-foreground">Atualizar Dados Corporais</DrawerTitle>
-                <DrawerDescription>Mantenha seus dados atualizados</DrawerDescription>
-              </div>
-            </div>
-          </DrawerHeader>
-          <div className="px-4 pb-4 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="weight">Peso (kg)</Label>
-              <Input id="weight" type="number" value={bodyWeight || ''} onChange={e => setBodyWeight(parseFloat(e.target.value) || 0)} placeholder="Ex: 70" className="bg-muted/50 border-lime-500/20 rounded-xl focus:border-lime-500/50 focus:ring-lime-500/20" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="height">Altura (cm)</Label>
-              <Input id="height" type="number" value={bodyHeight || ''} onChange={e => setBodyHeight(parseFloat(e.target.value) || 0)} placeholder="Ex: 170" className="bg-muted/50 border-lime-500/20 rounded-xl focus:border-lime-500/50 focus:ring-lime-500/20" />
-            </div>
-          </div>
-          <DrawerFooter className="pt-2">
-            <Button onClick={handleSaveBodyStats} disabled={savingBodyStats} className="w-full bg-gradient-to-r from-lime-500 to-green-500 hover:from-lime-600 hover:to-green-600 text-white shadow-lg shadow-lime-500/30">
-              {savingBodyStats ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Salvar
-            </Button>
-            <DrawerClose asChild>
-              <Button variant="ghost" className="w-full">Cancelar</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </div>
-      </DrawerContent>
-    </Drawer>
 
     {/* Personal Data Drawer */}
     <Drawer open={isPersonalDataOpen} onOpenChange={setIsPersonalDataOpen}>
