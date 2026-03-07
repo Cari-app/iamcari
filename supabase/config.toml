@@ -2,3 +2,6 @@ project_id = "kjxtihzksqmrbatezecq"
 
 [functions.analyze-meal]
 verify_jwt = true
+
+[functions.create-user-from-purchase]
+verify_jwt = false
