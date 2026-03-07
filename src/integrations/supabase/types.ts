@@ -345,6 +345,7 @@ export type Database = {
           gender: string | null
           height: number | null
           id: string
+          must_change_password: boolean
           nickname: string | null
           onboarding_completed: boolean
           tier: string
@@ -366,6 +367,7 @@ export type Database = {
           gender?: string | null
           height?: number | null
           id: string
+          must_change_password?: boolean
           nickname?: string | null
           onboarding_completed?: boolean
           tier?: string
@@ -387,6 +389,7 @@ export type Database = {
           gender?: string | null
           height?: number | null
           id?: string
+          must_change_password?: boolean
           nickname?: string | null
           onboarding_completed?: boolean
           tier?: string
