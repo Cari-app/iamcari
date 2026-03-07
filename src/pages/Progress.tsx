@@ -14,6 +14,8 @@ import { useSelectedDate } from '@/contexts/DateContext';
 import { toast } from '@/hooks/use-toast';
 import { AppHeader } from '@/components/AppHeader';
 import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
+import { AchievementsTab } from '@/components/progress/AchievementsTab';
+import { useAchievements } from '@/hooks/useAchievements';
 
 interface DayActivity {
   date: Date;
