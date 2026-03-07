@@ -185,21 +185,32 @@ export default function Progress() {
   // Build grid: columns = weeks, rows = days of week
   const heatmapGrid = useMemo(() => {
     if (filteredHeatmap.length === 0) return [];
-    // Pad the beginning so the first column starts on Monday
+
     const firstDay = filteredHeatmap[0].date.getDay();
-    // Convert to Mon=0 format
     const mondayOffset = firstDay === 0 ? 6 : firstDay - 1;
     const padded: (DayActivity | null)[] = Array(mondayOffset).fill(null).concat(filteredHeatmap);
-    // Build weeks (columns)
+
     const weeks: (DayActivity | null)[][] = [];
     for (let i = 0; i < padded.length; i += 7) {
       weeks.push(padded.slice(i, i + 7));
     }
-    // Pad last week
+
     const lastWeek = weeks[weeks.length - 1];
     while (lastWeek.length < 7) lastWeek.push(null);
+
     return weeks;
   }, [filteredHeatmap]);
+
+  // Keep heatmap visually stretched to the full card width in every period
+  const stretchedHeatmapGrid = useMemo(() => {
+    const minColumns = 14;
+    if (heatmapGrid.length >= minColumns) return heatmapGrid;
+
+    const fillerWeek: (DayActivity | null)[] = Array(7).fill(null);
+    const missingColumns = minColumns - heatmapGrid.length;
+
+    return [...Array(missingColumns).fill(null).map(() => [...fillerWeek]), ...heatmapGrid];
+  }, [heatmapGrid]);
 
   // Period stats
   const periodStats = useMemo(() => {
