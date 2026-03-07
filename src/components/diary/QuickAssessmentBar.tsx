@@ -6,7 +6,6 @@ interface QuickAssessmentBarProps {
   onMoodClick: () => void;
   onWaterClick: () => void;
   onWeightClick: () => void;
-  onMealClick?: () => void;
 }
 
 const actions = [
@@ -34,27 +33,17 @@ const actions = [
     hoverBg: 'hover:bg-[#84cc16]/10',
     activeBg: 'active:bg-[#84cc16]/20',
   },
-  {
-    id: 'meal',
-    label: 'Refeição',
-    icon: Utensils,
-    color: 'text-[#84cc16]',
-    hoverBg: 'hover:bg-[#84cc16]/10',
-    activeBg: 'active:bg-[#84cc16]/20',
-  },
 ];
 
 export function QuickAssessmentBar({
   onMoodClick,
   onWaterClick,
   onWeightClick,
-  onMealClick,
 }: QuickAssessmentBarProps) {
   const handlers: Record<string, () => void> = {
     mood: onMoodClick,
     water: onWaterClick,
     weight: onWeightClick,
-    meal: onMealClick,
   };
 
   return (
