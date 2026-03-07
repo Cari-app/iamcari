@@ -55,13 +55,6 @@ export default function Progress() {
   const [successRate, setSuccessRate] = useState('--');
   const [totalFastsCount, setTotalFastsCount] = useState(0);
   const [heatmapData, setHeatmapData] = useState<DayActivity[]>([]);
-  const [achievements, setAchievements] = useState<Array<{
-    id: string;
-    iconType: 'completed' | 'paused';
-    title: string;
-    description: string;
-  }>>([]);
-  const [achievementToDelete, setAchievementToDelete] = useState<string | null>(null);
 
   // Diary states
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
@@ -297,16 +290,6 @@ export default function Progress() {
     await supabase.from('profiles').update({ weight }).eq('id', user.id);
     setRefetchTrigger(p => p + 1);
     toast({ title: '⚖️ Peso registrado', description: `${weight}kg` });
-  };
-
-  const handleDeleteAchievement = async () => {
-    if (!user || !achievementToDelete || achievementToDelete === 'empty') return;
-    const idToDelete = achievementToDelete;
-    setAchievementToDelete(null);
-    setAchievements(prev => prev.filter(a => a.id !== idToDelete));
-    const { error } = await supabase.from('fasting_sessions').delete().eq('id', idToDelete);
-    if (error) { toast({ title: '❌ Erro', variant: 'destructive' }); return; }
-    toast({ title: '🗑️ Jejum removido' });
   };
 
   const handleDeleteHistoryEntry = async (entry: HistoryEntry) => {
