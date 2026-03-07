@@ -6,7 +6,7 @@ interface QuickAssessmentBarProps {
   onMoodClick: () => void;
   onWaterClick: () => void;
   onWeightClick: () => void;
-  onMealClick: () => void;
+  onMealClick?: () => void;
 }
 
 const actions = [
