@@ -215,7 +215,7 @@ export default function FastingResult() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/fasting')}
                 className="text-white hover:bg-white/20"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -319,7 +319,7 @@ export default function FastingResult() {
               transition={{ delay: 0.4 }}
             >
               <Button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/fasting')}
                 className="w-full h-14 rounded-2xl font-semibold text-base press-effect"
               >
                 {protocol.readinessLevel === 'low' ? 'Entendido, Voltar' : 'Iniciar Meu Jejum'}

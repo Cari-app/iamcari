@@ -1,26 +1,22 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
-import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
 import { WeightInputDialog } from '@/components/diary/WeightInputDialog';
 import { WaterInputDialog } from '@/components/diary/WaterInputDialog';
-import { MealInputDialog } from '@/components/diary/MealInputDialog';
-import { MealEditDialog } from '@/components/diary/MealEditDialog';
-import { TimelineEntryCard } from '@/components/diary/TimelineEntryCard';
 import { SwipeableRow } from '@/components/diary/SwipeableRow';
 import { DeleteConfirmationDrawer } from '@/components/DeleteConfirmationDrawer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Flame, Target, Trophy, TrendingUp, Coffee, CalendarDays, ListTodo, ChartBar } from 'lucide-react';
+import { Flame, Target, Trophy, TrendingUp, CalendarDays, ChartBar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSelectedDate } from '@/contexts/DateContext';
 import { toast } from '@/hooks/use-toast';
-import { TimelineEntry, EmotionTag } from '@/types';
+import { EmotionTag } from '@/types';
 import { AppHeader } from '@/components/AppHeader';
+import { QuickAssessmentBar } from '@/components/diary/QuickAssessmentBar';
 
 interface DayActivity {
   date: Date;
@@ -51,12 +47,7 @@ export default function Progress() {
   const [moodDrawerOpen, setMoodDrawerOpen] = useState(false);
   const [weightDialogOpen, setWeightDialogOpen] = useState(false);
   const [waterDialogOpen, setWaterDialogOpen] = useState(false);
-  const [mealDialogOpen, setMealDialogOpen] = useState(false);
-  const [mealEditDialogOpen, setMealEditDialogOpen] = useState(false);
-  const [editingMeal, setEditingMeal] = useState<TimelineEntry | null>(null);
-  const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
-  const [entryToDelete, setEntryToDelete] = useState<TimelineEntry | null>(null);
 
   // Fetch progress data (90 days)
   useEffect(() => {
@@ -78,25 +69,14 @@ export default function Progress() {
           .gte('created_at', ninetyDaysAgo.toISOString())
           .order('created_at', { ascending: true });
 
-        const { data: mealLogs, error: mealError } = await supabase
-          .from('meal_logs')
-          .select('*')
-          .eq('user_id', user.id)
-          .gte('created_at', ninetyDaysAgo.toISOString())
-          .order('created_at', { ascending: true });
-
-        if (fastingError || mealError) {
-          console.error('Error fetching data:', fastingError || mealError);
+        if (fastingError) {
+          console.error('Error fetching data:', fastingError);
           return;
         }
 
         const activeDays = new Map<string, number>();
         fastingSessions?.forEach(session => {
           const date = new Date(session.created_at).toDateString();
-          activeDays.set(date, (activeDays.get(date) || 0) + 1);
-        });
-        mealLogs?.forEach(log => {
-          const date = new Date(log.created_at).toDateString();
           activeDays.set(date, (activeDays.get(date) || 0) + 1);
         });
 
@@ -146,9 +126,9 @@ export default function Progress() {
         startOfWeek.setHours(0, 0, 0, 0);
         let weeklyCount = 0;
         for (let i = 0; i < 7; i++) {
-          const checkDate = new Date(startOfWeek);
-          checkDate.setDate(checkDate.getDate() + i);
-          if (activeDays.has(checkDate.toDateString())) {
+          const cd = new Date(startOfWeek);
+          cd.setDate(cd.getDate() + i);
+          if (activeDays.has(cd.toDateString())) {
             weeklyCount++;
           }
         }
@@ -215,79 +195,6 @@ export default function Progress() {
     fetchProgressData();
   }, [user, selectedDate, refetchTrigger]);
 
-  // Fetch daily timeline
-  useEffect(() => {
-    if (!user) return;
-    const fetchLogsForDate = async () => {
-      try {
-        const startOfDay = new Date(selectedDate);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(selectedDate);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        const { data, error } = await supabase
-          .from('meal_logs')
-          .select('*')
-          .eq('user_id', user.id)
-          .gte('logged_at', startOfDay.toISOString())
-          .lte('logged_at', endOfDay.toISOString())
-          .order('logged_at', { ascending: false });
-
-        if (error) {
-          console.error('Error fetching meal logs:', error);
-          return;
-        }
-        if (data) {
-          const entries: TimelineEntry[] = data.map(log => {
-            const status = (log.analysis_status === 'pending' || log.analysis_status === 'analyzed' || log.analysis_status === 'error' || log.analysis_status === 'manual') 
-              ? log.analysis_status as 'pending' | 'analyzed' | 'error' | 'manual'
-              : 'manual' as const;
-            return {
-              id: log.id,
-              type: 'meal' as const,
-              time: new Date(log.logged_at).toLocaleTimeString('pt-BR', {
-                hour: '2-digit',
-                minute: '2-digit'
-              }),
-              created_at: log.created_at,
-              entry_method: log.image_url ? 'ai' as const : 'manual' as const,
-              food_name: log.description || '',
-              description: log.description || '',
-              calories: log.calories || 0,
-              image_url: log.image_url,
-              macros: {
-                protein: log.protein || 0,
-                carbs: log.carbs || 0,
-                fat: log.fat || 0
-              },
-              status
-            };
-          });
-          setTimeline(entries);
-        }
-      } catch (error) {
-        console.error('Unexpected error:', error);
-      }
-    };
-    fetchLogsForDate();
-    const channel = supabase.channel('meal-logs-progress').on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'meal_logs',
-      filter: `user_id=eq.${user.id}`
-    }, () => {
-      fetchLogsForDate();
-    }).subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, selectedDate, refetchTrigger]);
-
-  const todayCalories = timeline.filter(e => e.type === 'meal').reduce((sum, e) => sum + (e.calories || 0), 0);
-  const todayMeals = timeline.filter(e => e.type === 'meal').length;
-  const waterTotal = timeline.filter(e => e.type === 'water').reduce((sum, e) => sum + (e.value || 0), 0);
-  const lastWeight = timeline.filter(e => e.type === 'weight').sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]?.value || 0;
-
   // Handlers
   const handleMoodSubmit = async (data: { energyLevel: number; emotion: EmotionTag }) => {
     if (!user) return;
@@ -333,43 +240,6 @@ export default function Progress() {
     toast({ title: '⚖️ Peso registrado', description: `${weight}kg` });
   };
 
-  const handleMealSubmit = async (data: {
-    method: 'ai' | 'manual';
-    description: string;
-    calories?: number;
-    imageUrl?: string;
-  }) => {
-    if (!user) return;
-    const { error } = await supabase.from('meal_logs').insert({
-      user_id: user.id,
-      description: data.description,
-      calories: data.calories || 0,
-      image_url: data.imageUrl || null,
-      meal_type: 'meal',
-      analysis_status: 'manual'
-    });
-    if (error) {
-      toast({ title: '❌ Erro', variant: 'destructive' });
-      return;
-    }
-    setRefetchTrigger(p => p + 1);
-    toast({ title: '🍎 Refeição registrada' });
-  };
-
-  const handleDeleteEntry = async () => {
-    if (!user || !entryToDelete) return;
-    const entryId = entryToDelete.id;
-    setEntryToDelete(null);
-    setTimeline(prev => prev.filter(e => e.id !== entryId));
-    const { error } = await supabase.from('meal_logs').delete().eq('id', entryId);
-    if (error) {
-      setRefetchTrigger(p => p + 1);
-      toast({ title: '❌ Erro', variant: 'destructive' });
-      return;
-    }
-    toast({ title: '🗑️ Registro apagado' });
-  };
-
   const handleDeleteAchievement = async () => {
     if (!user || !achievementToDelete || achievementToDelete === 'empty') return;
     const idToDelete = achievementToDelete;
@@ -381,29 +251,6 @@ export default function Progress() {
       return;
     }
     toast({ title: '🗑️ Jejum removido' });
-  };
-
-  const handleEditMeal = (entry: TimelineEntry) => {
-    setEditingMeal(entry);
-    setMealEditDialogOpen(true);
-  };
-
-  const handleMealEditSubmit = async (data: {
-    food_name: string;
-    calories: number;
-    is_emotional: boolean;
-  }) => {
-    if (!user || !editingMeal) return;
-    const { error } = await supabase.from('meal_logs').update({
-      description: data.food_name,
-      calories: data.calories
-    }).eq('id', editingMeal.id);
-    if (error) {
-      toast({ title: '❌ Erro', variant: 'destructive' });
-      return;
-    }
-    setRefetchTrigger(p => p + 1);
-    toast({ title: '✅ Atualizado' });
   };
 
   const weeks: DayActivity[][] = [];
@@ -457,12 +304,8 @@ export default function Progress() {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="timeline" className="mt-6 px-4">
-            <TabsList className="grid w-full grid-cols-3 bg-muted/50">
-              <TabsTrigger value="timeline" className="gap-1.5">
-                <ListTodo className="h-4 w-4" />
-                <span className="hidden sm:inline">Diário</span>
-              </TabsTrigger>
+          <Tabs defaultValue="heatmap" className="mt-6 px-4">
+            <TabsList className="grid w-full grid-cols-2 bg-muted/50">
               <TabsTrigger value="heatmap" className="gap-1.5">
                 <CalendarDays className="h-4 w-4" />
                 <span className="hidden sm:inline">Heatmap</span>
@@ -473,55 +316,16 @@ export default function Progress() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="timeline" className="mt-4 space-y-4">
+            <TabsContent value="heatmap" className="mt-4">
+              {/* Quick assessment bar */}
               <QuickAssessmentBar
                 onMoodClick={() => setMoodDrawerOpen(true)}
                 onWeightClick={() => setWeightDialogOpen(true)}
                 onWaterClick={() => setWaterDialogOpen(true)}
-                onMealClick={() => setMealDialogOpen(true)}
               />
 
-              {/* Daily Summary */}
-              <div className="grid grid-cols-3 gap-2">
-                <div className="p-3 rounded-xl bg-card/80 border border-border/60 text-center">
-                  <p className="text-lg font-bold text-foreground">{todayCalories}</p>
-                  <p className="text-xs text-muted-foreground">kcal</p>
-                </div>
-                <div className="p-3 rounded-xl bg-card/80 border border-border/60 text-center">
-                  <p className="text-lg font-bold text-foreground">{todayMeals}</p>
-                  <p className="text-xs text-muted-foreground">refeições</p>
-                </div>
-                <div className="p-3 rounded-xl bg-card/80 border border-border/60 text-center">
-                  <p className="text-lg font-bold text-foreground">{waterTotal}</p>
-                  <p className="text-xs text-muted-foreground">ml água</p>
-                </div>
-              </div>
-
-              {/* Timeline */}
-              <div className="space-y-3">
-                {loading ? (
-                  <>
-                    <Skeleton className="h-20 rounded-xl" />
-                    <Skeleton className="h-20 rounded-xl" />
-                  </>
-                ) : timeline.length > 0 ? (
-                  timeline.map(entry => (
-                    <SwipeableRow key={entry.id} onDelete={() => setEntryToDelete(entry)}>
-                      <TimelineEntryCard entry={entry} onEdit={() => handleEditMeal(entry)} />
-                    </SwipeableRow>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <Coffee className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-muted-foreground">Nenhum registro hoje</p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="heatmap" className="mt-4">
-              <div className="p-4 rounded-xl bg-card/80 border border-border/60">
-                <h3 className="font-semibold text-foreground mb-3">Atividade (90 dias)</h3>
+              <div className="p-4 rounded-xl bg-card/80 border border-border/60 mt-4">
+                <h3 className="font-semibold text-foreground mb-3">Atividade de Jejum (90 dias)</h3>
                 <div className="overflow-x-auto">
                   <div className="flex gap-1 min-w-max">
                     {weeks.map((week, weekIdx) => (
@@ -597,18 +401,6 @@ export default function Progress() {
       <MoodCheckInDrawer open={moodDrawerOpen} onOpenChange={setMoodDrawerOpen} onSubmit={handleMoodSubmit} />
       <WeightInputDialog open={weightDialogOpen} onOpenChange={setWeightDialogOpen} onSubmit={handleWeightSubmit} lastWeight={profile?.weight || 70} />
       <WaterInputDialog open={waterDialogOpen} onOpenChange={setWaterDialogOpen} onSubmit={handleWaterSubmit} />
-      <MealInputDialog open={mealDialogOpen} onOpenChange={setMealDialogOpen} onSubmit={handleMealSubmit} />
-      <MealEditDialog 
-        open={mealEditDialogOpen} 
-        onOpenChange={setMealEditDialogOpen} 
-        initialData={{
-          food_name: editingMeal?.food_name || '',
-          calories: editingMeal?.calories,
-          is_emotional: editingMeal?.is_emotional
-        }}
-        onSubmit={handleMealEditSubmit} 
-      />
-      <DeleteConfirmationDrawer open={!!entryToDelete} onOpenChange={open => !open && setEntryToDelete(null)} onConfirm={handleDeleteEntry} title="Deletar registro?" description="Esta ação não pode ser desfeita." />
       <DeleteConfirmationDrawer open={!!achievementToDelete} onOpenChange={open => !open && setAchievementToDelete(null)} onConfirm={handleDeleteAchievement} title="Deletar conquista?" description="Esta ação removerá o registro do jejum." />
     </div>
   );
