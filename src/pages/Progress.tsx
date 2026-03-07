@@ -154,24 +154,6 @@ export default function Progress() {
         }
         setHeatmapData(heatmap);
 
-        // Achievements
-        const finishedFasts = fastingSessions?.filter(s => s.end_time !== null) || [];
-        const achievementsList = finishedFasts.slice(-5).reverse().map(fast => {
-          const start = new Date(fast.start_time);
-          const end = new Date(fast.end_time!);
-          const totalMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
-          const hours = Math.floor(totalMinutes / 60);
-          const minutes = totalMinutes % 60;
-          const wasCompleted = fast.status === 'completed' || hours >= (fast.target_hours || 16);
-          const timeText = hours > 0 && minutes > 0 ? `${hours}h${minutes}min` : hours > 0 ? `${hours}h` : `${minutes}min`;
-          return {
-            id: fast.id,
-            iconType: (wasCompleted ? 'completed' : 'paused') as 'completed' | 'paused',
-            title: wasCompleted ? `Jejum de ${timeText} concluído` : `Jejum de ${timeText} pausado`,
-            description: new Date(fast.end_time!).toLocaleDateString('pt-BR')
-          };
-        });
-        setAchievements(achievementsList);
       } catch (error) {
         console.error('Unexpected error:', error);
       } finally {
@@ -481,34 +463,12 @@ export default function Progress() {
               )}
             </TabsContent>
 
-            <TabsContent value="achievements" className="mt-4 space-y-3">
-              {achievements.length > 0 ? (
-                achievements.map(achievement => (
-                  <SwipeableRow key={achievement.id} onDelete={() => setAchievementToDelete(achievement.id)}>
-                    <div className="p-4 rounded-xl bg-card/80 border border-border/60 flex items-center gap-3">
-                      <div className={cn(
-                        'p-2 rounded-lg',
-                        achievement.iconType === 'completed' ? 'bg-lime-500/20' : 'bg-orange-500/20'
-                      )}>
-                        <Trophy className={cn(
-                          'h-5 w-5',
-                          achievement.iconType === 'completed' ? 'text-lime-500' : 'text-orange-500'
-                        )} />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-foreground">{achievement.title}</p>
-                        <p className="text-xs text-muted-foreground">{achievement.description}</p>
-                      </div>
-                    </div>
-                  </SwipeableRow>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <Trophy className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-muted-foreground">Nenhuma conquista ainda</p>
-                  <p className="text-xs text-muted-foreground mt-1">Complete jejuns para ganhar conquistas</p>
-                </div>
-              )}
+            <TabsContent value="achievements" className="mt-4">
+              <AchievementsTab
+                unlockedAchievements={unlockedAchievements}
+                achievementData={achievementData}
+                loading={achievementsLoading}
+              />
             </TabsContent>
           </Tabs>
         </div>
@@ -518,7 +478,6 @@ export default function Progress() {
 
       <WeightInputDialog open={weightDialogOpen} onOpenChange={setWeightDialogOpen} onSubmit={handleWeightSubmit} lastWeight={profile?.weight || 70} />
       <WaterInputDialog open={waterDialogOpen} onOpenChange={setWaterDialogOpen} onSubmit={handleWaterSubmit} />
-      <DeleteConfirmationDrawer open={!!achievementToDelete} onOpenChange={open => !open && setAchievementToDelete(null)} onConfirm={handleDeleteAchievement} title="Deletar conquista?" description="Esta ação removerá o registro do jejum." />
     </div>
   );
 }
