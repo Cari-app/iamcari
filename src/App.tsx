@@ -34,7 +34,7 @@ const App = () => (
             <TooltipProvider>
               <Toaster />
               <Sonner />
-              <InstallPWAButton />
+              {/* InstallPWAButton removed - install page handles this */}
               <Routes>
                 <Route path="/" element={<Navigate to="/fasting" replace />} />
                 <Route path="/dashboard" element={<Navigate to="/fasting" replace />} />
