@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { BottomNav } from '@/components/BottomNav';
 import { WeekCalendar } from '@/components/dashboard/WeekCalendar';
 import { MoodCheckInDrawer } from '@/components/diary/MoodCheckInDrawer';
@@ -342,39 +342,33 @@ export default function Progress() {
 
                 {/* Heatmap Grid */}
                 <div className="px-4 pb-4 pt-2">
-                  <div className="flex gap-0.5">
-                    {/* Weekday labels */}
-                    <div className="flex flex-col gap-[3px] pr-1.5 pt-0">
-                      {WEEKDAY_LABELS.map((label, i) => (
-                        <div key={i} className="h-[14px] flex items-center">
+                  <div className="grid gap-[3px]" style={{ gridTemplateColumns: `auto repeat(${heatmapGrid.length}, 1fr)` }}>
+                    {/* Row by row: for each day of week, render label + all weeks */}
+                    {WEEKDAY_LABELS.map((label, dayIdx) => (
+                      <React.Fragment key={dayIdx}>
+                        <div className="flex items-center pr-1">
                           <span className="text-[9px] font-medium text-muted-foreground leading-none">{label}</span>
                         </div>
-                      ))}
-                    </div>
-                    {/* Grid */}
-                    <div className="flex-1 overflow-x-auto">
-                      <div className="flex gap-[3px] min-w-max">
-                        {heatmapGrid.map((week, weekIdx) => (
-                          <div key={weekIdx} className="flex flex-col gap-[3px]">
-                            {week.map((day, dayIdx) => (
-                              <div
-                                key={dayIdx}
-                                className={cn(
-                                  'w-[14px] h-[14px] rounded-[3px] transition-colors duration-200',
-                                  !day && 'bg-transparent',
-                                  day && day.intensity === 0 && 'bg-muted/80 dark:bg-muted/40',
-                                  day && day.intensity === 1 && 'bg-lime-400/40 dark:bg-lime-500/30',
-                                  day && day.intensity === 2 && 'bg-lime-400/65 dark:bg-lime-500/55',
-                                  day && day.intensity === 3 && 'bg-lime-500/85 dark:bg-lime-500/75',
-                                  day && day.intensity >= 4 && 'bg-lime-500 dark:bg-lime-400'
-                                )}
-                                title={day ? `${day.date.toLocaleDateString('pt-BR')}: ${day.count} jejum(s)` : ''}
-                              />
-                            ))}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                        {heatmapGrid.map((week, weekIdx) => {
+                          const day = week[dayIdx] || null;
+                          return (
+                            <div
+                              key={`${weekIdx}-${dayIdx}`}
+                              className={cn(
+                                'w-full aspect-square rounded-[3px] transition-colors duration-200',
+                                !day && 'bg-transparent',
+                                day && day.intensity === 0 && 'bg-muted/80 dark:bg-muted/40',
+                                day && day.intensity === 1 && 'bg-lime-400/40 dark:bg-lime-500/30',
+                                day && day.intensity === 2 && 'bg-lime-400/65 dark:bg-lime-500/55',
+                                day && day.intensity === 3 && 'bg-lime-500/85 dark:bg-lime-500/75',
+                                day && day.intensity >= 4 && 'bg-lime-500 dark:bg-lime-400'
+                              )}
+                              title={day ? `${day.date.toLocaleDateString('pt-BR')}: ${day.count} jejum(s)` : ''}
+                            />
+                          );
+                        })}
+                      </React.Fragment>
+                    ))}
                   </div>
 
                   {/* Legend */}
