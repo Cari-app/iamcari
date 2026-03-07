@@ -352,15 +352,15 @@ export default function Progress() {
                       ))}
                     </div>
                     {/* Grid */}
-                    <div className="flex-1 overflow-x-auto">
-                      <div className="flex gap-[3px] min-w-max">
+                    <div className="flex-1 overflow-hidden">
+                      <div className="grid gap-[3px]" style={{ gridTemplateColumns: `repeat(${heatmapGrid.length}, 1fr)` }}>
                         {heatmapGrid.map((week, weekIdx) => (
                           <div key={weekIdx} className="flex flex-col gap-[3px]">
                             {week.map((day, dayIdx) => (
                               <div
                                 key={dayIdx}
                                 className={cn(
-                                  'w-[14px] h-[14px] rounded-[3px] transition-colors duration-200',
+                                  'w-full aspect-square rounded-[3px] transition-colors duration-200',
                                   !day && 'bg-transparent',
                                   day && day.intensity === 0 && 'bg-muted/80 dark:bg-muted/40',
                                   day && day.intensity === 1 && 'bg-lime-400/40 dark:bg-lime-500/30',
