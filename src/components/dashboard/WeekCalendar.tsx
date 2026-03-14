@@ -21,7 +21,7 @@ export function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) 
   const scrollRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const dragState = useRef({ isDragging: false, startX: 0, scrollLeft: 0 });
-  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInitialScrolling = useRef(true);
   
   const today = useMemo(() => new Date(), []);
