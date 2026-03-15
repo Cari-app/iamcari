@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import logoImage from '@/assets/logo-cari.png';
+import { Logo } from '@/components/Logo';
 
 interface AppHeaderProps {
   showAvatar?: boolean;
@@ -14,7 +14,7 @@ export function AppHeader({ showAvatar = true, centered = false, className = '' 
 
   return (
     <header className={`flex items-center px-4 pb-2 pt-safe-top ${centered ? 'justify-center' : 'justify-between'} ${className}`}>
-      <img src={logoImage} alt="FastBurn" className="h-6" />
+      <Logo size="sm" forceDark />
       {showAvatar && !centered && (
         <Link to="/profile">
           <Avatar className="h-10 w-10">
