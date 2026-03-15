@@ -23,7 +23,7 @@ export default function Help() {
   const whatsappNumber = "5533999999999";
 
   const handleWhatsAppSupport = () => {
-    const message = encodeURIComponent("Olá! Preciso de ajuda com o Cari.");
+    const message = encodeURIComponent("Olá! Preciso de ajuda com o FastBurn.");
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
   };
 
