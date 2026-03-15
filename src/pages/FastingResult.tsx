@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import logoImage from '@/assets/logo-cari.png';
+import { Logo } from '@/components/Logo';
 
 interface ProtocolInfo {
   id: string;
