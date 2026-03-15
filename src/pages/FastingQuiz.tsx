@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import logoImage from '@/assets/logo-cari.png';
+import { Logo } from '@/components/Logo';
 
 interface Question {
   id: number;
