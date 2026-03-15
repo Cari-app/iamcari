@@ -249,7 +249,7 @@ export default function Login() {
           });
         } else {
           toast({
-            title: "Conta criada! Bem-vindo ao Cari. 🎉",
+            title: "Conta criada! Bem-vindo ao FastBurn. 🎉",
             description: "Redirecionando para o onboarding..."
           });
         }
