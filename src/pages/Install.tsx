@@ -90,7 +90,7 @@ export default function Install() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Baixe o Cari
+            Baixe o FastBurn
           </h1>
           <p className="text-muted-foreground text-lg">
             Instale o app no seu celular em segundos
