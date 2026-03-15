@@ -17,8 +17,8 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "pwa-icon-512.png"],
       manifest: {
-        name: "Cari - Jejum Inteligente com IA",
-        short_name: "Cari",
+        name: "FastBurn - Jejum Inteligente com IA",
+        short_name: "FastBurn",
         description: "App de Jejum Intermitente com IA e Terapia Cognitivo-Comportamental",
         theme_color: "#080b14",
         background_color: "#080b14",

@@ -27,7 +27,7 @@ export function Logo({ className, size = 'md', forceDark = false }: LogoProps) {
   return (
     <img 
       src={logo} 
-      alt="Cari" 
+      alt="FastBurn" 
       className={cn(sizeClasses[size], 'w-auto object-contain', className)}
     />
   );

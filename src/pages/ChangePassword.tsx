@@ -76,7 +76,7 @@ export default function ChangePassword() {
 
       toast({
         title: '✅ Senha criada!',
-        description: 'Sua senha foi definida com sucesso. Bem-vindo ao Cari!',
+        description: 'Sua senha foi definida com sucesso. Bem-vindo ao FastBurn!',
       });
 
       navigate('/fasting');

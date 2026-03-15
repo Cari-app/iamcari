@@ -90,7 +90,7 @@ export default function Install() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Baixe o Cari
+            Baixe o FastBurn
           </h1>
           <p className="text-muted-foreground text-lg">
             Instale o app no seu celular em segundos
@@ -109,7 +109,7 @@ export default function Install() {
               <div className="w-16 h-1.5 rounded-full bg-foreground/20" />
             </div>
             <Smartphone className="h-12 w-12 text-primary" />
-            <span className="text-sm font-semibold text-foreground">Cari</span>
+            <span className="text-sm font-semibold text-foreground">FastBurn</span>
             <span className="text-xs text-muted-foreground">Seu app de saúde</span>
           </div>
         </motion.div>
@@ -128,7 +128,7 @@ export default function Install() {
                 App Instalado! 🎉
               </h2>
               <p className="text-muted-foreground text-sm">
-                O Cari já está na sua tela inicial. Abra o app e comece sua jornada!
+                O FastBurn já está na sua tela inicial. Abra o app e comece sua jornada!
               </p>
               <Button
                 onClick={() => {
@@ -136,7 +136,7 @@ export default function Install() {
                 }}
                 className="mt-4 w-full h-14 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-base"
               >
-                Abrir o Cari
+                Abrir o FastBurn
               </Button>
             </div>
           ) : (
@@ -153,7 +153,7 @@ export default function Install() {
                 className="w-full h-16 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-lg shadow-lg shadow-primary/30"
               >
                 <Download className="mr-3 h-6 w-6" />
-                Instalar o Cari
+                Instalar o FastBurn
               </Button>
 
               {isIOS && showIOSSteps && (

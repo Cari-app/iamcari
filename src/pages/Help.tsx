@@ -23,18 +23,18 @@ export default function Help() {
   const whatsappNumber = "5533999999999";
 
   const handleWhatsAppSupport = () => {
-    const message = encodeURIComponent("Olá! Preciso de ajuda com o Cari.");
+    const message = encodeURIComponent("Olá! Preciso de ajuda com o FastBurn.");
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
   };
 
   const handleEmailSupport = () => {
-    window.location.href = "mailto:suporte@cari.com.br?subject=Preciso de Ajuda";
+    window.location.href = "mailto:suporte@fastburn.com.br?subject=Preciso de Ajuda";
   };
 
   const faqItems = [
     {
       question: "Como funciona a análise de refeições com IA?",
-      answer: "Tire uma foto da sua refeição e a Cari (nossa IA) analisa automaticamente as calorias e macros."
+      answer: "Tire uma foto da sua refeição e o FastBurn (nossa IA) analisa automaticamente as calorias e macros."
     },
     {
       question: "Como funciona o jejum intermitente?",
@@ -63,7 +63,7 @@ export default function Help() {
         <div className="relative z-10">
           {/* Top Bar */}
           <header className="flex items-center justify-between px-4 pb-2 pt-safe-top">
-            <img src={logoImage} alt="Cari" className="h-6" />
+            <img src={logoImage} alt="FastBurn" className="h-6" />
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
@@ -139,7 +139,7 @@ export default function Help() {
                         Email de Suporte
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        suporte@cari.com.br
+                        suporte@fastburn.com.br
                       </p>
                     </div>
                     <ExternalLink className="h-5 w-5 text-muted-foreground" />
