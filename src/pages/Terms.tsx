@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { BottomNav } from "@/components/BottomNav";
 import { motion } from "framer-motion";
-import logoImage from "@/assets/logo-cari.png";
+import { Logo } from "@/components/Logo";
 
 const Terms = () => {
   const navigate = useNavigate();
