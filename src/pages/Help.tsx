@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import logoImage from '@/assets/logo-cari.png';
+import { Logo } from '@/components/Logo';
 
 export default function Help() {
   const navigate = useNavigate();
@@ -63,7 +63,7 @@ export default function Help() {
         <div className="relative z-10">
           {/* Top Bar */}
           <header className="flex items-center justify-between px-4 pb-2 pt-safe-top">
-            <img src={logoImage} alt="FastBurn" className="h-6" />
+            <Logo size="sm" forceDark />
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"

@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { BottomNav } from "@/components/BottomNav";
 import { motion } from "framer-motion";
-import logoImage from "@/assets/logo-cari.png";
+import { Logo } from "@/components/Logo";
 
 const Privacy = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const Privacy = () => {
         <div className="relative z-10">
           {/* Top Bar */}
           <header className="flex items-center justify-between px-4 pb-2 pt-safe-top">
-            <img src={logoImage} alt="FastBurn" className="h-6" />
+            <Logo size="sm" forceDark />
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"

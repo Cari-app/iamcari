@@ -8,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import logoImage from '@/assets/logo-cari.png';
+import { Logo } from '@/components/Logo';
 
 interface Question {
   id: number;
@@ -305,7 +305,7 @@ export default function FastingQuiz() {
       <div className="mx-auto max-w-lg relative">
         <div className="relative z-10">
           <header className="flex items-center justify-between px-4 pb-2 pt-safe-top">
-            <img src={logoImage} alt="FastBurn" className="h-6" />
+            <Logo size="sm" forceDark />
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
