@@ -19,7 +19,7 @@ interface Protocol {
 
 const PROTOCOLS: Protocol[] = [
   { hours: 12, label: '12h', description: 'Iniciante' },
-  { hours: 16, label: '16h', description: 'Cari Padrão' },
+  { hours: 16, label: '16h', description: 'Padrão' },
   { hours: 18, label: '18h', description: 'Avançado' },
   { hours: 23, label: '23h', description: 'OMAD' },
 ];

@@ -139,7 +139,7 @@ export default function Help() {
                         Email de Suporte
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        suporte@cari.com.br
+                        suporte@fastburn.com.br
                       </p>
                     </div>
                     <ExternalLink className="h-5 w-5 text-muted-foreground" />

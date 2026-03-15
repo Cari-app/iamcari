@@ -158,7 +158,7 @@ const Privacy = () => {
                     </h2>
                     <p>
                       Para exercer seus direitos ou esclarecer dúvidas sobre esta
-                      política, entre em contato através do e-mail: contato@cari.com.br
+                      política, entre em contato através do e-mail: contato@fastburn.com.br
                     </p>
                   </section>
                 </div>

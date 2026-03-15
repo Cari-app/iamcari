@@ -1,4 +1,4 @@
-// Cari Type Definitions
+// FastBurn Type Definitions
 
 export interface Profile {
   id: string;

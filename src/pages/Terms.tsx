@@ -175,7 +175,7 @@ const Terms = () => {
                     </h2>
                     <p>
                       Para dúvidas sobre estes Termos de Uso, entre em contato
-                      através do e-mail: contato@cari.com.br
+                      através do e-mail: contato@fastburn.com.br
                     </p>
                   </section>
                 </div>

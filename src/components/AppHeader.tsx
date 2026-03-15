@@ -14,7 +14,7 @@ export function AppHeader({ showAvatar = true, centered = false, className = '' 
 
   return (
     <header className={`flex items-center px-4 pb-2 pt-safe-top ${centered ? 'justify-center' : 'justify-between'} ${className}`}>
-      <img src={logoImage} alt="Cari" className="h-6" />
+      <img src={logoImage} alt="FastBurn" className="h-6" />
       {showAvatar && !centered && (
         <Link to="/profile">
           <Avatar className="h-10 w-10">

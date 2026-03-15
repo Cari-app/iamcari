@@ -153,7 +153,7 @@ export default function Install() {
                 className="w-full h-16 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-lg shadow-lg shadow-primary/30"
               >
                 <Download className="mr-3 h-6 w-6" />
-                Instalar o Cari
+                Instalar o FastBurn
               </Button>
 
               {isIOS && showIOSSteps && (
