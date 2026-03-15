@@ -28,7 +28,7 @@ export default function Help() {
   };
 
   const handleEmailSupport = () => {
-    window.location.href = "mailto:suporte@cari.com.br?subject=Preciso de Ajuda";
+    window.location.href = "mailto:suporte@fastburn.com.br?subject=Preciso de Ajuda";
   };
 
   const faqItems = [
