@@ -109,7 +109,7 @@ export default function Install() {
               <div className="w-16 h-1.5 rounded-full bg-foreground/20" />
             </div>
             <Smartphone className="h-12 w-12 text-primary" />
-            <span className="text-sm font-semibold text-foreground">Cari</span>
+            <span className="text-sm font-semibold text-foreground">FastBurn</span>
             <span className="text-xs text-muted-foreground">Seu app de saúde</span>
           </div>
         </motion.div>
