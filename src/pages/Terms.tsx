@@ -25,7 +25,7 @@ const Terms = () => {
         <div className="relative z-10">
           {/* Top Bar */}
           <header className="flex items-center justify-between px-4 pb-2 pt-safe-top">
-            <img src={logoImage} alt="Cari" className="h-6" />
+            <img src={logoImage} alt="FastBurn" className="h-6" />
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
