@@ -136,7 +136,7 @@ export default function Install() {
                 }}
                 className="mt-4 w-full h-14 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-base"
               >
-                Abrir o Cari
+                Abrir o FastBurn
               </Button>
             </div>
           ) : (
