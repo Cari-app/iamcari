@@ -192,7 +192,7 @@ export default function Login() {
       setIsSent(true);
       toast({
         title: "Link mágico enviado! ✨",
-        description: "Verifique seu email para acessar o Cari."
+        description: "Verifique seu email para acessar o FastBurn."
       });
     }
   };
