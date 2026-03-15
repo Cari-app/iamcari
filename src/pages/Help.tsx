@@ -34,7 +34,7 @@ export default function Help() {
   const faqItems = [
     {
       question: "Como funciona a análise de refeições com IA?",
-      answer: "Tire uma foto da sua refeição e a Cari (nossa IA) analisa automaticamente as calorias e macros."
+      answer: "Tire uma foto da sua refeição e o FastBurn (nossa IA) analisa automaticamente as calorias e macros."
     },
     {
       question: "Como funciona o jejum intermitente?",
