@@ -128,7 +128,7 @@ export default function Install() {
                 App Instalado! 🎉
               </h2>
               <p className="text-muted-foreground text-sm">
-                O Cari já está na sua tela inicial. Abra o app e comece sua jornada!
+                O FastBurn já está na sua tela inicial. Abra o app e comece sua jornada!
               </p>
               <Button
                 onClick={() => {
