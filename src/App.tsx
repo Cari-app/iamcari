@@ -22,6 +22,8 @@ import Content from "./pages/Content";
 import NotFound from "./pages/NotFound";
 import Install from "./pages/Install";
 import Help from "./pages/Help";
+import MetabolicQuiz from "./pages/MetabolicQuiz";
+import MetabolicResult from "./pages/MetabolicResult";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,8 @@ const App = () => (
                 <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/content" element={<ProtectedRoute><Content /></ProtectedRoute>} />
+                <Route path="/metabolic-quiz" element={<ProtectedRoute><MetabolicQuiz /></ProtectedRoute>} />
+                <Route path="/metabolic-result" element={<ProtectedRoute><MetabolicResult /></ProtectedRoute>} />
                 <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />

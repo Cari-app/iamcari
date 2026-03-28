@@ -177,6 +177,123 @@ export type Database = {
         }
         Relationships: []
       }
+      fasting_onboarding_answers: {
+        Row: {
+          created_at: string
+          easiest_fasting_period: string
+          fasting_experience: string
+          fasting_response: string
+          goal_range: string
+          hardest_period: string
+          hunger_tolerance: string
+          id: string
+          main_food_barrier: string
+          preferred_plan_style: string
+          primary_goal: string
+          routine_break_response: string
+          routine_type: string
+          snacking_frequency: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          easiest_fasting_period: string
+          fasting_experience: string
+          fasting_response: string
+          goal_range: string
+          hardest_period: string
+          hunger_tolerance: string
+          id?: string
+          main_food_barrier: string
+          preferred_plan_style: string
+          primary_goal: string
+          routine_break_response: string
+          routine_type: string
+          snacking_frequency: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          easiest_fasting_period?: string
+          fasting_experience?: string
+          fasting_response?: string
+          goal_range?: string
+          hardest_period?: string
+          hunger_tolerance?: string
+          id?: string
+          main_food_barrier?: string
+          preferred_plan_style?: string
+          primary_goal?: string
+          routine_break_response?: string
+          routine_type?: string
+          snacking_frequency?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      fasting_plan_results: {
+        Row: {
+          active_plan: boolean
+          behavior_alerts: Json
+          created_at: string
+          dynamic_tags: Json
+          id: string
+          plan_focus: string
+          plan_style: string
+          profile_label: string
+          profile_type: string
+          progression_next_step: string
+          reason_summary: string
+          recommended_protocol_hours: number
+          schedule_end: string
+          schedule_label: string
+          schedule_start: string
+          support_style: string
+          user_id: string
+          weekly_goal_days: number
+        }
+        Insert: {
+          active_plan?: boolean
+          behavior_alerts?: Json
+          created_at?: string
+          dynamic_tags?: Json
+          id?: string
+          plan_focus: string
+          plan_style: string
+          profile_label: string
+          profile_type: string
+          progression_next_step: string
+          reason_summary: string
+          recommended_protocol_hours: number
+          schedule_end: string
+          schedule_label: string
+          schedule_start: string
+          support_style: string
+          user_id: string
+          weekly_goal_days: number
+        }
+        Update: {
+          active_plan?: boolean
+          behavior_alerts?: Json
+          created_at?: string
+          dynamic_tags?: Json
+          id?: string
+          plan_focus?: string
+          plan_style?: string
+          profile_label?: string
+          profile_type?: string
+          progression_next_step?: string
+          reason_summary?: string
+          recommended_protocol_hours?: number
+          schedule_end?: string
+          schedule_label?: string
+          schedule_start?: string
+          support_style?: string
+          user_id?: string
+          weekly_goal_days?: number
+        }
+        Relationships: []
+      }
       fasting_sessions: {
         Row: {
           created_at: string
