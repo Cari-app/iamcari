@@ -22,6 +22,8 @@ import Content from "./pages/Content";
 import NotFound from "./pages/NotFound";
 import Install from "./pages/Install";
 import Help from "./pages/Help";
+import MetabolicQuiz from "./pages/MetabolicQuiz";
+import MetabolicResult from "./pages/MetabolicResult";
 
 const queryClient = new QueryClient();
 
