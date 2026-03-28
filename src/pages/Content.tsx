@@ -48,6 +48,11 @@ export default function Content() {
       .limit(1)
       .maybeSingle()
       .then(({ data }) => {
+        if (!data) {
+          // No assessment yet — redirect to quiz
+          navigate('/metabolic-quiz');
+          return;
+        }
         if (data) {
           setResult({
             profile_type: data.profile_type,
