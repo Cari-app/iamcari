@@ -44,7 +44,7 @@ const App = () => (
             <TooltipProvider>
               <Toaster />
               <Sonner />
-              {/* InstallPWAButton removed - install page handles this */}
+              <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Navigate to="/fasting" replace />} />
                 <Route path="/dashboard" element={<Navigate to="/fasting" replace />} />
