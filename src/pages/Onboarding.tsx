@@ -14,10 +14,10 @@ import { Progress } from '@/components/ui/progress';
 type Gender = 'male' | 'female';
 
 const FASTING_PROTOCOLS = [
-  { value: '16:8', label: '16:8', desc: '16h de jejum, 8h de alimentação', icon: '⏱️' },
-  { value: '18:6', label: '18:6', desc: '18h de jejum, 6h de alimentação', icon: '🔥' },
-  { value: '20:4', label: '20:4', desc: '20h de jejum, 4h de alimentação', icon: '💪' },
-  { value: 'OMAD', label: 'OMAD', desc: 'Uma refeição por dia (23:1)', icon: '🏆' },
+  { value: '16h', label: '16:8', desc: '16h de jejum, 8h de alimentação', icon: '⏱️' },
+  { value: '18h', label: '18:6', desc: '18h de jejum, 6h de alimentação', icon: '🔥' },
+  { value: '20h', label: '20:4', desc: '20h de jejum, 4h de alimentação', icon: '💪' },
+  { value: '23h', label: 'OMAD', desc: 'Uma refeição por dia (23:1)', icon: '🏆' },
 ];
 
 export default function Onboarding() {
