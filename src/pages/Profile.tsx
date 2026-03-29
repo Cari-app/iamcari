@@ -17,7 +17,7 @@ import { AppHeader } from '@/components/AppHeader';
 
 export default function Profile() {
   const { theme, toggleTheme } = useTheme();
-  const { user, signOut, profile } = useAuth();
+  const { user, signOut, profile, refreshProfile } = useAuth();
   const { isAdmin } = useUserRole();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
