@@ -56,6 +56,7 @@ const App = () => (
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/install" element={<Install />} />
+                <Route path="/registro" element={<Register />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </TooltipProvider>
