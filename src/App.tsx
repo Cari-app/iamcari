@@ -21,6 +21,7 @@ import Terms from "./pages/Terms";
 import Content from "./pages/Content";
 import NotFound from "./pages/NotFound";
 import Install from "./pages/Install";
+import Register from "./pages/Register";
 import Help from "./pages/Help";
 import MetabolicQuiz from "./pages/MetabolicQuiz";
 import MetabolicResult from "./pages/MetabolicResult";
