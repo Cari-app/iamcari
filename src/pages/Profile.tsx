@@ -101,6 +101,7 @@ export default function Profile() {
       const { error: updateError } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
       if (updateError) throw updateError;
       setAvatarUrl(publicUrl);
+      await refreshProfile();
       toast({ title: '✅ Avatar atualizado', description: 'Sua foto foi salva com sucesso' });
     } catch (error) {
       console.error('Error uploading avatar:', error);
