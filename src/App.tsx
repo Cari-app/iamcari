@@ -66,6 +66,7 @@ const App = () => (
                 <Route path="/registro" element={<Register />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </Suspense>
             </TooltipProvider>
           </DateProvider>
         </AuthProvider>
