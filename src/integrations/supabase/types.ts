@@ -517,6 +517,60 @@ export type Database = {
         }
         Relationships: []
       }
+      purchases: {
+        Row: {
+          created_at: string
+          customer_name: string | null
+          email: string
+          id: string
+          paid_amount: number | null
+          payment_method: string | null
+          product_id: string | null
+          product_name: string | null
+          raw_payload: Json | null
+          status: string
+          ticto_order_hash: string | null
+          ticto_order_id: string | null
+          ticto_token: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_name?: string | null
+          email: string
+          id?: string
+          paid_amount?: number | null
+          payment_method?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          raw_payload?: Json | null
+          status?: string
+          ticto_order_hash?: string | null
+          ticto_order_id?: string | null
+          ticto_token?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string | null
+          email?: string
+          id?: string
+          paid_amount?: number | null
+          payment_method?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          raw_payload?: Json | null
+          status?: string
+          ticto_order_hash?: string | null
+          ticto_order_id?: string | null
+          ticto_token?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_key: string
