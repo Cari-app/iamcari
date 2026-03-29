@@ -63,7 +63,7 @@ export default function Fasting() {
   };
 
   const handleStartFasting = async () => {
-    await startFasting(selectedProtocol, isCustomProtocol ? 'custom' : 'standard');
+    await startFasting(selectedProtocol);
     toast({ title: 'Jejum iniciado!', description: `Meta de ${selectedProtocol} horas de jejum.` });
   };
 
