@@ -58,7 +58,7 @@ export default function Register() {
     setIsLoading(true);
 
     // Check if email has an approved purchase
-    const { data: purchase, error } = await supabase
+    const { data: purchase, error } = await (supabase as any)
       .from('purchases')
       .select('email, customer_name, product_name, status, user_id')
       .eq('email', email.toLowerCase().trim())
