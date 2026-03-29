@@ -288,11 +288,11 @@ export default function Register() {
 
               <div>
                 <h1 className="text-2xl font-bold text-foreground mb-2">Conta criada! 🎉</h1>
-                <p className="text-muted-foreground">Sua conta foi criada com sucesso. Faça login para começar.</p>
+                <p className="text-muted-foreground">Sua conta foi criada com sucesso. Baixe o aplicativo para começar!</p>
               </div>
 
-              <Button onClick={() => navigate('/login')} className="w-full h-14 rounded-2xl gradient-primary text-white font-semibold text-base press-effect shadow-violet">
-                Ir para o Login
+              <Button onClick={() => navigate('/install')} className="w-full h-14 rounded-2xl gradient-primary text-white font-semibold text-base press-effect shadow-violet">
+                Baixar o Aplicativo
               </Button>
             </motion.div>
           )}
