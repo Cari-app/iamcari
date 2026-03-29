@@ -40,8 +40,8 @@ export default function Fasting() {
   // Load protocol from profile
   useEffect(() => {
     if (profile?.fasting_protocol) {
-      const hours = parseInt(profile.fasting_protocol.replace(/[^0-9]/g, ''));
-      if (!isNaN(hours) && hours > 0) setSelectedProtocol(hours);
+      const hours = parseFloat(profile.fasting_protocol.replace(/[^0-9.]/g, ''));
+      if (!isNaN(hours) && hours > 0 && hours <= 48) setSelectedProtocol(hours);
     }
   }, [profile]);
 
