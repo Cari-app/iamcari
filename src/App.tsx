@@ -6,25 +6,32 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DateProvider } from "@/contexts/DateContext";
+import { lazy, Suspense } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { InstallPWAButton } from "@/components/InstallPWAButton";
-import Login from "./pages/Login";
-import ChangePassword from "./pages/ChangePassword";
-import Fasting from "./pages/Fasting";
-import Progress from "./pages/Progress";
-import Profile from "./pages/Profile";
-import Onboarding from "./pages/Onboarding";
-import FastingQuiz from "./pages/FastingQuiz";
-import FastingResult from "./pages/FastingResult";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import Content from "./pages/Content";
-import NotFound from "./pages/NotFound";
-import Install from "./pages/Install";
-import Register from "./pages/Register";
-import Help from "./pages/Help";
-import MetabolicQuiz from "./pages/MetabolicQuiz";
-import MetabolicResult from "./pages/MetabolicResult";
+
+const Login = lazy(() => import("./pages/Login"));
+const ChangePassword = lazy(() => import("./pages/ChangePassword"));
+const Fasting = lazy(() => import("./pages/Fasting"));
+const Progress = lazy(() => import("./pages/Progress"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+const FastingQuiz = lazy(() => import("./pages/FastingQuiz"));
+const FastingResult = lazy(() => import("./pages/FastingResult"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Content = lazy(() => import("./pages/Content"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Install = lazy(() => import("./pages/Install"));
+const Register = lazy(() => import("./pages/Register"));
+const Help = lazy(() => import("./pages/Help"));
+const MetabolicQuiz = lazy(() => import("./pages/MetabolicQuiz"));
+const MetabolicResult = lazy(() => import("./pages/MetabolicResult"));
+
+const PageLoader = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="h-12 w-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+  </div>
+);
 
 const queryClient = new QueryClient();
 
